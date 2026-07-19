@@ -1,22 +1,22 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Heart, Star, Plus, Minus, Share2, ShieldCheck, Truck } from 'lucide-react'
-import { supabase } from '../../lib/supabase'
-import { useCartStore, useWishlistStore } from '../../lib/store'
-import ProductCard from '../product/ProductCard'
+import { supabase } from '../lib/supabase'
+import { useCartStore, useWishlistStore } from '../lib/store'
+import ProductCard from '../components/product/ProductCard'
 import toast from 'react-hot-toast'
 
 
 // Cultural notes for Ugandan produce
 const CULTURAL_NOTES = {
-  'matoke': 'Matoke (green cooking banana) is Uganda's national dish. Steamed in banana leaves and mashed, it's served at virtually every Ugandan family table.',
-  'plantain': 'Plantain (gonja) is a Ugandan staple — sliced and deep-fried into golden chips, roasted whole over charcoal, or boiled as a starchy side dish.',
-  'cassava': 'Cassava is a lifeline crop across Uganda, eaten boiled, fried, or ground into flour for flatbreads and porridge.',
-  'avocado': 'Uganda is one of Africa's top avocado producers. Ugandan Hass avocados are prized for their rich, buttery flavour and creamy texture.',
-  'ginger': 'Ugandan ginger is among the world's most aromatic, grown in fertile soils at altitude. It's a key ingredient in East African teas, curries and wellness drinks.',
-  'passion': 'Uganda produces some of the world's finest passion fruit. The fragrant golden pulp is a favourite in fresh juices across East Africa.',
-  'sweet potato': 'The orange-fleshed sweet potato was introduced to Uganda and has become a vital crop, providing nutrition for millions of families.',
-  'sour sop': 'Soursop (kitafeeri) is valued across Uganda for its uniquely sweet-tart flavour and its use in traditional herbal medicine.',
+  "matoke": "Matoke (green cooking banana) is Uganda's national dish. Steamed in banana leaves and mashed, it's served at virtually every Ugandan family table.",
+  "plantain": "Plantain (gonja) is a Ugandan staple — sliced and deep-fried into golden chips, roasted whole over charcoal, or boiled as a starchy side dish.",
+  "cassava": "Cassava is a lifeline crop across Uganda, eaten boiled, fried, or ground into flour for flatbreads and porridge.",
+  "avocado": "Uganda is one of Africa's top avocado producers. Ugandan Hass avocados are prized for their rich, buttery flavour and creamy texture.",
+  "ginger": "Ugandan ginger is among the world's most aromatic, grown in fertile soils at altitude. It's a key ingredient in East African teas, curries and wellness drinks.",
+  "passion": "Uganda produces some of the world's finest passion fruit. The fragrant golden pulp is a favourite in fresh juices across East Africa.",
+  "sweet potato": "The orange-fleshed sweet potato was introduced to Uganda and has become a vital crop, providing nutrition for millions of families.",
+  "sour sop": "Soursop (kitafeeri) is valued across Uganda for its uniquely sweet-tart flavour and its use in traditional herbal medicine.",
 }
 
 function getCulturalNote(productName) {

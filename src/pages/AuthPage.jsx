@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { Eye, EyeOff, ArrowLeft } from 'lucide-react'
-import { useAuthStore } from '../../lib/store'
+import { useAuthStore } from '../lib/store'
 import toast from 'react-hot-toast'
 
 export default function AuthPage() {
