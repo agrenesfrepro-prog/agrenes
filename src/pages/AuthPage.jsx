@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { Eye, EyeOff, ArrowLeft } from 'lucide-react'
-import { useAuthStore } from '../lib/store'
+import { useAuthStore } from '../../lib/store'
 import toast from 'react-hot-toast'
 
 export default function AuthPage() {
@@ -153,7 +153,13 @@ export default function AuthPage() {
         </div>
 
         {/* Social login placeholder */}
-        <button style={{
+        <button onClick={async () => {
+          const { error } = await import('../lib/supabase').then(m => m.supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: { redirectTo: window.location.origin }
+          }))
+          if (error) toast.error(error.message)
+        }} style={{
           width:'100%', background:'var(--bg)', border:'1px solid var(--br)',
           borderRadius:10, padding:'12px 0', fontSize:14, fontWeight:600,
           display:'flex', alignItems:'center', justifyContent:'center', gap:10, cursor:'pointer'

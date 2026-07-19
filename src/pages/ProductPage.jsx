@@ -1,10 +1,32 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Heart, Star, Plus, Minus, Share2, ShieldCheck, Truck } from 'lucide-react'
-import { supabase } from '../lib/supabase'
-import { useCartStore, useWishlistStore } from '../lib/store'
-import ProductCard from '../components/product/ProductCard'
+import { supabase } from '../../lib/supabase'
+import { useCartStore, useWishlistStore } from '../../lib/store'
+import ProductCard from '../product/ProductCard'
 import toast from 'react-hot-toast'
+
+
+// Cultural notes for Ugandan produce
+const CULTURAL_NOTES = {
+  'matoke': 'Matoke (green cooking banana) is Uganda's national dish. Steamed in banana leaves and mashed, it's served at virtually every Ugandan family table.',
+  'plantain': 'Plantain (gonja) is a Ugandan staple — sliced and deep-fried into golden chips, roasted whole over charcoal, or boiled as a starchy side dish.',
+  'cassava': 'Cassava is a lifeline crop across Uganda, eaten boiled, fried, or ground into flour for flatbreads and porridge.',
+  'avocado': 'Uganda is one of Africa's top avocado producers. Ugandan Hass avocados are prized for their rich, buttery flavour and creamy texture.',
+  'ginger': 'Ugandan ginger is among the world's most aromatic, grown in fertile soils at altitude. It's a key ingredient in East African teas, curries and wellness drinks.',
+  'passion': 'Uganda produces some of the world's finest passion fruit. The fragrant golden pulp is a favourite in fresh juices across East Africa.',
+  'sweet potato': 'The orange-fleshed sweet potato was introduced to Uganda and has become a vital crop, providing nutrition for millions of families.',
+  'sour sop': 'Soursop (kitafeeri) is valued across Uganda for its uniquely sweet-tart flavour and its use in traditional herbal medicine.',
+}
+
+function getCulturalNote(productName) {
+  if (!productName) return null
+  const name = productName.toLowerCase()
+  for (const [key, note] of Object.entries(CULTURAL_NOTES)) {
+    if (name.includes(key)) return note
+  }
+  return null
+}
 
 export default function ProductPage() {
   const { id } = useParams()
@@ -19,6 +41,8 @@ export default function ProductPage() {
   const [qty, setQty] = useState(1)
   const [isBulk, setIsBulk] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [variants, setVariants] = useState([])
+  const [selectedVariant, setSelectedVariant] = useState(null)
   const [showReviewForm, setShowReviewForm] = useState(false)
 
   useEffect(() => {
@@ -28,7 +52,10 @@ export default function ProductPage() {
     Promise.all([
       supabase.from('products').select('*, categories(name,slug)').eq('id', id).single(),
       supabase.from('reviews').select('*, profiles(full_name)').eq('product_id', id).order('created_at', {ascending:false}).limit(10),
-    ]).then(([{data:p}, {data:r}]) => {
+      supabase.from('product_variants').select('*').eq('product_id', id).eq('is_active', true).order('sort_order'),
+    ]).then(([{data:p}, {data:r}, {data:vv}]) => {
+      setVariants(vv || [])
+      if (vv?.length) setSelectedVariant(vv[0])
       setProduct(p)
       setReviews(r || [])
       if (p?.vendor_id) {
@@ -52,17 +79,23 @@ export default function ProductPage() {
 
   const discount = product.compare_price ? Math.round((1 - product.price/product.compare_price)*100) : 0
   const wished = has(product.id)
-  const price = isBulk && product.bulk_price ? product.bulk_price : product.price
+  const price = selectedVariant ? selectedVariant.price : (isBulk && product.bulk_price ? product.bulk_price : product.price)
   const images = product.images?.length ? product.images : [product.img].filter(Boolean)
 
   const handleAddToCart = () => {
-    addItem({ ...product, price }, qty)
+    const cartItem = selectedVariant
+      ? { ...product, id: product.id + '-' + selectedVariant.id, price, name: product.name + ' (' + selectedVariant.label + ')', variant_id: selectedVariant.id }
+      : { ...product, price }
+    addItem(cartItem, qty)
     toast.success(`${product.name} added to cart!`)
     openCart()
   }
 
   const handleBuyNow = () => {
-    addItem({ ...product, price }, qty)
+    const cartItem = selectedVariant
+      ? { ...product, id: product.id + '-' + selectedVariant.id, price, name: product.name + ' (' + selectedVariant.label + ')', variant_id: selectedVariant.id }
+      : { ...product, price }
+    addItem(cartItem, qty)
     navigate('/checkout')
   }
 
@@ -150,6 +183,29 @@ export default function ProductPage() {
                 }}
               >{tab.label}</button>
             ))}
+          </div>
+        )}
+
+        {/* Size variants */}
+        {variants.length > 0 && (
+          <div style={{marginBottom:14}}>
+            <div style={{fontSize:11, fontWeight:800, textTransform:'uppercase', letterSpacing:.5, color:'var(--mu)', marginBottom:8}}>
+              Select Size
+            </div>
+            <div style={{display:'flex', gap:8, flexWrap:'wrap'}}>
+              {variants.map(v => (
+                <button key={v.id} onClick={() => setSelectedVariant(v)} style={{
+                  padding:'9px 18px', borderRadius:10, fontSize:13.5, fontWeight:700,
+                  background: selectedVariant?.id === v.id ? 'var(--g2)' : 'var(--wh)',
+                  color: selectedVariant?.id === v.id ? '#fff' : 'var(--tx)',
+                  border: '1.5px solid ' + (selectedVariant?.id === v.id ? 'var(--g2)' : 'var(--br)'),
+                  cursor:'pointer', transition:'all .15s'
+                }}>
+                  {v.label}
+                  <span style={{display:'block', fontSize:11, fontWeight:600, opacity:.8}}>£{v.price?.toFixed(2)}</span>
+                </button>
+              ))}
+            </div>
           </div>
         )}
 

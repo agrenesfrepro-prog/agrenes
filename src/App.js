@@ -17,12 +17,13 @@ import OrdersPage from './pages/OrdersPage'
 import { AccountPage, WishlistPage } from './pages/AccountPage'
 import AuthPage from './pages/AuthPage'
 import AdminPage from './pages/AdminPage'
+import ResetPasswordPage from './pages/ResetPasswordPage'
 import VendorsPage from './pages/VendorsPage'
 import VendorPortalPage from './pages/VendorPortalPage'
 import AddressesPage from './pages/AddressesPage'
 import BulkEnquiryPage from './pages/BulkEnquiryPage'
-import WhatsAppButton from './components/shared/WhatsAppButton'
 import { AboutPage, ContactPage, TermsPage, PrivacyPage, ReturnsPage } from './pages/FooterPages'
+import WhatsAppButton from './components/shared/WhatsAppButton'
 
 // ── SEO: dynamic page titles ──────────────────────────────
 const PAGE_TITLES = {
@@ -72,7 +73,8 @@ function Layout({ children, showCatBar = false, showFooter = true }) {
       {showFooter && <Footer />}
       <BottomNav />
       <CartDrawer />
-      <SideMenu open={menuOpen} onClose={() => setMenuOpen(false)} />\n      <WhatsAppButton />
+      <SideMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
+      <WhatsAppButton />
     </div>
   )
 }
@@ -98,6 +100,7 @@ export default function App() {
       <Routes>
         {/* Auth — no layout */}
         <Route path="/login" element={<AuthPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
 
         {/* Main pages */}
         <Route path="/" element={<Layout><HomePage /></Layout>} />

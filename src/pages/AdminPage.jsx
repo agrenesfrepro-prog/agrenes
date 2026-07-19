@@ -24,21 +24,43 @@ function ImageUploader({ images, onChange }) {
   const inputRef = useRef()
   const [uploading, setUploading] = useState(false)
 
+  // Compress image before upload
+  const compressImage = (file, maxWidth = 800, quality = 0.8) => {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')
+      const img = new Image()
+      img.onload = () => {
+        let { width, height } = img
+        if (width > maxWidth) { height = (height * maxWidth) / width; width = maxWidth }
+        canvas.width = width; canvas.height = height
+        ctx.drawImage(img, 0, 0, width, height)
+        canvas.toBlob(resolve, 'image/jpeg', quality)
+      }
+      img.src = URL.createObjectURL(file)
+    })
+  }
+
   const handleFiles = async (files) => {
     if (!files?.length) return
     setUploading(true)
     const uploaded = []
     for (const file of files) {
-      const ext = file.name.split('.').pop()
-      const path = `products/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-      const { data, error } = await supabase.storage
-        .from('product-images')
-        .upload(path, file, { contentType: file.type, upsert: true })
-      if (error) {
-        toast.error('Upload failed: ' + error.message)
-      } else {
-        const { data: urlData } = supabase.storage.from('product-images').getPublicUrl(path)
-        uploaded.push(urlData.publicUrl)
+      try {
+        // Compress image
+        const compressed = await compressImage(file)
+        const path = `products/${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`
+        const { error } = await supabase.storage
+          .from('product-images')
+          .upload(path, compressed, { contentType: 'image/jpeg', upsert: true })
+        if (error) {
+          toast.error('Upload failed: ' + error.message)
+        } else {
+          const { data: urlData } = supabase.storage.from('product-images').getPublicUrl(path)
+          uploaded.push(urlData.publicUrl)
+        }
+      } catch (err) {
+        toast.error('Failed to process image')
       }
     }
     onChange([...images, ...uploaded])
@@ -138,7 +160,20 @@ function ProductForm({ product, categories, vendors, onSave, onClose }) {
     ...(product || {})
   })
   const [saving, setSaving] = useState(false)
+  const [variants, setVariants] = useState([])
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
+
+  // Load existing variants when editing
+  useEffect(() => {
+    if (product?.id) {
+      supabase.from('product_variants').select('*').eq('product_id', product.id).order('sort_order')
+        .then(({ data }) => setVariants(data || []))
+    }
+  }, [product?.id])
+
+  const addVariant = () => setVariants(v => [...v, { label: '', price: '', stock_qty: '', _new: true }])
+  const updateVariant = (i, k, val) => setVariants(v => v.map((x, idx) => idx === i ? { ...x, [k]: val } : x))
+  const removeVariant = (i) => setVariants(v => v.filter((_, idx) => idx !== i))
 
   const handleSave = async () => {
     if (!form.name || !form.price) { toast.error('Name and price are required'); return }
@@ -172,6 +207,31 @@ function ProductForm({ product, categories, vendors, onSave, onClose }) {
         ({ error } = await supabase.from('products').insert(payload))
       }
       if (error) throw error
+
+      // Save variants
+      let productId = product?.id
+      if (!isEdit) {
+        const { data: newProd } = await supabase.from('products').select('id').eq('slug', payload.slug).single()
+        productId = newProd?.id
+      }
+      if (productId && variants.length > 0) {
+        // Delete removed variants, upsert the rest
+        await supabase.from('product_variants').delete().eq('product_id', productId)
+        const validVariants = variants.filter(v => v.label && v.price)
+        if (validVariants.length > 0) {
+          await supabase.from('product_variants').insert(
+            validVariants.map((v, i) => ({
+              product_id: productId,
+              label: v.label,
+              price: parseFloat(v.price),
+              stock_qty: parseFloat(v.stock_qty) || 0,
+              sort_order: i,
+              is_active: true,
+            }))
+          )
+        }
+      }
+
       toast.success(isEdit ? 'Product updated!' : 'Product created!')
       onSave()
     } catch (err) {
@@ -296,6 +356,30 @@ function ProductForm({ product, categories, vendors, onSave, onClose }) {
             <label>Origin</label>
             <input className="form-input" placeholder="Kampala, Uganda"
               value={form.origin} onChange={e => set('origin', e.target.value)} />
+          </div>
+
+          {/* Size variants */}
+          <div className="form-group">
+            <label>Size Options (e.g. 500g, 1kg, 2kg — optional)</label>
+            {variants.map((v, i) => (
+              <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 8, alignItems: 'center' }}>
+                <input className="form-input" placeholder="Label e.g. 500g" style={{ flex: 2 }}
+                  value={v.label} onChange={e => updateVariant(i, 'label', e.target.value)} />
+                <input className="form-input" type="number" step="0.01" placeholder="Price £" style={{ flex: 2 }}
+                  value={v.price} onChange={e => updateVariant(i, 'price', e.target.value)} />
+                <input className="form-input" type="number" placeholder="Stock" style={{ flex: 1 }}
+                  value={v.stock_qty} onChange={e => updateVariant(i, 'stock_qty', e.target.value)} />
+                <button type="button" onClick={() => removeVariant(i)} style={{
+                  background: 'var(--rdl)', border: '1px solid #F4B0B4', borderRadius: 8,
+                  width: 34, height: 40, cursor: 'pointer', color: 'var(--rd)', flexShrink: 0, fontSize: 16
+                }}>×</button>
+              </div>
+            ))}
+            <button type="button" onClick={addVariant} style={{
+              background: 'var(--gll)', border: '1px dashed var(--g4)', borderRadius: 8,
+              padding: '9px 16px', fontSize: 12.5, fontWeight: 700, color: 'var(--g2)',
+              cursor: 'pointer', width: '100%'
+            }}>+ Add Size Option</button>
           </div>
 
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 20 }}>
