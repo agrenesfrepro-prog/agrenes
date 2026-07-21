@@ -15,8 +15,16 @@ export default function ProductCard({ product }) {
     ? Math.round((1 - product.price / product.compare_price) * 100)
     : 0
 
+  const variantPrices = (product.product_variants || []).filter(v => v.is_active !== false).map(v => Number(v.price)).filter(n => !isNaN(n))
+  const hasVariants = variantPrices.length > 0
+  const displayPrice = hasVariants ? Math.min(...variantPrices) : product.price
+
   const handleAdd = async (e) => {
     e.stopPropagation()
+    if (hasVariants) {
+      navigate(`/product/${product.id}`)
+      return
+    }
     setAdding(true)
     addItem(product)
     toast.success(`${product.name} added to cart`)
@@ -68,7 +76,20 @@ export default function ProductCard({ product }) {
             fontSize:10, fontWeight:700, padding:'3px 8px', borderRadius:5
           }}>⚡ Flash</span>
         )}
-        {product.stock_qty <= 10 && product.stock_qty > 0 && (
+        {product.stock_qty === 0 && (
+          <div style={{
+            position:'absolute', inset:0, background:'rgba(255,255,255,.75)',
+            display:'flex', alignItems:'center', justifyContent:'center',
+            backdropFilter:'blur(2px)'
+          }}>
+            <span style={{
+              background:'var(--rd)', color:'#fff', fontSize:11,
+              fontWeight:800, padding:'5px 14px', borderRadius:20,
+              letterSpacing:.5
+            }}>OUT OF STOCK</span>
+          </div>
+        )}
+        {product.stock_qty > 0 && product.stock_qty <= 10 && (
           <span style={{
             position:'absolute', bottom:8, left:8,
             background:'rgba(230,57,70,.88)', color:'#fff',
@@ -120,7 +141,8 @@ export default function ProductCard({ product }) {
         {/* Price */}
         <div style={{display:'flex', alignItems:'baseline', gap:6, marginBottom:8}}>
           <span style={{fontFamily:'Fraunces, serif', fontSize:17, fontWeight:700, color:'var(--g2)'}}>
-            £{product.price?.toFixed(2)}
+            {hasVariants && <span style={{fontSize:11, fontWeight:600, color:'var(--mu)', fontFamily:'Plus Jakarta Sans, sans-serif'}}>From </span>}
+            £{displayPrice?.toFixed(2)}
           </span>
           {product.compare_price && (
             <span style={{fontSize:11, color:'var(--lt)', textDecoration:'line-through'}}>
@@ -141,15 +163,19 @@ export default function ProductCard({ product }) {
         )}
 
         {/* Add to cart */}
-        <button onClick={handleAdd} style={{
-          width:'100%', background: adding ? 'var(--g4)' : 'var(--g2)',
-          color:'#fff', border:'none', borderRadius:8,
+        <button onClick={product.stock_qty === 0 ? undefined : handleAdd}
+          disabled={product.stock_qty === 0}
+          style={{
+          width:'100%',
+          background: product.stock_qty === 0 ? 'var(--br)' : adding ? 'var(--g4)' : 'var(--g2)',
+          color: product.stock_qty === 0 ? 'var(--lt)' : '#fff',
+          border:'none', borderRadius:8,
           padding:'9px 0', fontSize:12.5, fontWeight:700,
           display:'flex', alignItems:'center', justifyContent:'center', gap:5,
-          transition:'all .2s'
+          transition:'all .2s', cursor: product.stock_qty === 0 ? 'not-allowed' : 'pointer'
         }}>
           <Plus size={14} />
-          {adding ? 'Added!' : 'Add to Cart'}
+          {product.stock_qty === 0 ? 'Out of Stock' : hasVariants ? 'Choose Size' : adding ? 'Added!' : 'Add to Cart'}
         </button>
       </div>
     </div>

@@ -67,7 +67,7 @@ export default function ShopPage() {
 
     let query = supabase
       .from('products')
-      .select('*, vendors(name, is_verified)')
+      .select('*, vendors(name, is_verified), product_variants(price,is_active)')
       .eq('is_active', true)
       .order(sortCol, { ascending: sortDir === 'asc' })
       .lte('price', priceMax)
