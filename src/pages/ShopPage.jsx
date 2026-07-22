@@ -39,6 +39,9 @@ export default function ShopPage() {
 
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
+  const [page, setPage] = useState(0)
+  const [hasMore, setHasMore] = useState(false)
+  const PAGE_SIZE = 12
   const [sort, setSort] = useState('sales_count.desc')
   const [showFilters, setShowFilters] = useState(false)
   const [priceMax, setPriceMax] = useState(50)
@@ -71,7 +74,7 @@ export default function ShopPage() {
       .eq('is_active', true)
       .order(sortCol, { ascending: sortDir === 'asc' })
       .lte('price', priceMax)
-      .limit(48)
+      .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1)
 
     if (catSlug !== 'all' && catMap[catSlug]) {
       query = query.eq('category_id', catMap[catSlug])
@@ -83,13 +86,20 @@ export default function ShopPage() {
     if (selectedCerts.length > 0) query = query.overlaps('certifications', selectedCerts)
 
     query.then(({ data, error }) => {
-      setProducts(data?.map(p => ({
+      const mapped = data?.map(p => ({
         ...p,
         vendor_name: p.vendors?.name,
-      })) || [])
+      })) || []
+      setProducts(prev => page === 0 ? mapped : [...prev, ...mapped])
+      setHasMore(mapped.length === PAGE_SIZE)
       setLoading(false)
     })
-  }, [catSlug, searchQ, sort, priceMax, selectedCerts, inStock, flashOnly, bulkOnly, catMap])
+  }, [catSlug, searchQ, sort, priceMax, selectedCerts, inStock, flashOnly, bulkOnly, catMap, page])
+
+  // Reset to first page when any filter changes
+  useEffect(() => {
+    setPage(0)
+  }, [catSlug, searchQ, sort, priceMax, selectedCerts, inStock, flashOnly, bulkOnly])
 
   const toggleCert = (c) =>
     setSelectedCerts(prev => prev.includes(c) ? prev.filter(x=>x!==c) : [...prev, c])
@@ -221,9 +231,19 @@ export default function ShopPage() {
           </button>
         </div>
       ) : (
-        <div className="pgrid" style={{paddingTop:14}}>
-          {products.map(p => <ProductCard key={p.id} product={p} />)}
-        </div>
+        <>
+          <div className="pgrid" style={{paddingTop:14}}>
+            {products.map(p => <ProductCard key={p.id} product={p} />)}
+          </div>
+          {hasMore && (
+            <div style={{textAlign:'center', padding:'18px 14px 8px'}}>
+              <button onClick={() => setPage(p => p + 1)} className="btn-outline"
+                style={{minWidth:200, justifyContent:'center', height:46}}>
+                {loading ? 'Loading…' : 'Load More Products'}
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   )
