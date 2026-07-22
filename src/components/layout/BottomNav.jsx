@@ -1,27 +1,28 @@
 import { useNavigate, useLocation, Link } from 'react-router-dom'
-import { Home, ShoppingBag, Package, Heart, User, X, ShieldCheck, Store, LayoutDashboard } from 'lucide-react'
+import { Home, ShoppingBag, ShoppingCart, Package, Heart, User, X, ShieldCheck, Store, LayoutDashboard } from 'lucide-react'
 import { useCartStore, useAuthStore, useWishlistStore } from '../../lib/store'
 
 export function BottomNav() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { items } = useCartStore()
-  const { items: wishlist } = useWishlistStore()
+  const { items, openCart } = useCartStore()
   const cartCount = items.reduce((s, i) => s + i.qty, 0)
   const path = location.pathname
 
   const tabs = [
     { icon: <Home size={22} />, label: 'Home', to: '/' },
     { icon: <ShoppingBag size={22} />, label: 'Shop', to: '/shop' },
+    { icon: <ShoppingCart size={22} />, label: 'Cart', action: openCart, badge: cartCount },
     { icon: <Package size={22} />, label: 'Orders', to: '/orders' },
-    { icon: <Heart size={22} />, label: 'Saved', to: '/wishlist', badge: wishlist.length },
     { icon: <User size={22} />, label: 'Account', to: '/account' },
   ]
 
   return (
     <nav className="bottom-nav">
       {tabs.map(tab => (
-        <button key={tab.to} onClick={() => navigate(tab.to)} className={`bn-item ${path === tab.to ? 'active' : ''}`}>
+        <button key={tab.label}
+          onClick={() => tab.action ? tab.action() : navigate(tab.to)}
+          className={`bn-item ${tab.to && path === tab.to ? 'active' : ''}`}>
           {tab.icon}
           {tab.badge > 0 && <span className="bn-badge">{tab.badge}</span>}
           {tab.label}
