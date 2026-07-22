@@ -172,28 +172,38 @@ function TrustStrip() {
 function PromoGrid() {
   const navigate = useNavigate()
   const cards = [
-    {color:'green', bg:'var(--gl)', border:'#9FE1CB', emoji:'🥑', title:'Food Boxes', sub:'Fresh mixed produce boxes', cat:'all'},
-    {color:'amber', bg:'var(--aml)', border:'#FAC775', emoji:'🌶', title:'Vegetables', sub:'Peppers, tomatoes, cabbage', cat:'vegetables'},
-    {color:'purple', bg:'var(--pul)', border:'#C8B5F0', emoji:'🍌', title:'Beans & Nuts', sub:'Red beans, yellow beans, cashews', cat:'bananas'},
-    {color:'red', bg:'var(--rdl)', border:'#F4B0B4', emoji:'🍠', title:'Dried Foods', sub:'Cassava, yam, sweet potato', cat:'tubers'},
-    {color:'blue', bg:'#E3F2FD', border:'#90CAF9', emoji:'🥤', title:'Beverages', sub:'Juices, tea, coffee', cat:'beverages'},
-    {color:'brown', bg:'#F0E6DA', border:'#D9BFA0', emoji:'🧺', title:'African Crafts', sub:'Baskets, textiles & décor', cat:'crafts'},
+    {img:'https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=640&q=60&auto=format&fit=crop', bg:'var(--gl)', border:'#9FE1CB', emoji:'📦', title:'Food Boxes', sub:'Avocado, plantain, sweet potato', cat:'all'},
+    {img:'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=640&q=60&auto=format&fit=crop', bg:'var(--aml)', border:'#FAC775', emoji:'🥦', title:'Fresh Vegetables', sub:'Peppers, tomatoes, cabbage', cat:'vegetables'},
+    {img:'https://images.unsplash.com/photo-1515543904379-3d757afe72e4?w=640&q=60&auto=format&fit=crop', bg:'var(--pul)', border:'#C8B5F0', emoji:'🫘', title:'Beans & Nuts', sub:'Red beans, yellow beans, cashews', cat:'legumes'},
+    {img:'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=640&q=60&auto=format&fit=crop', bg:'var(--rdl)', border:'#F4B0B4', emoji:'🌾', title:'Dried Foods', sub:'Cassava, yam, sweet potato', cat:'dried'},
+    {img:'https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?w=640&q=60&auto=format&fit=crop', bg:'var(--gll)', border:'#9FE1CB', emoji:'🥤', title:'Beverages', sub:'Bushera, Stoney, Novida', cat:'all'},
+    {img:'https://images.unsplash.com/photo-1632171927336-1ca4b53a0b57?w=640&q=60&auto=format&fit=crop', bg:'#FFF3E0', border:'#FFCC80', emoji:'🧺', title:'African Crafts', sub:'Wooden art, clay cups, mats', cat:'all'},
   ]
   return (
-    <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, padding:'10px 14px'}}>
+    <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(150px, 1fr))', gap:10, padding:'10px 14px'}}>
       {cards.map(c => (
-        <div key={c.cat} onClick={() => navigate(`/shop?cat=${c.cat}`)}
+        <div key={c.title} onClick={() => navigate(`/shop?cat=${c.cat}`)}
           style={{
-            background:c.bg, border:`.5px solid ${c.border}`, borderRadius:12,
-            padding:15, cursor:'pointer', position:'relative', overflow:'hidden',
-            transition:'all .2s'
+            background:'var(--wh)', border:`.5px solid ${c.border}`, borderRadius:14,
+            cursor:'pointer', position:'relative', overflow:'hidden',
+            transition:'all .2s', boxShadow:'var(--sh1)'
           }}
           onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='var(--sh2)' }}
-          onMouseLeave={e => { e.currentTarget.style.transform=''; e.currentTarget.style.boxShadow='' }}
+          onMouseLeave={e => { e.currentTarget.style.transform=''; e.currentTarget.style.boxShadow='var(--sh1)' }}
         >
-          <span style={{fontSize:30, display:'block', marginBottom:6}}>{c.emoji}</span>
-          <h4 style={{fontSize:13.5, fontWeight:700, color:'var(--tx)', marginBottom:2}}>{c.title}</h4>
-          <p style={{fontSize:11, color:'var(--mu)'}}>{c.sub}</p>
+          <div style={{height:96, background:c.bg, position:'relative', overflow:'hidden'}}>
+            <img src={c.img} alt={c.title} loading="lazy" decoding="async"
+              style={{width:'100%', height:'100%', objectFit:'cover', display:'block'}}
+              onError={e => { e.currentTarget.style.display='none'; e.currentTarget.nextSibling.style.display='flex' }} />
+            <span style={{
+              display:'none', position:'absolute', inset:0,
+              alignItems:'center', justifyContent:'center', fontSize:40
+            }}>{c.emoji}</span>
+          </div>
+          <div style={{padding:'10px 12px 12px'}}>
+            <h4 style={{fontSize:13.5, fontWeight:700, color:'var(--tx)', marginBottom:2}}>{c.title}</h4>
+            <p style={{fontSize:11, color:'var(--mu)'}}>{c.sub}</p>
+          </div>
         </div>
       ))}
     </div>
