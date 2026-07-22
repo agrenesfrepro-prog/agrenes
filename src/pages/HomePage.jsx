@@ -172,10 +172,10 @@ function TrustStrip() {
 function PromoGrid() {
   const navigate = useNavigate()
   const cards = [
-    {img:'https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=640&q=60&auto=format&fit=crop', bg:'var(--gl)', border:'#9FE1CB', emoji:'📦', title:'Food Boxes', sub:'Avocado, plantain, sweet potato', cat:'all'},
-    {img:'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=640&q=60&auto=format&fit=crop', bg:'var(--aml)', border:'#FAC775', emoji:'🥦', title:'Fresh Vegetables', sub:'Peppers, tomatoes, cabbage', cat:'vegetables'},
+    {img:'https://ierviwtmdqerdmwtnimn.supabase.co/storage/v1/object/public/product-images/products/1784272182381-usc22b751rp.jpg', bg:'var(--gl)', border:'#9FE1CB', emoji:'📦', title:'Food Boxes', sub:'Avocado, plantain, sweet potato', cat:'all'},
+    {img:'https://ierviwtmdqerdmwtnimn.supabase.co/storage/v1/object/public/product-images/products/1784273521387-tkpq9h8jan.jpg', bg:'var(--aml)', border:'#FAC775', emoji:'🥦', title:'Fresh Vegetables', sub:'Peppers, tomatoes, cabbage', cat:'vegetables'},
     {img:'https://images.unsplash.com/photo-1515543904379-3d757afe72e4?w=640&q=60&auto=format&fit=crop', bg:'var(--pul)', border:'#C8B5F0', emoji:'🫘', title:'Beans & Nuts', sub:'Red beans, yellow beans, cashews', cat:'legumes'},
-    {img:'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=640&q=60&auto=format&fit=crop', bg:'var(--rdl)', border:'#F4B0B4', emoji:'🌾', title:'Dried Foods', sub:'Cassava, yam, sweet potato', cat:'dried'},
+    {img:'https://ierviwtmdqerdmwtnimn.supabase.co/storage/v1/object/public/product-images/products/1784274303524-g5grofoo6w.jpeg', bg:'var(--rdl)', border:'#F4B0B4', emoji:'🌾', title:'Dried Foods', sub:'Cassava, yam, sweet potato', cat:'dried'},
     {img:'https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?w=640&q=60&auto=format&fit=crop', bg:'var(--gll)', border:'#9FE1CB', emoji:'🥤', title:'Beverages', sub:'Bushera, Stoney, Novida', cat:'all'},
     {img:'https://images.unsplash.com/photo-1632171927336-1ca4b53a0b57?w=640&q=60&auto=format&fit=crop', bg:'#FFF3E0', border:'#FFCC80', emoji:'🧺', title:'African Crafts', sub:'Wooden art, clay cups, mats', cat:'all'},
   ]
