@@ -433,8 +433,8 @@ export default function AdminPage() {
   const loadAll = async () => {
     setLoading(true)
     const [{ data: p }, { data: o }, { data: v }, { data: c }] = await Promise.all([
-      supabase.from('products').select('*, vendors(name), categories(name)').order('created_at', { ascending: false }).limit(100),
-      supabase.from('orders').select('*').order('created_at', { ascending: false }).limit(100),
+      supabase.from('products').select('*, vendors(name), categories(name)').order('created_at', { ascending: false }).limit(500),
+      supabase.from('orders').select('*').order('created_at', { ascending: false }).limit(500),
       supabase.from('vendors').select('*').order('name'),
       supabase.from('categories').select('*').order('sort_order'),
     ])
