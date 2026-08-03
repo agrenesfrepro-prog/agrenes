@@ -24,20 +24,26 @@ function ImageUploader({ images, onChange }) {
   const inputRef = useRef()
   const [uploading, setUploading] = useState(false)
 
-  // Compress image before upload
-  const compressImage = (file, maxWidth = 800, quality = 0.8) => {
+  // Compress image before upload — always resolves with something usable (compressed OR original file)
+  const compressImage = (file, maxWidth = 1200, quality = 0.82) => {
     return new Promise((resolve) => {
-      const canvas = document.createElement('canvas')
-      const ctx = canvas.getContext('2d')
-      const img = new Image()
-      img.onload = () => {
-        let { width, height } = img
-        if (width > maxWidth) { height = (height * maxWidth) / width; width = maxWidth }
-        canvas.width = width; canvas.height = height
-        ctx.drawImage(img, 0, 0, width, height)
-        canvas.toBlob(resolve, 'image/jpeg', quality)
-      }
-      img.src = URL.createObjectURL(file)
+      try {
+        const url = URL.createObjectURL(file)
+        const img = new Image()
+        img.onload = () => {
+          try {
+            const canvas = document.createElement('canvas')
+            let { width, height } = img
+            if (width > maxWidth) { height = (height * maxWidth) / width; width = maxWidth }
+            canvas.width = width; canvas.height = height
+            const ctx = canvas.getContext('2d')
+            ctx.drawImage(img, 0, 0, width, height)
+            canvas.toBlob(blob => { URL.revokeObjectURL(url); resolve(blob || file) }, 'image/jpeg', quality)
+          } catch { URL.revokeObjectURL(url); resolve(file) }
+        }
+        img.onerror = () => { URL.revokeObjectURL(url); resolve(file) }
+        img.src = url
+      } catch { resolve(file) }
     })
   }
 
@@ -47,12 +53,16 @@ function ImageUploader({ images, onChange }) {
     const uploaded = []
     for (const file of files) {
       try {
-        // Compress image
         const compressed = await compressImage(file)
-        const path = `products/${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`
+        const blob = compressed || file
+        const isJpeg = blob && blob.type && blob.type.includes('jpeg')
+        const rawExt = (file.name.split('.').pop() || 'jpg').toLowerCase()
+        const ext = isJpeg ? 'jpg' : rawExt
+        const path = `products/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+        const contentType = isJpeg ? 'image/jpeg' : (file.type || 'image/jpeg')
         const { error } = await supabase.storage
           .from('product-images')
-          .upload(path, compressed, { contentType: 'image/jpeg', upsert: true })
+          .upload(path, blob, { contentType, upsert: true })
         if (error) {
           toast.error('Upload failed: ' + error.message)
         } else {
@@ -60,7 +70,7 @@ function ImageUploader({ images, onChange }) {
           uploaded.push(urlData.publicUrl)
         }
       } catch (err) {
-        toast.error('Failed to process image')
+        toast.error('Upload failed: ' + (err?.message || 'unknown error'))
       }
     }
     onChange([...images, ...uploaded])
