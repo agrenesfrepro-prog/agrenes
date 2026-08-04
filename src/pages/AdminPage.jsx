@@ -20,7 +20,7 @@ function StatCard({ icon, label, value, color, sub }) {
   )
 }
 
-function ImageUploader({ images, onChange }) {
+function ImageUploader({ images, onChange, exposePaste }) {
   const inputRef = useRef()
   const [uploading, setUploading] = useState(false)
 
@@ -77,6 +77,9 @@ function ImageUploader({ images, onChange }) {
     setUploading(false)
     if (uploaded.length) toast.success(uploaded.length + ' image(s) uploaded!')
   }
+
+  // Expose handleFiles so the parent modal can forward paste events
+  useEffect(() => { if (exposePaste) exposePaste(handleFiles) }, [exposePaste])
 
   const handleDrop = (e) => {
     e.preventDefault()
@@ -140,7 +143,7 @@ function ImageUploader({ images, onChange }) {
           <>
             <Upload size={24} color="var(--g3)" style={{ margin: '0 auto 8px' }} />
             <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--tx)', marginBottom: 4 }}>
-              Click to upload, drag & drop, or paste an image
+              Click to upload · drag & drop · or press Ctrl+V to paste
             </div>
             <div style={{ fontSize: 12, color: 'var(--lt)' }}>PNG, JPG, WEBP supported</div>
           </>
@@ -161,6 +164,7 @@ function ImageUploader({ images, onChange }) {
 
 function ProductForm({ product, categories, vendors, onSave, onClose }) {
   const isEdit = !!product?.id
+  // Handled below by useEffect that binds a global paste listener
   const [form, setForm] = useState({
     name: '', description: '', price: '', compare_price: '', unit: 'kg',
     stock_qty: '', bulk_price: '', bulk_min_qty: '',
@@ -170,6 +174,28 @@ function ProductForm({ product, categories, vendors, onSave, onClose }) {
     ...(product || {})
   })
   const [saving, setSaving] = useState(false)
+
+  // Global paste-to-upload: while the product form is open, Ctrl+V pastes an image
+  const pasteRef = useRef(null)
+  useEffect(() => {
+    const onPaste = (e) => {
+      const items = e.clipboardData?.items
+      if (!items) return
+      const files = []
+      for (const item of items) {
+        if (item.type && item.type.startsWith('image/')) {
+          const f = item.getAsFile()
+          if (f) files.push(f)
+        }
+      }
+      if (files.length && pasteRef.current) {
+        e.preventDefault()
+        pasteRef.current(files)
+      }
+    }
+    document.addEventListener('paste', onPaste)
+    return () => document.removeEventListener('paste', onPaste)
+  }, [])
   const [variants, setVariants] = useState([])
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
@@ -275,6 +301,7 @@ function ProductForm({ product, categories, vendors, onSave, onClose }) {
             <ImageUploader
               images={form.images || []}
               onChange={imgs => set('images', imgs)}
+              exposePaste={fn => { pasteRef.current = fn }}
             />
           </div>
 
