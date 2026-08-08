@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Heart, Plus, Star } from 'lucide-react'
 import { useCartStore, useWishlistStore } from '../../lib/store'
 import toast from 'react-hot-toast'
+import { img } from '../../lib/img'
 
 export default function ProductCard({ product }) {
   const navigate = useNavigate()

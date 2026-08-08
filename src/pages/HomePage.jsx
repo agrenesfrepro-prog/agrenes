@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronRight, Zap, Star, TrendingUp, Users } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import { img } from '../lib/img'
 import ProductCard from '../components/product/ProductCard'
 
 // ── HERO CAROUSEL ────────────────────────────────────────────
@@ -192,7 +193,7 @@ function PromoGrid() {
           onMouseLeave={e => { e.currentTarget.style.transform=''; e.currentTarget.style.boxShadow='var(--sh1)' }}
         >
           <div style={{height:96, background:c.bg, position:'relative', overflow:'hidden'}}>
-            <img src={c.img} alt={c.title} loading="lazy" decoding="async"
+            <img src={img(c.img, 640)} alt={c.title} loading="lazy" decoding="async"
               style={{width:'100%', height:'100%', objectFit:'cover', display:'block'}}
               onError={e => { e.currentTarget.style.display='none'; e.currentTarget.nextSibling.style.display='flex' }} />
             <span style={{
