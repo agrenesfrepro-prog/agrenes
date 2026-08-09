@@ -63,6 +63,10 @@ function HeroCarousel() {
 
   const s = SLIDES[idx]
 
+  useEffect(() => {
+    supabase.from('bundles').select('id,slug,name,tagline,price,compare_price,hero_emoji,hero_image').eq('is_active', true).eq('is_featured', true).order('sort_order').limit(6).then(({ data }) => setBundles(data || []))
+  }, [])
+
   return (
     <div style={{background: s.bg, transition:'background .5s', position:'relative', overflow:'hidden'}}>
       <div style={{
@@ -193,8 +197,8 @@ function PromoGrid() {
           onMouseLeave={e => { e.currentTarget.style.transform=''; e.currentTarget.style.boxShadow='var(--sh1)' }}
         >
           <div style={{height:96, background:c.bg, position:'relative', overflow:'hidden'}}>
-            <img src={img(c.img, 640)?.replace('resize=cover', 'resize=contain')} alt={c.title} loading="lazy" decoding="async"
-              style={{width:'100%', height:'100%', objectFit:'contain', display:'block', padding:6}}
+            <img src={img(c.img, 640)} alt={c.title} loading="lazy" decoding="async"
+              style={{width:'100%', height:'100%', objectFit:'cover', display:'block'}}
               onError={e => { e.currentTarget.style.display='none'; e.currentTarget.nextSibling.style.display='flex' }} />
             <span style={{
               display:'none', position:'absolute', inset:0,
@@ -305,6 +309,7 @@ function StatsBanner() {
 export default function HomePage() {
   const [flashDeals, setFlashDeals] = useState([])
   const [featured, setFeatured] = useState([])
+  const [bundles, setBundles] = useState([])
   const [topRated, setTopRated] = useState([])
 
   useEffect(() => {
@@ -326,6 +331,37 @@ export default function HomePage() {
       <HeroCarousel />
       <TrustStrip />
       <PromoGrid />
+        {bundles.length > 0 && (
+          <div style={{padding:'6px 14px 12px'}}>
+            <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10}}>
+              <div>
+                <div style={{fontSize:11, fontWeight:800, letterSpacing:.6, color:'var(--g2)'}}>CURATED BUNDLES</div>
+                <h2 style={{fontFamily:'Fraunces,serif', fontSize:20, color:'var(--g1)', marginTop:2}}>Boxes for every occasion 🎁</h2>
+              </div>
+              <button onClick={() => navigate('/bundles')} style={{background:'none', border:'none', color:'var(--g2)', fontWeight:700, fontSize:13, cursor:'pointer'}}>See all →</button>
+            </div>
+            <div className="hide-scroll" style={{display:'flex', gap:12, overflowX:'auto', paddingBottom:6}}>
+              {bundles.map(b => (
+                <div key={b.id} onClick={() => navigate('/bundles/' + b.slug)}
+                  className="card" style={{minWidth:200, flexShrink:0, cursor:'pointer', padding:0, overflow:'hidden'}}>
+                  <div style={{height:80, background:'linear-gradient(135deg,var(--gll),var(--gl))', display:'flex', alignItems:'center', justifyContent:'center', fontSize:42}}>
+                    {b.hero_emoji || '📦'}
+                  </div>
+                  <div style={{padding:12}}>
+                    <div style={{fontWeight:700, fontSize:13.5, color:'var(--tx)', lineHeight:1.25, marginBottom:6}}>{b.name}</div>
+                    <div style={{display:'flex', alignItems:'baseline', gap:6}}>
+                      <span style={{fontFamily:'Fraunces,serif', fontSize:15, fontWeight:700, color:'var(--g2)'}}>£{Number(b.price).toFixed(2)}</span>
+                      {b.compare_price && Number(b.compare_price) > Number(b.price) && (
+                        <span style={{fontSize:11, color:'var(--mu)', textDecoration:'line-through'}}>£{Number(b.compare_price).toFixed(2)}</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
       <FlashRow products={flashDeals} />
       <StatsBanner />
       <FeaturedSection title="Featured Produce" icon="⭐" products={featured} linkTo="/shop?featured=1" />

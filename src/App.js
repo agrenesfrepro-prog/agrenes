@@ -18,6 +18,8 @@ import { AccountPage, WishlistPage } from './pages/AccountPage'
 import AuthPage from './pages/AuthPage'
 import AdminPage from './pages/AdminPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
+import BundlesPage from './pages/BundlesPage'
+import BundleDetailPage from './pages/BundleDetailPage'
 import VendorsPage from './pages/VendorsPage'
 import VendorPortalPage from './pages/VendorPortalPage'
 import AddressesPage from './pages/AddressesPage'
@@ -101,6 +103,8 @@ export default function App() {
         {/* Auth — no layout */}
         <Route path="/login" element={<AuthPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/bundles" element={<BundlesPage />} />
+<Route path="/bundles/:slug" element={<BundleDetailPage />} />
 
         {/* Main pages */}
         <Route path="/" element={<Layout><HomePage /></Layout>} />
