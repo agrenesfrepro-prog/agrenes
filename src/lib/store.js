@@ -2,43 +2,55 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { supabase } from '../lib/supabase'
 
+// Helper to keep the derived fields in sync whenever items change
+const computeTotals = (items) => ({
+  total: items.reduce((sum, i) => sum + (Number(i.price) || 0) * (Number(i.qty) || 1), 0),
+  count: items.reduce((sum, i) => sum + (Number(i.qty) || 1), 0),
+})
+
 // ── CART STORE ──────────────────────────────────────────────
 export const useCartStore = create(persist(
   (set, get) => ({
     items: [],
+    total: 0,
+    count: 0,
     isOpen: false,
 
     addItem: (product, qty = 1) => {
       const items = get().items
       const existing = items.find(i => i.id === product.id)
-      if (existing) {
-        set({ items: items.map(i => i.id === product.id ? { ...i, qty: i.qty + qty } : i) })
-      } else {
-        set({ items: [...items, { ...product, qty }] })
-      }
+      const nextItems = existing
+        ? items.map(i => i.id === product.id ? { ...i, qty: i.qty + qty } : i)
+        : [...items, { ...product, qty }]
+      set({ items: nextItems, ...computeTotals(nextItems) })
     },
-
-    removeItem: (id) => set({ items: get().items.filter(i => i.id !== id) }),
-
+    removeItem: (id) => {
+      const nextItems = get().items.filter(i => i.id !== id)
+      set({ items: nextItems, ...computeTotals(nextItems) })
+    },
     updateQty: (id, qty) => {
       if (qty <= 0) return get().removeItem(id)
-      set({ items: get().items.map(i => i.id === id ? { ...i, qty } : i) })
+      const nextItems = get().items.map(i => i.id === id ? { ...i, qty } : i)
+      set({ items: nextItems, ...computeTotals(nextItems) })
     },
-
-    clearCart: () => set({ items: [] }),
+    clearCart: () => set({ items: [], total: 0, count: 0 }),
 
     toggleCart: () => set({ isOpen: !get().isOpen }),
     openCart: () => set({ isOpen: true }),
     closeCart: () => set({ isOpen: false }),
-
-    get total() {
-      return get().items.reduce((sum, i) => sum + i.price * i.qty, 0)
-    },
-    get count() {
-      return get().items.reduce((sum, i) => sum + i.qty, 0)
-    },
   }),
-  { name: 'agrenes-cart' }
+  {
+    name: 'agrenes-cart',
+    // Persist only items; totals get recomputed on rehydrate
+    partialize: (state) => ({ items: state.items }),
+    onRehydrateStorage: () => (state) => {
+      if (state && Array.isArray(state.items)) {
+        const t = computeTotals(state.items)
+        state.total = t.total
+        state.count = t.count
+      }
+    },
+  }
 ))
 
 // ── AUTH STORE ──────────────────────────────────────────────
@@ -46,14 +58,12 @@ export const useAuthStore = create((set, get) => ({
   user: null,
   profile: null,
   loading: true,
-
   init: async () => {
     const { data: { session } } = await supabase.auth.getSession()
     if (session?.user) {
       await get().loadProfile(session.user)
     }
     set({ loading: false })
-
     supabase.auth.onAuthStateChange(async (event, session) => {
       if (session?.user) {
         await get().loadProfile(session.user)
@@ -62,7 +72,6 @@ export const useAuthStore = create((set, get) => ({
       }
     })
   },
-
   loadProfile: async (user) => {
     set({ user })
     const { data } = await supabase
@@ -72,7 +81,6 @@ export const useAuthStore = create((set, get) => ({
       .single()
     set({ profile: data })
   },
-
   signUp: async (email, password, fullName) => {
     const { data, error } = await supabase.auth.signUp({
       email, password,
@@ -80,17 +88,14 @@ export const useAuthStore = create((set, get) => ({
     })
     return { data, error }
   },
-
   signIn: async (email, password) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     return { data, error }
   },
-
   signOut: async () => {
     await supabase.auth.signOut()
     set({ user: null, profile: null })
   },
-
   isAdmin: () => get().profile?.role === 'admin',
   isVendor: () => ['vendor', 'admin'].includes(get().profile?.role),
 }))
@@ -99,7 +104,6 @@ export const useAuthStore = create((set, get) => ({
 export const useWishlistStore = create(persist(
   (set, get) => ({
     items: [],
-
     toggle: (product) => {
       const has = get().items.find(i => i.id === product.id)
       if (has) {
@@ -108,7 +112,6 @@ export const useWishlistStore = create(persist(
         set({ items: [...get().items, product] })
       }
     },
-
     has: (id) => !!get().items.find(i => i.id === id),
   }),
   { name: 'agrenes-wishlist' }
