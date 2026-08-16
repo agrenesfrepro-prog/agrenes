@@ -1,63 +1,266 @@
-import os
-import requests
-from docx import Document
-from docx.shared import Inches
+import { useState, useEffect } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { SlidersHorizontal, X } from 'lucide-react'
+import { supabase } from '../lib/supabase'
+import ProductCard from '../components/product/ProductCard'
 
-# --- CONFIGURATION ---
-UNSPLASH_ACCESS_KEY = "GQ7p__8sgKbA7_8lVcw6fUa9BgStoUpWTe_g7QkX4ks"
-DOCX_FILE = "Universal_access_grid_qatar_uganda_proposal.docx"
-OUTPUT_FILE = "Universal_access_grid_qatar_uganda_proposal_With_Images.docx"
-
-# Search queries for Unsplash
-SEARCH_QUERIES = [
-    "rural uganda community water crisis dry well",
-    "karamoja pastoralists water trough cattle africa",
-    "uganda refugee settlement water kiosk solar pump",
-    "clean drinking water point rural africa community"
+const SORTS = [
+  { label: 'Most Popular', value: 'sales_count.desc' },
+  { label: 'Top Rated', value: 'rating.desc' },
+  { label: 'Price: Low → High', value: 'price.asc' },
+  { label: 'Price: High → Low', value: 'price.desc' },
+  { label: 'Newest', value: 'created_at.desc' },
 ]
 
-def download_image(query, filename):
-    url = f"https://api.unsplash.com/search/photos?query={query}&per_page=1&client_id={UNSPLASH_ACCESS_KEY}"
-    try:
-        res = requests.get(url).json()
-        if res.get("results"):
-            img_url = res["results"][0]["urls"]["regular"]
-            img_data = requests.get(img_url).content
-            with open(filename, "wb") as f:
-                f.write(img_data)
-            return True
-    except Exception as e:
-        print(f"Error downloading image for '{query}': {e}")
-    return False
+const CERTS = ['GAP / UNBS', 'MAAIF', 'Organic', 'HACCP', 'Global G.A.P']
 
-def replace_placeholders():
-    if not os.path.exists(DOCX_FILE):
-        print(f"Error: Could not find '{DOCX_FILE}'. Make sure the file name matches exactly.")
-        return
+function ProductSkeleton() {
+  return (
+    <div className="card" style={{overflow:'hidden'}}>
+      <div className="skel" style={{height:160}}/>
+      <div style={{padding:'10px 11px 12px'}}>
+        <div className="skel" style={{height:12, marginBottom:8, width:'60%'}}/>
+        <div className="skel" style={{height:14, marginBottom:8}}/>
+        <div className="skel" style={{height:14, marginBottom:12, width:'40%'}}/>
+        <div className="skel" style={{height:36, borderRadius:8}}/>
+      </div>
+    </div>
+  )
+}
 
-    doc = Document(DOCX_FILE)
-    image_index = 0
+export default function ShopPage() {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const params = new URLSearchParams(location.search)
+  const catSlug = params.get('cat') || 'all'
+  const searchQ = params.get('q') || ''
+  const flashOnly = params.get('flash') === '1'
+  const bulkOnly = params.get('bulk') === '1'
 
-    for paragraph in doc.paragraphs:
-        if "PHOTO PLACEHOLDER" in paragraph.text.upper() or "[PHOTO:" in paragraph.text.upper():
-            if image_index < len(SEARCH_QUERIES):
-                query = SEARCH_QUERIES[image_index]
-                temp_filename = f"temp_img_{image_index}.jpg"
-                
-                print(f"Fetching image {image_index + 1}/{len(SEARCH_QUERIES)} for: '{query}'...")
-                
-                if download_image(query, temp_filename):
-                    paragraph.text = ""
-                    run = paragraph.add_run()
-                    run.add_picture(temp_filename, width=Inches(5.5))
-                    print(f"Successfully inserted image {image_index + 1}!")
-                    image_index += 1
-                
-                if os.path.exists(temp_filename):
-                    os.remove(temp_filename)
+  const [products, setProducts] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [page, setPage] = useState(0)
+  const [hasMore, setHasMore] = useState(false)
+  const PAGE_SIZE = 12
+  const [sort, setSort] = useState('sales_count.desc')
+  const [showFilters, setShowFilters] = useState(false)
+  const [priceMax, setPriceMax] = useState(50)
+  const [selectedCerts, setSelectedCerts] = useState([])
+  const [inStock, setInStock] = useState(false)
+  const [categories, setCategories] = useState([])
+  const [catMap, setCatMap] = useState({})
 
-    doc.save(OUTPUT_FILE)
-    print(f"\nFinished! Output saved as: {OUTPUT_FILE}")
+  // Load categories
+  useEffect(() => {
+    supabase.from('categories').select('*').eq('is_active', true).order('sort_order')
+      .then(({ data }) => {
+        if (data) {
+          setCategories(data)
+          const map = {}
+          data.forEach(c => { map[c.slug] = c.id })
+          setCatMap(map)
+        }
+      })
+  }, [])
 
-if __name__ == "__main__":
-    replace_placeholders()
+  // Load products
+  useEffect(() => {
+    setLoading(true)
+    const [sortCol, sortDir] = sort.split('.')
+
+    let query = supabase
+      .from('products')
+      .select('*, vendors(name, is_verified), product_variants(price,is_active)')
+      .eq('is_active', true)
+      .order(sortCol, { ascending: sortDir === 'asc' })
+      .lte('price', priceMax)
+      .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1)
+
+    if (catSlug !== 'all' && catMap[catSlug]) {
+      query = query.eq('category_id', catMap[catSlug])
+    }
+    if (searchQ) query = query.ilike('name', `%${searchQ}%`)
+    if (flashOnly) query = query.eq('is_flash_deal', true)
+    if (bulkOnly) query = query.not('bulk_price', 'is', null)
+    if (inStock) query = query.gt('stock_qty', 0)
+    if (selectedCerts.length > 0) query = query.overlaps('certifications', selectedCerts)
+
+    query.then(({ data, error }) => {
+      const mapped = data?.map(p => ({
+        ...p,
+        vendor_name: p.vendors?.name,
+      })) || []
+      setProducts(prev => page === 0 ? mapped : [...prev, ...mapped])
+      setHasMore(mapped.length === PAGE_SIZE)
+      setLoading(false)
+    })
+  }, [catSlug, searchQ, sort, priceMax, selectedCerts, inStock, flashOnly, bulkOnly, catMap, page])
+
+  // Reset to first page when any filter changes
+  useEffect(() => {
+    setPage(0)
+  }, [catSlug, searchQ, sort, priceMax, selectedCerts, inStock, flashOnly, bulkOnly])
+
+  const toggleCert = (c) =>
+    setSelectedCerts(prev => prev.includes(c) ? prev.filter(x=>x!==c) : [...prev, c])
+
+  const activeFilterCount = [
+    priceMax < 50, selectedCerts.length > 0, inStock, flashOnly, bulkOnly
+  ].filter(Boolean).length
+
+  return (
+    <div className="page-enter">
+      {/* Page header */}
+      <div style={{
+        padding:'14px 14px 12px', borderBottom:'1px solid var(--br)',
+        background:'var(--wh)'
+      }}>
+        <h1 style={{fontSize:18, marginBottom:4, display:'flex', alignItems:'center', gap:8}}>
+          {flashOnly && '⚡ Flash Deals'}
+          {bulkOnly && '📦 Bulk / Wholesale'}
+          {searchQ && `Results for "${searchQ}"`}
+          {!flashOnly && !bulkOnly && !searchQ && (
+            catSlug === 'all' ? '🥬 All Fresh Produce' : `${categories.find(c=>c.slug===catSlug)?.emoji} ${categories.find(c=>c.slug===catSlug)?.name}`
+          )}
+        </h1>
+        {!loading && (
+          <p style={{fontSize:12, color:'var(--mu)'}}>
+            {products.length} product{products.length !== 1 ? 's' : ''} found
+          </p>
+        )}
+      </div>
+
+      {/* Filter + Sort bar */}
+      <div style={{
+        background:'var(--wh)', padding:'10px 14px',
+        display:'flex', gap:8, alignItems:'center',
+        borderBottom:'1px solid var(--br)', flexWrap:'wrap'
+      }}>
+        <button onClick={() => setShowFilters(!showFilters)} style={{
+          background: showFilters ? 'var(--g4)' : 'var(--bg)',
+          border:'1px solid var(--br)', color: showFilters ? '#fff' : 'var(--mu)',
+          padding:'7px 13px', borderRadius:20, fontSize:12, fontWeight:600,
+          display:'flex', alignItems:'center', gap:6, cursor:'pointer'
+        }}>
+          <SlidersHorizontal size={14}/> Filters
+          {activeFilterCount > 0 && (
+            <span style={{
+              background:'var(--rd)', color:'#fff', borderRadius:'50%',
+              width:17, height:17, fontSize:9, fontWeight:700,
+              display:'flex', alignItems:'center', justifyContent:'center'
+            }}>{activeFilterCount}</span>
+          )}
+        </button>
+
+        {/* Active filter chips */}
+        {flashOnly && <Chip label="⚡ Flash" onRemove={() => navigate(location.pathname)} />}
+        {bulkOnly && <Chip label="📦 Bulk" onRemove={() => navigate(location.pathname)} />}
+        {inStock && <Chip label="In Stock" onRemove={() => setInStock(false)} />}
+        {selectedCerts.map(c => <Chip key={c} label={c} onRemove={() => toggleCert(c)} />)}
+
+        <select value={sort} onChange={e => setSort(e.target.value)} style={{
+          marginLeft:'auto', background:'var(--bg)', border:'1px solid var(--br)',
+          color:'var(--tx)', padding:'7px 13px', borderRadius:20, fontSize:12,
+          fontWeight:600, outline:'none', cursor:'pointer'
+        }}>
+          {SORTS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+        </select>
+      </div>
+
+      {/* Filter Panel */}
+      {showFilters && (
+        <div style={{
+          background:'var(--wh)', borderBottom:'1px solid var(--br)',
+          padding:14, display:'flex', gap:16, flexWrap:'wrap'
+        }}>
+          <div style={{flex:1, minWidth:140}}>
+            <label style={{fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:.6, color:'var(--mu)', display:'block', marginBottom:8}}>
+              Max Price: £{priceMax}
+            </label>
+            <input type="range" min={1} max={50} value={priceMax}
+              onChange={e => setPriceMax(+e.target.value)}
+              style={{width:'100%', accentColor:'var(--g3)'}}
+            />
+          </div>
+          <div style={{flex:1, minWidth:140}}>
+            <label style={{fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:.6, color:'var(--mu)', display:'block', marginBottom:8}}>
+              Certification
+            </label>
+            <div style={{display:'flex', flexDirection:'column', gap:6}}>
+              {CERTS.map(c => (
+                <label key={c} style={{display:'flex', alignItems:'center', gap:8, fontSize:12.5, cursor:'pointer'}}>
+                  <input type="checkbox" checked={selectedCerts.includes(c)}
+                    onChange={() => toggleCert(c)}
+                    style={{accentColor:'var(--g3)', width:15, height:15}}
+                  /> {c}
+                </label>
+              ))}
+            </div>
+          </div>
+          <div style={{flex:1, minWidth:140}}>
+            <label style={{fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:.6, color:'var(--mu)', display:'block', marginBottom:8}}>
+              Availability
+            </label>
+            <label style={{display:'flex', alignItems:'center', gap:8, fontSize:12.5, cursor:'pointer'}}>
+              <input type="checkbox" checked={inStock} onChange={e=>setInStock(e.target.checked)}
+                style={{accentColor:'var(--g3)', width:15, height:15}}
+              /> In Stock Only
+            </label>
+            <label style={{display:'flex', alignItems:'center', gap:8, fontSize:12.5, cursor:'pointer', marginTop:6}}>
+              <input type="checkbox" checked={bulkOnly}
+                onChange={e => navigate(e.target.checked ? `${location.pathname}?bulk=1` : location.pathname)}
+                style={{accentColor:'var(--g3)', width:15, height:15}}
+              /> Bulk / Wholesale
+            </label>
+          </div>
+        </div>
+      )}
+
+      {/* Products grid */}
+      {loading ? (
+        <div className="pgrid" style={{paddingTop:14}}>
+          {Array(8).fill(0).map((_, i) => <ProductSkeleton key={i} />)}
+        </div>
+      ) : products.length === 0 ? (
+        <div style={{textAlign:'center', padding:'60px 20px', color:'var(--lt)'}}>
+          <div style={{fontSize:48, marginBottom:12}}>🔍</div>
+          <p style={{fontSize:16, fontWeight:600, color:'var(--tx)'}}>No products found</p>
+          <p style={{fontSize:13, marginTop:6}}>Try adjusting your filters or search term</p>
+          <button onClick={() => navigate('/shop')} className="btn-primary" style={{marginTop:20}}>
+            Browse All Produce
+          </button>
+        </div>
+      ) : (
+        <>
+          <div className="pgrid" style={{paddingTop:14}}>
+            {products.map(p => <ProductCard key={p.id} product={p} />)}
+          </div>
+          {hasMore && (
+            <div style={{textAlign:'center', padding:'18px 14px 8px'}}>
+              <button onClick={() => setPage(p => p + 1)} className="btn-outline"
+                style={{minWidth:200, justifyContent:'center', height:46}}>
+                {loading ? 'Loading…' : 'Load More Products'}
+              </button>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
+
+function Chip({ label, onRemove }) {
+  return (
+    <span style={{
+      background:'var(--gl)', color:'var(--g2)',
+      border:'1px solid var(--g4)', borderRadius:20,
+      padding:'4px 10px', fontSize:11.5, fontWeight:600,
+      display:'flex', alignItems:'center', gap:4
+    }}>
+      {label}
+      <button onClick={onRemove} style={{background:'none',border:'none',color:'var(--g2)',cursor:'pointer',lineHeight:1}}>
+        <X size={11}/>
+      </button>
+    </span>
+  )
+}
