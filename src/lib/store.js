@@ -1,8 +1,11 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { supabase } from '../lib/supabase'
+import { computeDeliveryFee } from './shipping'
 
-// Helper to keep the derived fields in sync whenever items change
+// Compute derived totals whenever items change. Delivery is left at 0 here — the
+// checkout page recomputes it once the destination country is chosen. The cart
+// drawer shows the UK estimate.
 const computeTotals = (items) => ({
   total: items.reduce((sum, i) => sum + (Number(i.price) || 0) * (Number(i.qty) || 1), 0),
   count: items.reduce((sum, i) => sum + (Number(i.qty) || 1), 0),
@@ -15,6 +18,8 @@ export const useCartStore = create(persist(
     total: 0,
     count: 0,
     isOpen: false,
+    // Country for delivery quoting. Defaults to UK; checkout page updates it.
+    country: 'UK',
 
     addItem: (product, qty = 1) => {
       const items = get().items
@@ -34,6 +39,18 @@ export const useCartStore = create(persist(
       set({ items: nextItems, ...computeTotals(nextItems) })
     },
     clearCart: () => set({ items: [], total: 0, count: 0 }),
+    setCountry: (country) => set({ country }),
+
+    // Derived delivery fee based on current items + country
+    deliveryFee: () => {
+      const { items, total, country } = get()
+      return computeDeliveryFee(items, total, country)
+    },
+    // Grand total including delivery
+    grandTotal: () => {
+      const { items, total, country } = get()
+      return total + computeDeliveryFee(items, total, country)
+    },
 
     toggleCart: () => set({ isOpen: !get().isOpen }),
     openCart: () => set({ isOpen: true }),
@@ -41,8 +58,7 @@ export const useCartStore = create(persist(
   }),
   {
     name: 'agrenes-cart',
-    // Persist only items; totals get recomputed on rehydrate
-    partialize: (state) => ({ items: state.items }),
+    partialize: (state) => ({ items: state.items, country: state.country }),
     onRehydrateStorage: () => (state) => {
       if (state && Array.isArray(state.items)) {
         const t = computeTotals(state.items)
