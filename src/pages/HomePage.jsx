@@ -63,10 +63,6 @@ function HeroCarousel() {
 
   const s = SLIDES[idx]
 
-  useEffect(() => {
-    supabase.from('bundles').select('id,slug,name,tagline,price,compare_price,hero_emoji,hero_image').eq('is_active', true).eq('is_featured', true).order('sort_order').limit(6).then(({ data }) => setBundles(data || []))
-  }, [])
-
   return (
     <div style={{background: s.bg, transition:'background .5s', position:'relative', overflow:'hidden'}}>
       <div style={{
@@ -310,6 +306,10 @@ export default function HomePage() {
   const [flashDeals, setFlashDeals] = useState([])
   const [featured, setFeatured] = useState([])
   const [bundles, setBundles] = useState([])
+
+  useEffect(() => {
+    supabase.from('bundles').select('id,slug,name,tagline,price,compare_price,hero_emoji,hero_image').eq('is_active', true).eq('is_featured', true).order('sort_order').limit(6).then(({ data }) => setBundles(data || []))
+  }, [])
   const [topRated, setTopRated] = useState([])
 
   useEffect(() => {
