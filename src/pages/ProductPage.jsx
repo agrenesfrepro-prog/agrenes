@@ -44,6 +44,7 @@ export default function ProductPage() {
   const [qty, setQty] = useState(1)
   const [isBulk, setIsBulk] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [showReview, setShowReview] = useState(false)
 
   useEffect(() => {
     setLoading(true)
@@ -309,10 +310,21 @@ export default function ProductPage() {
               ))}
             </div>
           )}
-          <WriteReview productId={product.id} onSubmit={() => {
-            supabase.from('reviews').select('*, profiles(full_name)').eq('product_id', id).order('created_at', { ascending: false }).limit(10)
-              .then(({ data }) => setReviews(data || []))
-          }} />
+          <button onClick={() => setShowReview(true)} className="btn-outline"
+            style={{ width: '100%', justifyContent: 'center', height: 44, fontSize: 13.5, marginTop: 8 }}>
+            ✍️ Write a Review
+          </button>
+          {showReview && (
+            <WriteReview
+              productId={product.id}
+              onClose={() => setShowReview(false)}
+              onSubmit={() => {
+                setShowReview(false)
+                supabase.from('reviews').select('*, profiles(full_name)').eq('product_id', id).order('created_at', { ascending: false }).limit(10)
+                  .then(({ data }) => setReviews(data || []))
+              }}
+            />
+          )}
         </div>
       </div>
 
