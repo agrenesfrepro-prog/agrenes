@@ -30,17 +30,43 @@ export default function WriteReview({ productId, onSubmit, onClose }) {
   }
 
   return (
-    <div className="modal">
-      <div className="overlay" onClick={onClose} />
-      <div className="modal-box" style={{ maxWidth: 440 }}>
-        <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--br)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 9999,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: 16
+    }}>
+      {/* Backdrop — sits BELOW the modal box via z-index */}
+      <div onClick={onClose} style={{
+        position: 'fixed', inset: 0,
+        background: 'rgba(0,0,0,.45)',
+        backdropFilter: 'blur(3px)',
+        WebkitBackdropFilter: 'blur(3px)',
+        zIndex: 1
+      }} />
+
+      {/* Modal box — sits ABOVE the backdrop, fully clear */}
+      <div style={{
+        position: 'relative', zIndex: 2,
+        background: '#fff', borderRadius: 14,
+        width: '100%', maxWidth: 440,
+        maxHeight: '90vh', overflowY: 'auto',
+        boxShadow: '0 20px 60px rgba(0,0,0,.3)'
+      }}>
+        <div style={{
+          padding: '16px 20px', borderBottom: '1px solid var(--br)',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+        }}>
           <h2 style={{ fontSize: 16 }}>Write a Review</h2>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--mu)' }}><X size={20} /></button>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--mu)' }}>
+            <X size={20} />
+          </button>
         </div>
+
         <form onSubmit={handleSubmit} style={{ padding: 20 }}>
-          {/* Stars */}
           <div style={{ textAlign: 'center', marginBottom: 20 }}>
-            <div style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: .5, color: 'var(--mu)', marginBottom: 10 }}>Your Rating *</div>
+            <div style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: .5, color: 'var(--mu)', marginBottom: 10 }}>
+              Your Rating *
+            </div>
             <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
               {[1, 2, 3, 4, 5].map(s => (
                 <button key={s} type="button"
@@ -75,7 +101,6 @@ export default function WriteReview({ productId, onSubmit, onClose }) {
               value={form.body} onChange={e => setForm(f => ({ ...f, body: e.target.value }))}
               style={{ resize: 'vertical' }} />
           </div>
-
           <button type="submit" disabled={saving || rating === 0} className="btn-primary"
             style={{ width: '100%', justifyContent: 'center', height: 46, opacity: (saving || rating === 0) ? .6 : 1 }}>
             {saving ? 'Submitting…' : 'Submit Review'}
