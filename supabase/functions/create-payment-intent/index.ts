@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
   try {
     const { amount, currency, orderId, customerEmail, metadata } = await req.json()
 
-    if (!amount || amount < 50) {
+    if (!amount || amount < 0.50) {
       throw new Error('Invalid amount — minimum is £0.50')
     }
 
