@@ -1,3 +1,4 @@
+import SEO from '../components/SEO'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
@@ -18,6 +19,11 @@ export default function BundlesPage() {
 
   return (
     <div className="page-enter" style={{ paddingBottom: 40 }}>
+<SEO
+  title="Curated Ugandan Bundles"
+  description="Sunday lunch boxes, care packages and gift sets — curated Ugandan bundles delivered UK-wide."
+  url="/bundles"
+/>
       <div style={{ background: 'linear-gradient(135deg,var(--g1),var(--g2))', padding: '30px 16px 24px', color: '#fff', textAlign: 'center' }}>
         <div style={{ fontSize: 12, letterSpacing: 1.4, opacity: .8, marginBottom: 6 }}>CURATED BUNDLES</div>
         <h1 style={{ fontFamily: 'Fraunces,serif', fontSize: 28, marginBottom: 8 }}>Boxes with intention 🎁</h1>

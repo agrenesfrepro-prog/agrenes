@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import SEO from '../components/SEO'
 import { useNavigate } from 'react-router-dom'
 import { ChevronRight, Zap, Star, TrendingUp, Users } from 'lucide-react'
 import { supabase } from '../lib/supabase'
@@ -328,6 +329,7 @@ export default function HomePage() {
 
   return (
     <div className="page-enter">
+      <SEO />
       <HeroCarousel />
       <TrustStrip />
       <PromoGrid />

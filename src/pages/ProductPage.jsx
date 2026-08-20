@@ -1,3 +1,4 @@
+import SEO from '../components/SEO'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, Heart, Minus, Plus, ShieldCheck, Truck, Package, MapPin } from 'lucide-react'
