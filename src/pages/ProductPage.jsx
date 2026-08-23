@@ -96,6 +96,18 @@ export default function ProductPage() {
 
   return (
     <div className="page-enter" style={{ paddingBottom: 96 }}>
+      {product && (
+        <SEO
+          title={product.name}
+          description={product.description || `Fresh ${product.name} from Uganda, delivered UK-wide.`}
+          image={product.images?.[0]}
+          url={`/product/${product.id}`}
+          type="product"
+          price={product.price}
+          productBrand={product.vendors?.name}
+          availability={product.stock_qty > 0 ? 'in stock' : 'out of stock'}
+        />
+      )}
       <div style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
         <button onClick={() => navigate(-1)} style={{ background: 'var(--wh)', border: '1px solid var(--br)', borderRadius: 10, width: 40, height: 40, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <ChevronLeft size={20} />

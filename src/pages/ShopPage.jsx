@@ -1,3 +1,4 @@
+import SEO from '../components/SEO'
 import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { SlidersHorizontal, X } from 'lucide-react'
@@ -107,9 +108,13 @@ export default function ShopPage() {
   const activeFilterCount = [
     priceMax < 50, selectedCerts.length > 0, inStock, flashOnly, bulkOnly
   ].filter(Boolean).length
-
-  return (
+return (
     <div className="page-enter">
+      <SEO
+        title="Shop All Ugandan Produce"
+        description="Browse fresh fruits, vegetables, dried foods, beverages and African crafts — air-freighted from Uganda to the UK."
+        url="/shop"
+      />
       {/* Page header */}
       <div style={{
         padding:'14px 14px 12px', borderBottom:'1px solid var(--br)',
