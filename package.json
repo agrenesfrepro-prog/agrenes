@@ -17,13 +17,13 @@
     "zustand": "^4.5.0"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "dev": "next dev",
-    "next-build": "next build",
-    "next-start": "next start"
+  "start": "next start",
+  "build": "next build",
+  "test": "react-scripts test",
+  "eject": "react-scripts eject",
+  "dev": "next dev",
+  "cra-start": "react-scripts start",
+  "cra-build": "react-scripts build"
   },
   "reactSnap": {
     "inlineCss": true,
