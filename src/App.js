@@ -26,6 +26,7 @@ import AddressesPage from './screens/AddressesPage'
 import BulkEnquiryPage from './screens/BulkEnquiryPage'
 import { AboutPage, ContactPage, TermsPage, PrivacyPage, ReturnsPage } from './screens/FooterPages'
 import WhatsAppButton from './components/shared/WhatsAppButton'
+import HydrationTrigger from './components/HydrationTrigger'
 
 // ── SEO: dynamic page titles ──────────────────────────────
 const PAGE_TITLES = {
@@ -87,6 +88,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
+    <HydrationTrigger />
       <TitleManager />
       <Toaster
         position="bottom-center"

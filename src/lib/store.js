@@ -11,6 +11,8 @@ const computeTotals = (items) => ({
 export const useCartStore = create(persist(
   (set, get) => ({
     items: [], total: 0, count: 0, isOpen: false, country: 'UK',
+    hasHydrated: false,
+    setHasHydrated: (v) => set({ hasHydrated: v }),
     addItem: (product, qty = 1) => {
       const items = get().items
       const existing = items.find(i => i.id === product.id)
@@ -44,6 +46,7 @@ export const useCartStore = create(persist(
   }),
   {
     name: 'agrenes-cart',
+    skipHydration: true,
     partialize: (state) => ({ items: state.items, country: state.country }),
     onRehydrateStorage: () => (state) => {
       if (state && Array.isArray(state.items)) {
@@ -81,11 +84,16 @@ export const useAuthStore = create((set, get) => ({
 export const useWishlistStore = create(persist(
   (set, get) => ({
     items: [],
+    hasHydrated: false,
+    setHasHydrated: (v) => set({ hasHydrated: v }),
     toggle: (product) => {
       const has = get().items.find(i => i.id === product.id)
       set({ items: has ? get().items.filter(i => i.id !== product.id) : [...get().items, product] })
     },
     has: (id) => !!get().items.find(i => i.id === id),
   }),
-  { name: 'agrenes-wishlist' }
+  {
+    name: 'agrenes-wishlist',
+    skipHydration: true,
+  }
 ))
