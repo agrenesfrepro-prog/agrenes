@@ -1,6 +1,7 @@
+'use client'
 import SEO from '../components/SEO'
 import { useState, useEffect } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { SlidersHorizontal, X } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import ProductCard from '../components/product/ProductCard'
@@ -29,16 +30,17 @@ function ProductSkeleton() {
   )
 }
 
-export default function ShopPage() {
-  const location = useLocation()
-  const navigate = useNavigate()
-  const params = new URLSearchParams(location.search)
+export default function ShopPage({ initialProducts } = {}) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const pathname = usePathname()
+  const params = searchParams
   const catSlug = params.get('cat') || 'all'
   const searchQ = params.get('q') || ''
   const flashOnly = params.get('flash') === '1'
   const bulkOnly = params.get('bulk') === '1'
 
-  const [products, setProducts] = useState([])
+  const [products, setProducts] = useState(initialProducts || [])
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(0)
   const [hasMore, setHasMore] = useState(false)
@@ -158,8 +160,8 @@ return (
         </button>
 
         {/* Active filter chips */}
-        {flashOnly && <Chip label="⚡ Flash" onRemove={() => navigate(location.pathname)} />}
-        {bulkOnly && <Chip label="📦 Bulk" onRemove={() => navigate(location.pathname)} />}
+        {flashOnly && <Chip label="⚡ Flash" onRemove={() => router.push(pathname)} />}
+        {bulkOnly && <Chip label="📦 Bulk" onRemove={() => router.push(pathname)} />}
         {inStock && <Chip label="In Stock" onRemove={() => setInStock(false)} />}
         {selectedCerts.map(c => <Chip key={c} label={c} onRemove={() => toggleCert(c)} />)}
 
@@ -213,7 +215,7 @@ return (
             </label>
             <label style={{display:'flex', alignItems:'center', gap:8, fontSize:12.5, cursor:'pointer', marginTop:6}}>
               <input type="checkbox" checked={bulkOnly}
-                onChange={e => navigate(e.target.checked ? `${location.pathname}?bulk=1` : location.pathname)}
+                onChange={e => router.push(e.target.checked ? `${pathname}?bulk=1` : pathname)}
                 style={{accentColor:'var(--g3)', width:15, height:15}}
               /> Bulk / Wholesale
             </label>
@@ -231,7 +233,7 @@ return (
           <div style={{fontSize:48, marginBottom:12}}>🔍</div>
           <p style={{fontSize:16, fontWeight:600, color:'var(--tx)'}}>No products found</p>
           <p style={{fontSize:13, marginTop:6}}>Try adjusting your filters or search term</p>
-          <button onClick={() => navigate('/shop')} className="btn-primary" style={{marginTop:20}}>
+          <button onClick={() => router.push('/shop')} className="btn-primary" style={{marginTop:20}}>
             Browse All Produce
           </button>
         </div>
