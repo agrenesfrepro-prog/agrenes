@@ -1,11 +1,12 @@
+'use client'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useRouter } from 'next/navigation'
 import { Heart, Plus, Star } from 'lucide-react'
 import { useCartStore, useWishlistStore } from '../../lib/store'
 import toast from 'react-hot-toast'
 
 export default function ProductCard({ product }) {
-  const navigate = useNavigate()
+  const router = useRouter()
   const { addItem } = useCartStore()
   const { toggle, has } = useWishlistStore()
   const [adding, setAdding] = useState(false)
@@ -22,7 +23,7 @@ export default function ProductCard({ product }) {
   const handleAdd = async (e) => {
     e.stopPropagation()
     if (hasVariants) {
-      navigate(`/product/${product.id}`)
+      router.push(`/product/${product.id}`)
       return
     }
     setAdding(true)
@@ -38,7 +39,7 @@ export default function ProductCard({ product }) {
   }
 
   return (
-    <div onClick={() => navigate(`/product/${product.id}`)}
+    <div onClick={() => router.push(`/product/${product.id}`)}
       className="card"
       style={{cursor:'pointer', transition:'all .18s', position:'relative'}}
       onMouseEnter={e => {

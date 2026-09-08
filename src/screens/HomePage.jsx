@@ -1,6 +1,7 @@
+'use client'
 import { useState, useEffect, useRef } from 'react'
 import SEO from '../components/SEO'
-import { useNavigate } from 'react-router-dom'
+import { useRouter } from 'next/navigation'
 import { ChevronRight, Zap, Star, TrendingUp, Users } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { img } from '../lib/img'
@@ -50,7 +51,7 @@ const SLIDES = [
 ]
 
 function HeroCarousel() {
-  const navigate = useNavigate()
+  const router = useRouter()
   const [idx, setIdx] = useState(0)
   const timer = useRef(null)
 
@@ -94,7 +95,7 @@ function HeroCarousel() {
             color:'rgba(255,255,255,.75)', fontSize:13.5, lineHeight:1.65,
             marginBottom:20, maxWidth:300
           }}>{s.sub}</p>
-          <button onClick={() => navigate(s.flash ? '/shop?flash=1' : s.bulk ? '/shop?bulk=1' : '/shop')}
+          <button onClick={() => router.push(s.flash ? '/shop?flash=1' : s.bulk ? '/shop?bulk=1' : '/shop')}
             style={{
               background:'var(--am)', color:'var(--amd)', border:'none',
               padding:'12px 26px', borderRadius:10, fontWeight:800, fontSize:14,
@@ -172,7 +173,7 @@ function TrustStrip() {
 
 // ── PROMO GRID ───────────────────────────────────────────────
 function PromoGrid() {
-  const navigate = useNavigate()
+  const router = useRouter()
   const cards = [
     {img:'https://ierviwtmdqerdmwtnimn.supabase.co/storage/v1/object/public/product-images/products/1784272182381-usc22b751rp.jpg', bg:'var(--gl)', border:'#9FE1CB', emoji:'📦', title:'Food Boxes', sub:'Avocado, plantain, sweet potato', cat:'all'},
     {img:'https://ierviwtmdqerdmwtnimn.supabase.co/storage/v1/object/public/product-images/products/1784273521387-tkpq9h8jan.jpg', bg:'var(--aml)', border:'#FAC775', emoji:'🥦', title:'Fresh Vegetables', sub:'Peppers, tomatoes, cabbage', cat:'vegetables'},
@@ -184,7 +185,7 @@ function PromoGrid() {
   return (
     <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(150px, 1fr))', gap:10, padding:'10px 14px'}}>
       {cards.map(c => (
-        <div key={c.title} onClick={() => navigate(`/shop?cat=${c.cat}`)}
+        <div key={c.title} onClick={() => router.push(`/shop?cat=${c.cat}`)}
           style={{
             background:'var(--wh)', border:`.5px solid ${c.border}`, borderRadius:14,
             cursor:'pointer', position:'relative', overflow:'hidden',
@@ -215,20 +216,20 @@ function PromoGrid() {
 // ── FLASH DEALS ROW ──────────────────────────────────────────
 function FlashRow({ products }) {
   if (!products.length) return null
-  const navigate = useNavigate()
+  const router = useRouter()
   const { addItem } = require('../lib/store').useCartStore()
 
   return (
     <div style={{paddingBottom:8}}>
       <div className="sec-hd">
         <h2><Zap size={18} color="var(--rd)" /> Flash Deals</h2>
-        <button className="see-all" onClick={() => navigate('/shop?flash=1')}>
+        <button className="see-all" onClick={() => router.push('/shop?flash=1')}>
           See all <ChevronRight size={13}/>
         </button>
       </div>
       <div className="hide-scroll" style={{display:'flex', gap:10, overflowX:'auto', padding:'0 14px 4px'}}>
         {products.map(p => (
-          <div key={p.id} className="card" onClick={() => navigate(`/product/${p.id}`)}
+          <div key={p.id} className="card" onClick={() => router.push(`/product/${p.id}`)}
             style={{minWidth:140, cursor:'pointer', flexShrink:0, transition:'all .18s'}}
             onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='var(--sh2)' }}
             onMouseLeave={e => { e.currentTarget.style.transform=''; e.currentTarget.style.boxShadow='var(--sh1)' }}
@@ -257,13 +258,13 @@ function FlashRow({ products }) {
 
 // ── FEATURED PRODUCTS ────────────────────────────────────────
 function FeaturedSection({ title, icon, products, linkTo }) {
-  const navigate = useNavigate()
+  const router = useRouter()
   if (!products.length) return null
   return (
     <div style={{paddingBottom:8}}>
       <div className="sec-hd">
         <h2>{icon} {title}</h2>
-        <button className="see-all" onClick={() => navigate(linkTo)}>
+        <button className="see-all" onClick={() => router.push(linkTo)}>
           See all <ChevronRight size={13}/>
         </button>
       </div>
@@ -339,11 +340,11 @@ export default function HomePage({ initialData }) {
                 <div style={{fontSize:11, fontWeight:800, letterSpacing:.6, color:'var(--g2)'}}>CURATED BUNDLES</div>
                 <h2 style={{fontFamily:'Fraunces,serif', fontSize:20, color:'var(--g1)', marginTop:2}}>Boxes for every occasion 🎁</h2>
               </div>
-              <button onClick={() => navigate('/bundles')} style={{background:'none', border:'none', color:'var(--g2)', fontWeight:700, fontSize:13, cursor:'pointer'}}>See all →</button>
+              <button onClick={() => router.push('/bundles')} style={{background:'none', border:'none', color:'var(--g2)', fontWeight:700, fontSize:13, cursor:'pointer'}}>See all →</button>
             </div>
             <div className="hide-scroll" style={{display:'flex', gap:12, overflowX:'auto', paddingBottom:6}}>
               {bundles.map(b => (
-                <div key={b.id} onClick={() => navigate('/bundles/' + b.slug)}
+                <div key={b.id} onClick={() => router.push('/bundles/' + b.slug)}
                   className="card" style={{minWidth:200, flexShrink:0, cursor:'pointer', padding:0, overflow:'hidden'}}>
                   <div style={{height:80, background:'linear-gradient(135deg,var(--gll),var(--gl))', display:'flex', alignItems:'center', justifyContent:'center', fontSize:42}}>
                     {b.hero_emoji || '📦'}
