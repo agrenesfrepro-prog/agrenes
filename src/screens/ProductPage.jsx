@@ -1,6 +1,7 @@
+'use client'
 import SEO from '../components/SEO'
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useRouter, useParams } from 'next/navigation'
 import { ChevronLeft, ChevronRight, Heart, Minus, Plus, ShieldCheck, Truck, Package, MapPin } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useCartStore, useWishlistStore } from '../lib/store'
@@ -28,17 +29,18 @@ function getCulturalNote(name) {
   return null
 }
 
-export default function ProductPage() {
-  const { id } = useParams()
-  const navigate = useNavigate()
+export default function ProductPage({ initialData } = {}) {
+  const { id: paramId } = useParams()
+  const id = initialData?.product?.id || paramId
+  const router = useRouter()
   const { addItem, openCart, country: cartCountry, setCountry } = useCartStore()
   const wishlist = useWishlistStore()
 
-  const [product, setProduct] = useState(null)
-  const [reviews, setReviews] = useState([])
-  const [variants, setVariants] = useState([])
+  const [product, setProduct] = useState(initialData?.product || null)
+  const [reviews, setReviews] = useState(initialData?.reviews || [])
+  const [variants, setVariants] = useState(initialData?.variants || [])
   const [selectedVariant, setSelectedVariant] = useState(null)
-  const [related, setRelated] = useState([])
+  const [related, setRelated] = useState(initialData?.related || [])
   const [imgIndex, setImgIndex] = useState(0)
   const [qty, setQty] = useState(1)
   const [loading, setLoading] = useState(true)
@@ -46,6 +48,7 @@ export default function ProductPage() {
   const [deliveryCountry, setDeliveryCountry] = useState(cartCountry || 'UK')
 
   useEffect(() => {
+    if (initialData) { setLoading(false); if (initialData.variants?.length) setSelectedVariant(initialData.variants[0]); return }
     setLoading(true); setImgIndex(0); setQty(1); setSelectedVariant(null)
     Promise.all([
       supabase.from('products').select('*, categories(name,slug), vendors(name,is_verified)').eq('id', id).single(),
@@ -77,7 +80,7 @@ export default function ProductPage() {
   const deliveryEstimate = activeProduct ? estimateDeliveryForProduct(activeProduct, qty, deliveryCountry) : 0
 
   if (loading) return <div style={{ padding: 16 }}><div className="card skel" style={{ height: 320, marginBottom: 12 }} /><div className="card skel" style={{ height: 160 }} /></div>
-  if (!product) return <div style={{ padding: 40, textAlign: 'center' }}><div style={{ fontSize: 44 }}>🥬</div><h2>Product not found</h2><button onClick={() => navigate('/shop')} className="btn-primary">Browse Shop</button></div>
+  if (!product) return <div style={{ padding: 40, textAlign: 'center' }}><div style={{ fontSize: 44 }}>🥬</div><h2>Product not found</h2><button onClick={() => router.push('/shop')} className="btn-primary">Browse Shop</button></div>
 
   const images = product.images?.length ? product.images : []
   const heroSrc = images[imgIndex] ? img(images[imgIndex], 900)?.replace('resize=cover', 'resize=contain') : null
@@ -109,7 +112,7 @@ export default function ProductPage() {
         />
       )}
       <div style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
-        <button onClick={() => navigate(-1)} style={{ background: 'var(--wh)', border: '1px solid var(--br)', borderRadius: 10, width: 40, height: 40, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <button onClick={() => router.push(-1)} style={{ background: 'var(--wh)', border: '1px solid var(--br)', borderRadius: 10, width: 40, height: 40, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <ChevronLeft size={20} />
         </button>
         <div style={{ flex: 1, fontSize: 12, color: 'var(--mu)' }}>{product.categories?.name}</div>
