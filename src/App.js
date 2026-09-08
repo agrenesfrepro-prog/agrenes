@@ -1,13 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
-import { Toaster } from 'react-hot-toast'
 import './styles/global.css'
-import { useAuthStore } from './lib/store'
-import Navbar from './components/layout/Navbar'
-import CategoryBar from './components/layout/CategoryBar'
-import { BottomNav, SideMenu } from './components/layout/BottomNav'
-import CartDrawer from './components/cart/CartDrawer'
-import Footer from './components/layout/Footer'
 
 import HomePage from './screens/HomePage'
 import ShopPage from './screens/ShopPage'
@@ -25,10 +18,8 @@ import VendorPortalPage from './screens/VendorPortalPage'
 import AddressesPage from './screens/AddressesPage'
 import BulkEnquiryPage from './screens/BulkEnquiryPage'
 import { AboutPage, ContactPage, TermsPage, PrivacyPage, ReturnsPage } from './screens/FooterPages'
-import WhatsAppButton from './components/shared/WhatsAppButton'
-import HydrationTrigger from './components/HydrationTrigger'
 
-// ── SEO: dynamic page titles ──────────────────────────────
+// ─ SEO: dynamic page titles ─────────────────────────────────────────────
 const PAGE_TITLES = {
   '/': 'AGRENES — Fresh Ugandan Produce Delivered to the UK',
   '/shop': 'Shop Fresh Produce — AGRENES',
@@ -53,92 +44,48 @@ function TitleManager() {
   useEffect(() => {
     const title = PAGE_TITLES[location.pathname] || 'AGRENES — Fresh from Uganda'
     document.title = title
-    // Update meta description
-    const meta = document.querySelector('meta[name="description"]')
-    if (meta) {
-      if (location.pathname === '/') {
-        meta.setAttribute('content', 'Direct from Uganda\'s farms to your door. GAP & UNBS certified fresh fruits, vegetables, bananas and more. Free UK delivery on orders over £75.')
-      } else if (location.pathname === '/shop') {
-        meta.setAttribute('content', 'Browse 26+ lines of fresh Ugandan produce. Avocados, plantain, fine beans, chilli, ginger and more. Retail and bulk orders.')
-      }
-    }
   }, [location.pathname])
   return null
 }
 
-function Layout({ children, showCatBar = false, showFooter = true }) {
-  const [menuOpen, setMenuOpen] = useState(false)
-  return (
-    <div style={{ minHeight: '100vh', paddingBottom: 68 }}>
-      <Navbar onMenuOpen={() => setMenuOpen(true)} />
-      {showCatBar && <CategoryBar />}
-      <main>{children}</main>
-      {showFooter && <Footer />}
-      <BottomNav />
-      <CartDrawer />
-      <SideMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
-      <WhatsAppButton />
-    </div>
-  )
-}
-
+/**
+ * Legacy CRA app. Shared shell (Navbar/Footer/Cart/BottomNav/WhatsApp)
+ * is now provided by Next.js app/layout.js -> Shell.jsx. This component only
+ * handles route -> screen mapping for pages not yet converted to Next.js.
+ */
 export default function App() {
-  const { init } = useAuthStore()
-  useEffect(() => { init() }, [])
-
   return (
     <BrowserRouter>
-    <HydrationTrigger />
       <TitleManager />
-      <Toaster
-        position="bottom-center"
-        toastOptions={{
-          style: {
-            background: 'var(--tx)', color: '#fff',
-            borderRadius: 10, fontSize: 13.5, fontWeight: 500,
-            padding: '12px 16px', maxWidth: 340,
-          },
-          success: { iconTheme: { primary: 'var(--g4)', secondary: '#fff' } }
-        }}
-      />
       <Routes>
-        {/* Auth — no layout */}
         <Route path="/login" element={<AuthPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/bundles" element={<BundlesPage />} />
-<Route path="/bundles/:slug" element={<BundleDetailPage />} />
-
-        {/* Main pages */}
-        <Route path="/" element={<Layout><HomePage /></Layout>} />
-        <Route path="/shop" element={<Layout showCatBar><ShopPage /></Layout>} />
-        <Route path="/product/:id" element={<Layout><ProductPage /></Layout>} />
-        <Route path="/checkout" element={<Layout showFooter={false}><CheckoutPage /></Layout>} />
-        <Route path="/orders" element={<Layout><OrdersPage /></Layout>} />
-        <Route path="/account" element={<Layout><AccountPage /></Layout>} />
-        <Route path="/account/addresses" element={<Layout showFooter={false}><AddressesPage /></Layout>} />
-        <Route path="/wishlist" element={<Layout><WishlistPage /></Layout>} />
-        <Route path="/vendors" element={<Layout><VendorsPage /></Layout>} />
-        <Route path="/vendor" element={<Layout showFooter={false}><VendorPortalPage /></Layout>} />
-        <Route path="/admin" element={<Layout showFooter={false}><AdminPage /></Layout>} />
-        <Route path="/bulk" element={<Layout><BulkEnquiryPage /></Layout>} />
-
-        {/* Info pages */}
-        <Route path="/about" element={<Layout><AboutPage /></Layout>} />
-        <Route path="/contact" element={<Layout><ContactPage /></Layout>} />
-        <Route path="/terms" element={<Layout><TermsPage /></Layout>} />
-        <Route path="/privacy" element={<Layout><PrivacyPage /></Layout>} />
-        <Route path="/returns" element={<Layout><ReturnsPage /></Layout>} />
-
-        {/* 404 */}
+        <Route path="/bundles/:slug" element={<BundleDetailPage />} />
+        <Route path="/" element={<HomePage />} />
+        <Route path="/shop" element={<ShopPage />} />
+        <Route path="/product/:id" element={<ProductPage />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/orders" element={<OrdersPage />} />
+        <Route path="/account" element={<AccountPage />} />
+        <Route path="/account/addresses" element={<AddressesPage />} />
+        <Route path="/wishlist" element={<WishlistPage />} />
+        <Route path="/vendors" element={<VendorsPage />} />
+        <Route path="/vendor" element={<VendorPortalPage />} />
+        <Route path="/admin" element={<AdminPage />} />
+        <Route path="/bulk" element={<BulkEnquiryPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/returns" element={<ReturnsPage />} />
         <Route path="*" element={
-          <Layout>
-            <div style={{ textAlign: 'center', padding: '80px 20px' }}>
-              <div style={{ fontSize: 64, marginBottom: 16 }}>🥬</div>
-              <h2 style={{ fontSize: 24, marginBottom: 8 }}>Page not found</h2>
-              <p style={{ color: 'var(--mu)', marginBottom: 24 }}>That page doesn't exist. Let's get you back to the fresh produce.</p>
-              <a href="/" className="btn-primary">Go Home</a>
-            </div>
-          </Layout>
+          <div style={{ textAlign: 'center', padding: '80px 20px' }}>
+            <div style={{ fontSize: 64, marginBottom: 16 }}>🥺</div>
+            <h2 style={{ fontSize: 24, marginBottom: 8 }}>Page not found</h2>
+            <p style={{ color: 'var(--mu)', marginBottom: 24 }}>That page doesn't exist. Let's get you back to the fresh produce.</p>
+            <a href="/" className="btn-primary">Go Home</a>
+          </div>
         } />
       </Routes>
     </BrowserRouter>

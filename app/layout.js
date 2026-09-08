@@ -1,3 +1,6 @@
+import '../src/styles/global.css'
+import Shell from './_layout/Shell'
+
 export const metadata = {
   title: 'AGRENES · Fresh Ugandan Produce Delivered UK-Wide',
   description: 'Fresh Ugandan produce, air-freighted weekly to your door across the UK. Quality GAP & UNBS certified fruits, vegetables and staples.',
@@ -28,6 +31,9 @@ export const metadata = {
     icon: '/logo.png',
     apple: '/logo.png',
   },
+}
+
+export const viewport = {
   themeColor: '#063D32',
 }
 
@@ -35,7 +41,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        {children}
+        <Shell>{children}</Shell>
       </body>
     </html>
   )

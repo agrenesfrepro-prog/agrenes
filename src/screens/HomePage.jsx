@@ -303,30 +303,29 @@ function StatsBanner() {
 }
 
 // ── HOME PAGE ────────────────────────────────────────────────
-export default function HomePage() {
-  const [flashDeals, setFlashDeals] = useState([])
-  const [featured, setFeatured] = useState([])
-  const [bundles, setBundles] = useState([])
+export default function HomePage({ initialData }) {
+  // If server passed us data (SSR path), use it. Otherwise fetch client-side (bridge path).
+  const [flashDeals, setFlashDeals] = useState(initialData?.flashDeals || [])
+  const [featured, setFeatured] = useState(initialData?.featured || [])
+  const [bundles, setBundles] = useState(initialData?.bundles || [])
+  const [topRated, setTopRated] = useState(initialData?.topRated || [])
 
   useEffect(() => {
+    // Skip if server already gave us data
+    if (initialData) return
+
+    // Bridge path: fetch on client
     supabase.from('bundles').select('id,slug,name,tagline,price,compare_price,hero_emoji,hero_image').eq('is_active', true).eq('is_featured', true).order('sort_order').limit(6).then(({ data }) => setBundles(data || []))
-  }, [])
-  const [topRated, setTopRated] = useState([])
 
-  useEffect(() => {
-    // Flash deals
     supabase.from('products').select('*').eq('is_flash_deal', true).eq('is_active', true).limit(8)
       .then(({ data }) => setFlashDeals(data || []))
 
-    // Featured
     supabase.from('products').select('*').eq('is_featured', true).eq('is_active', true).limit(6)
       .then(({ data }) => setFeatured(data || []))
 
-    // Top rated
     supabase.from('products').select('*').eq('is_active', true).order('rating', { ascending: false }).limit(8)
       .then(({ data }) => setTopRated(data || []))
-  }, [])
-
+  }, [initialData])
   return (
     <div className="page-enter">
       <SEO />
