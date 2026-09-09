@@ -50,7 +50,6 @@ export default async function ProductRoute({ params }) {
       .order('sort_order'),
   ])
 
-
   if (!productRes.data) {
     notFound()
   }
@@ -67,12 +66,55 @@ export default async function ProductRoute({ params }) {
     related = data || []
   }
 
+  const product = productRes.data
+
+  // Build JSON-LD Product schema for rich Google search results
+  const jsonLd = {
+    '@context': 'https://schema.org/',
+    '@type': 'Product',
+    name: product.name,
+    description: product.description || 'Fresh Ugandan produce from AGRENES',
+    image: product.images && product.images.length > 0 ? product.images : ['/og-image.png'],
+    sku: product.id,
+    brand: {
+      '@type': 'Brand',
+      name: 'AGRENES',
+    },
+    offers: {
+      '@type': 'Offer',
+      url: 'https://agrenesmarket.com/product/' + product.id,
+      priceCurrency: 'GBP',
+      price: product.price,
+      availability: product.stock_qty > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      itemCondition: 'https://schema.org/NewCondition',
+      seller: {
+        '@type': 'Organization',
+        name: 'AGRENES',
+      },
+    },
+    ...(product.rating > 0 && product.review_count > 0 ? {
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: product.rating,
+        reviewCount: product.review_count,
+      },
+    } : {}),
+  }
+
   const initialData = {
-    product: productRes.data,
+    product,
     reviews: reviewsRes.data || [],
     variants: variantsRes.data || [],
     related,
   }
 
-  return <ProductPage initialData={initialData} />
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <ProductPage initialData={initialData} />
+    </>
+  )
 }
