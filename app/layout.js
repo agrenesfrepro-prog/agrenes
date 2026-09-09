@@ -31,6 +31,9 @@ export const metadata = {
     icon: '/logo.png',
     apple: '/logo.png',
   },
+  verification: {
+    google: 'R_wgB9NSm_prsdJPupI_qr5oma8wtsPZnJ9XKZ8dMWo',
+  }
 }
 
 export const viewport = {
