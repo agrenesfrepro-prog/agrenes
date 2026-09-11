@@ -58,9 +58,13 @@ export default async function Home() {
       addressLocality: 'Kampala',
       addressCountry: 'UG',
     },
-    sameAs: [
-      'https://www.facebook.com/agrenes',
-      'https://www.instagram.com/agrenes',
+       sameAs: [
+      'https://www.facebook.com/agrenesltd',
+      'https://www.instagram.com/agrenesmarket',
+      'https://x.com/agrenesmarket',
+      'https://www.linkedin.com/in/agricultural-environment-and-ecosystem-a32053402',
+      'https://www.youtube.com/@Agrenesmarket',
+      'https://www.tiktok.com/@agrenesmarket',
     ],
   }
 
