@@ -2,6 +2,7 @@ import '../src/styles/global.css'
 import Shell from './_layout/Shell'
 import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
+import { GoogleAnalytics } from '@next/third-parties/google'
 
 export const metadata = {
   title: 'AGRENES · Fresh Ugandan Produce Delivered UK-Wide',
@@ -52,6 +53,7 @@ export default function RootLayout({ children }) {
         <Shell>{children}</Shell>
         <Analytics />
         <SpeedInsights />
+        <GoogleAnalytics gaId="G-FTZQ3S7CSN" />
       </body>
     </html>
   )
