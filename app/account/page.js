@@ -1,4 +1,4 @@
-import AccountPage from '../../src/screens/AccountPage'
+import { AccountPage } from '../../src/screens/AccountPage'
 
 export const metadata = {
   title: 'My Account - AGRENES',
