@@ -1,5 +1,6 @@
+'use client'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useRouter } from 'next/navigation'
 import { User, MapPin, Bell, Shield, LogOut, ChevronRight } from 'lucide-react'
 import { useAuthStore, useWishlistStore } from '../lib/store'
 import { supabase } from '../lib/supabase'
@@ -9,7 +10,7 @@ import toast from 'react-hot-toast'
 // ── ACCOUNT PAGE ─────────────────────────────────────────────
 export function AccountPage() {
   const { user, profile, signOut } = useAuthStore()
-  const navigate = useNavigate()
+  const router = useRouter()
   const [editMode, setEditMode] = useState(false)
   const [form, setForm] = useState({
     full_name: profile?.full_name || '',
@@ -27,14 +28,14 @@ export function AccountPage() {
 
   const handleSignOut = async () => {
     await signOut()
-    navigate('/')
+    router.push('/')
   }
 
   if (!user) return (
     <div style={{ padding: 40, textAlign: 'center' }}>
       <div style={{ fontSize: 48, marginBottom: 16 }}>👤</div>
       <h2 style={{ marginBottom: 8 }}>Sign in to manage your account</h2>
-      <button onClick={() => navigate('/login')} className="btn-primary" style={{ marginTop: 12 }}>
+      <button onClick={() => router.push('/login')} className="btn-primary" style={{ marginTop: 12 }}>
         Sign In / Register
       </button>
     </div>
@@ -129,7 +130,7 @@ export function AccountPage() {
       {/* Menu */}
       <div className="card" style={{ margin: '0 14px 14px', overflow: 'hidden' }}>
         {menuItems.map((item, i) => (
-          <button key={item.label} onClick={() => navigate(item.to)} style={{
+          <button key={item.label} onClick={() => router.push(item.to)} style={{
             width: '100%', padding: '14px 16px', background: 'none',
             border: 'none', borderBottom: i < menuItems.length - 1 ? '1px solid var(--brl)' : 'none',
             display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer',
@@ -163,7 +164,7 @@ export function AccountPage() {
 // ── WISHLIST PAGE ────────────────────────────────────────────
 export function WishlistPage() {
   const { items, toggle } = useWishlistStore()
-  const navigate = useNavigate()
+  const router = useRouter()
 
   return (
     <div className="page-enter">
@@ -179,7 +180,7 @@ export function WishlistPage() {
           <div style={{ fontSize: 56, marginBottom: 16 }}>❤️</div>
           <p style={{ fontSize: 16, fontWeight: 600, color: 'var(--tx)' }}>Your wishlist is empty</p>
           <p style={{ fontSize: 13, marginTop: 6 }}>Save products you love for later</p>
-          <button onClick={() => navigate('/shop')} className="btn-primary" style={{ marginTop: 20 }}>
+          <button onClick={() => router.push('/shop')} className="btn-primary" style={{ marginTop: 20 }}>
             Browse Produce
           </button>
         </div>

@@ -1,5 +1,6 @@
+'use client'
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useRouter } from 'next/navigation'
 import { Package, ChevronRight, Truck, Check, Clock } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../lib/store'
@@ -233,7 +234,7 @@ function OrderDetail({ order, items, onBack }) {
 
 export default function OrdersPage() {
   const { user } = useAuthStore()
-  const navigate = useNavigate()
+  const router = useRouter()
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState(null)
@@ -273,7 +274,7 @@ export default function OrdersPage() {
     <div style={{ padding: 40, textAlign: 'center' }}>
       <div style={{ fontSize: 48, marginBottom: 16 }}>📦</div>
       <h2 style={{ marginBottom: 8 }}>Sign in to view orders</h2>
-      <button onClick={() => navigate('/login')} className="btn-primary" style={{ marginTop: 12 }}>
+      <button onClick={() => router.push('/login')} className="btn-primary" style={{ marginTop: 12 }}>
         Sign In
       </button>
     </div>
@@ -322,7 +323,7 @@ export default function OrdersPage() {
             <Package size={48} style={{ margin: '0 auto 16px', opacity: .3 }} />
             <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--tx)' }}>No orders yet</p>
             <p style={{ fontSize: 13, marginTop: 6 }}>Your orders will appear here</p>
-            <button onClick={() => navigate('/shop')} className="btn-primary" style={{ marginTop: 20 }}>
+            <button onClick={() => router.push('/shop')} className="btn-primary" style={{ marginTop: 20 }}>
               Start Shopping
             </button>
           </div>
