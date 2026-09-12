@@ -1,6 +1,7 @@
 'use client'
 
 import dynamic from 'next/dynamic'
+import { usePathname } from 'next/navigation'
 
 const App = dynamic(() => import('../../src/App'), {
   ssr: false,
@@ -20,5 +21,8 @@ const App = dynamic(() => import('../../src/App'), {
 })
 
 export default function CatchAll() {
-  return <App />
+  const pathname = usePathname()
+  // key={pathname} forces the CRA bridge to re-mount when URL changes,
+  // so react-router-dom inside always syncs with the current URL.
+  return <App key={pathname} />
 }
