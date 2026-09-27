@@ -5,8 +5,11 @@ import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-
 import { stripePromise, createPaymentIntent } from '../lib/stripe'
 import { useCartStore, useAuthStore } from '../lib/store'
 import { supabase } from '../lib/supabase'
-import { computeDeliveryFee, isUKCountry } from '../lib/shipping'
+import { computeDeliveryInfo, isUKCountry } from '../lib/shipping'
 import toast from 'react-hot-toast'
+
+// AGRENES WhatsApp for bulk-order quotes
+const AGRENES_WHATSAPP = '256706956784'
 
 const STEPS = ['Delivery', 'Payment', 'Confirmed']
 
@@ -77,8 +80,9 @@ export default function CheckoutPage() {
   })
   const setD = (k, v) => setDelivery(f => ({ ...f, [k]: v }))
 
-  // Dynamic delivery fee updates as country/items change
-  const deliveryFee = computeDeliveryFee(items, total, delivery.country)
+  // Rich delivery info — weight, bulk-contact flag, price, label
+  const deliveryInfo = computeDeliveryInfo(items, total, delivery.country)
+  const deliveryFee = deliveryInfo.bulkContact ? 0 : deliveryInfo.cost
   const grandTotal = total + deliveryFee
 
   // Keep cart store's country in sync
@@ -104,6 +108,52 @@ export default function CheckoutPage() {
   const pickSavedAddress = (addr) => {
     setSelectedAddress(addr.id)
     setDelivery({ fullName: addr.full_name, phone: addr.phone || '', line1: addr.line1, city: addr.city, postcode: addr.postcode, country: addr.country })
+  }
+
+  // Bulk-order path — save the order as 'quote_pending' and open WhatsApp
+  const requestBulkQuote = async () => {
+    if (!delivery.fullName || !delivery.line1 || !delivery.city || !delivery.postcode) {
+      toast.error('Please fill in all required delivery fields'); return
+    }
+    setLoading(true)
+    try {
+      const { data: order, error: orderErr } = await supabase.from('orders').insert({
+        user_id: user.id,
+        status: 'quote_pending',
+        order_type: 'wholesale',
+        subtotal: total,
+        delivery_fee: 0,
+        discount: 0,
+        total: total,
+        currency: 'GBP',
+        payment_method: 'bulk_quote',
+        payment_status: 'awaiting_quote',
+        notes: `BULK QUOTE REQUEST · ${deliveryInfo.totalWeightKg} kg · Delivery: ${delivery.fullName}, ${delivery.line1}, ${delivery.city}, ${delivery.postcode}, ${delivery.country}${delivery.phone ? ' · Phone: ' + delivery.phone : ''}`,
+      }).select().single()
+      if (orderErr) throw orderErr
+
+      await supabase.from('order_items').insert(
+        items.map(i => ({
+          order_id: order.id,
+          product_id: i.id, vendor_id: i.vendor_id,
+          name: i.name, image: i.images?.[0] || i.img,
+          price: i.price, qty: i.qty, unit: i.unit,
+          subtotal: i.price * i.qty,
+        }))
+      )
+
+      // Build WhatsApp message with the quote details
+      const itemsList = items.map(i => `• ${i.name} × ${i.qty} = £${(i.price * i.qty).toFixed(2)}`).join('\n')
+      const msg = `Hi AGRENES Market, I'd like a bulk shipping quote for the following order:\n\n${itemsList}\n\nSubtotal: £${total.toFixed(2)}\nTotal weight: ${deliveryInfo.totalWeightKg} kg\nDelivering to: ${delivery.city}, ${delivery.postcode}, ${delivery.country}\n\nOrder ref: ${order.reference || order.id}`
+      const waUrl = `https://wa.me/${AGRENES_WHATSAPP}?text=${encodeURIComponent(msg)}`
+
+      toast.success('Bulk quote request saved. Opening WhatsApp…')
+      window.open(waUrl, '_blank')
+      clearCart()
+      navigate('/orders')
+    } catch (err) {
+      toast.error(err.message || 'Something went wrong. Please try again.')
+    } finally { setLoading(false) }
   }
 
   const proceedToPayment = async () => {
@@ -264,7 +314,7 @@ export default function CheckoutPage() {
 
             <div className="card" style={{ padding: 18 }}>
               <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 12, textTransform: 'uppercase', letterSpacing: .5, color: 'var(--mu)' }}>
-                Order Summary ({items.reduce((s, i) => s + i.qty, 0)} items)
+                Order Summary ({items.reduce((s, i) => s + i.qty, 0)} items · {deliveryInfo.totalWeightKg} kg)
               </h3>
               {items.map(item => (
                 <div key={item.id} style={{ display: 'flex', gap: 8, marginBottom: 8, alignItems: 'center' }}>
@@ -277,16 +327,31 @@ export default function CheckoutPage() {
                 <Row label="Subtotal" val={`£${total.toFixed(2)}`} />
                 <Row
                   label={<span><MapPin size={11} style={{ verticalAlign: 'middle', marginRight: 3 }} />Delivery ({isUKCountry(delivery.country) ? '🇬🇧 UK' : '🌍 Intl'})</span>}
-                  val={deliveryFee === 0 ? 'FREE 🎉' : `£${deliveryFee.toFixed(2)}`}
-                  valColor={deliveryFee === 0 ? 'var(--g3)' : undefined}
+                  val={deliveryInfo.bulkContact ? 'Quote by WhatsApp' : `£${deliveryFee.toFixed(2)}`}
+                  valColor={deliveryInfo.bulkContact ? 'var(--amd)' : undefined}
                 />
-                <Row label="Total" val={`£${grandTotal.toFixed(2)}`} bold />
+                {deliveryInfo.bulkContact && (
+                  <div style={{ background: 'var(--aml)', border: '1px solid #FAC775', borderRadius: 8, padding: '8px 12px', fontSize: 12, color: 'var(--amd)', margin: '8px 0', fontWeight: 500 }}>
+                    🚚 Your order is over 30 kg — we'll send you a shipping quote by WhatsApp before payment. Faster and cheaper than standard courier.
+                  </div>
+                )}
+                <Row
+                  label="Total"
+                  val={deliveryInfo.bulkContact ? `£${total.toFixed(2)} + shipping` : `£${grandTotal.toFixed(2)}`}
+                  bold
+                />
               </div>
             </div>
 
-            <button onClick={proceedToPayment} disabled={loading} className="btn-primary" style={{ width: '100%', justifyContent: 'center', height: 50, fontSize: 15, borderRadius: 12 }}>
-              {loading ? 'Setting up payment…' : <>Continue to Payment →</>}
-            </button>
+            {deliveryInfo.bulkContact ? (
+              <button onClick={requestBulkQuote} disabled={loading} className="btn-primary" style={{ width: '100%', justifyContent: 'center', height: 50, fontSize: 15, borderRadius: 12, background: 'var(--g2)' }}>
+                {loading ? 'Saving order…' : <>💬 Request Bulk Quote via WhatsApp →</>}
+              </button>
+            ) : (
+              <button onClick={proceedToPayment} disabled={loading} className="btn-primary" style={{ width: '100%', justifyContent: 'center', height: 50, fontSize: 15, borderRadius: 12 }}>
+                {loading ? 'Setting up payment…' : <>Continue to Payment →</>}
+              </button>
+            )}
             <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
           </>
         )}

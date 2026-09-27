@@ -1,15 +1,15 @@
 import { useNavigate } from 'react-router-dom'
 import { X, Plus, Minus, Trash2, ShoppingBag } from 'lucide-react'
 import { useCartStore } from '../../lib/store'
-import { amountToFreeUK, isUKCountry } from '../../lib/shipping'
+import { computeDeliveryInfo, isUKCountry } from '../../lib/shipping'
 
 export default function CartDrawer() {
   const navigate = useNavigate()
   const { items, isOpen, closeCart, updateQty, removeItem, total, country } = useCartStore()
-  // Pull dynamic delivery from the store — respects weight, country, and free-over threshold
-  const deliveryFee = useCartStore.getState().deliveryFee()
-  const finalTotal = total + deliveryFee
-  const showFreeNudge = isUKCountry(country) && deliveryFee > 0
+
+  // Rich delivery info — knows about weight bands, bulk-contact, etc.
+  const deliveryInfo = computeDeliveryInfo(items, total, country)
+  const finalTotal = deliveryInfo.bulkContact ? total : total + deliveryInfo.cost
 
   const goCheckout = () => {
     closeCart()
@@ -71,23 +71,28 @@ export default function CartDrawer() {
               <span style={{ fontWeight: 600 }}>£{total.toFixed(2)}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12, fontSize: 13 }}>
-              <span style={{ color: 'var(--mu)' }}>Delivery ({isUKCountry(country) ? '🇬🇧 UK' : '🌍 Intl'})</span>
-              {deliveryFee === 0
-                ? <span style={{ color: 'var(--g3)', fontWeight: 700 }}>FREE 🎉</span>
-                : <span style={{ fontWeight: 600 }}>£{deliveryFee.toFixed(2)}</span>
+              <span style={{ color: 'var(--mu)' }}>Delivery ({isUKCountry(country) ? '🇬🇧 UK' : '🌍 Intl'}) · {deliveryInfo.totalWeightKg} kg</span>
+              {deliveryInfo.bulkContact
+                ? <span style={{ color: 'var(--amd)', fontWeight: 700, fontSize: 12 }}>Contact us for quote</span>
+                : <span style={{ fontWeight: 600 }}>£{deliveryInfo.cost.toFixed(2)}</span>
               }
             </div>
-            {showFreeNudge && (
+            {deliveryInfo.bulkContact && (
               <div style={{ background: 'var(--aml)', border: '1px solid #FAC775', borderRadius: 8, padding: '8px 12px', fontSize: 12, color: 'var(--amd)', marginBottom: 12, fontWeight: 500 }}>
-                Add £{amountToFreeUK(total).toFixed(2)} more for free UK delivery!
+                🚚 Bulk order — we'll send you a shipping quote by WhatsApp or email before payment.
               </div>
             )}
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 14, fontFamily: 'Fraunces, serif', fontSize: 20, fontWeight: 700 }}>
               <span>Total</span>
-              <span style={{ color: 'var(--g2)' }}>£{finalTotal.toFixed(2)}</span>
+              <span style={{ color: 'var(--g2)' }}>
+                {deliveryInfo.bulkContact
+                  ? <>£{total.toFixed(2)}<span style={{ fontSize: 12, fontWeight: 500, color: 'var(--mu)', marginLeft: 6 }}>+ shipping</span></>
+                  : <>£{finalTotal.toFixed(2)}</>
+                }
+              </span>
             </div>
             <button onClick={goCheckout} className="btn-primary" style={{ width: '100%', justifyContent: 'center', fontSize: 15 }}>
-              Proceed to Checkout →
+              {deliveryInfo.bulkContact ? 'Request Bulk Quote →' : 'Proceed to Checkout →'}
             </button>
           </div>
         )}
