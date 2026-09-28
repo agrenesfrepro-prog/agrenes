@@ -7,7 +7,7 @@ import { supabase } from '../lib/supabase'
 import { useCartStore, useWishlistStore } from '../lib/store'
 import { img } from '../lib/img'
 import { priceFor, tiersFor } from '../lib/pricing'
-import { estimateDeliveryForProduct, isUKCountry } from '../lib/shipping'
+import { estimateDeliveryForProduct, computeDeliveryInfo, isUKCountry } from '../lib/shipping'
 import ProductCard from '../components/product/ProductCard'
 import WriteReview from '../components/product/WriteReview'
 import toast from 'react-hot-toast'
@@ -78,6 +78,9 @@ export default function ProductPage({ initialData } = {}) {
   const pricing = priceFor(activeProduct, qty)
   const tiers = tiersFor(activeProduct)
   const deliveryEstimate = activeProduct ? estimateDeliveryForProduct(activeProduct, qty, deliveryCountry) : 0
+  const deliveryInfo = activeProduct
+    ? computeDeliveryInfo([{ ...activeProduct, qty }], pricing.line_total, deliveryCountry)
+    : { cost: 0, label: '', bulkContact: false, totalWeightKg: 0 }
 
   if (loading) return <div style={{ padding: 16 }}><div className="card skel" style={{ height: 320, marginBottom: 12 }} /><div className="card skel" style={{ height: 160 }} /></div>
   if (!product) return <div style={{ padding: 40, textAlign: 'center' }}><div style={{ fontSize: 44 }}>🥬</div><h2>Product not found</h2><button onClick={() => router.push('/shop')} className="btn-primary">Browse Shop</button></div>
@@ -257,13 +260,26 @@ export default function ProductPage({ initialData } = {}) {
                 <option value="OTHER">🌍 Other</option>
               </select>
               <div style={{ flex: 1, textAlign: 'right' }}>
-                <div style={{ fontFamily: 'Fraunces,serif', fontSize: 20, fontWeight: 700, color: 'var(--g2)' }}>£{deliveryEstimate.toFixed(2)}</div>
-                <div style={{ fontSize: 11, color: 'var(--mu)' }}>
-                  {isUKCountry(deliveryCountry) ? (pricing.line_total >= 75 ? '✓ Free — over £75' : 'Free over £75') : (pricing.line_total >= 150 ? '✓ Free — over £150' : 'Free over £150')}
-                </div>
+                {deliveryInfo.bulkContact ? (
+                  <>
+                    <div style={{ fontFamily: 'Fraunces,serif', fontSize: 16, fontWeight: 700, color: 'var(--amd, #B87333)' }}>Contact us</div>
+                    <div style={{ fontSize: 11, color: 'var(--mu)' }}>Bulk shipping quote · {deliveryInfo.totalWeightKg} kg</div>
+                  </>
+                ) : (
+                  <>
+                    <div style={{ fontFamily: 'Fraunces,serif', fontSize: 20, fontWeight: 700, color: 'var(--g2)' }}>£{deliveryInfo.cost.toFixed(2)}</div>
+                    <div style={{ fontSize: 11, color: 'var(--mu)' }}>
+                      {isUKCountry(deliveryCountry) ? `Standard UK · ${deliveryInfo.totalWeightKg} kg` : 'International rate'}
+                    </div>
+                  </>
+                )}
               </div>
             </div>
-            <div style={{ fontSize: 11.5, color: 'var(--mu)' }}>Air-freighted weekly from Kampala. Typical delivery {isUKCountry(deliveryCountry) ? '2–4' : '4–7'} working days.</div>
+            <div style={{ fontSize: 11.5, color: 'var(--mu)' }}>
+              {deliveryInfo.bulkContact
+                ? "🚚 Bulk order (over 30 kg) — we'll send you a shipping quote by WhatsApp before payment."
+                : `Air-freighted weekly from Kampala. Typical delivery ${isUKCountry(deliveryCountry) ? '2–4' : '4–7'} working days.`}
+            </div>
           </div>
 
           {/* Desktop CTAs */}
