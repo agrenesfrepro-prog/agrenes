@@ -44,7 +44,7 @@ const SLIDES = [
     cat: null,
     bulk: true,
     stats: [
-      { n: '48', l: 'Active Vendors' },
+      { n: '1,500+', l: 'Partner Farmers' },
       { n: 'UNBS', l: 'Certified' },
     ]
   },
@@ -153,7 +153,7 @@ function HeroCarousel() {
 function TrustStrip() {
   const items = [
     '🇺🇬 Grown in Uganda', '✈️ Flown to Gatwick', '✅ GAP Certified',
-    '🏛️ UNBS & MAAIF', '🇬🇧 Prices in GBP', '📦 Free Delivery £75+',
+    '🏛️ UNBS & MAAIF', '🇬🇧 Prices in GBP', '🚚 UK-wide Delivery',
     '🌡️ Cold Chain Maintained', '♻️ Sustainable Farms'
   ]
   return (
@@ -180,7 +180,7 @@ function PromoGrid() {
     {img:'https://images.unsplash.com/photo-1515543904379-3d757afe72e4?w=640&q=60&auto=format&fit=crop', bg:'var(--pul)', border:'#C8B5F0', emoji:'🫘', title:'Beans & Nuts', sub:'Red beans, yellow beans, cashews', cat:'legumes'},
     {img:'https://ierviwtmdqerdmwtnimn.supabase.co/storage/v1/object/public/product-images/products/1784274303524-g5grofoo6w.jpeg', bg:'var(--rdl)', border:'#F4B0B4', emoji:'🌾', title:'Dried Foods', sub:'Cassava, yam, sweet potato', cat:'dried'},
     {img:'https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?w=640&q=60&auto=format&fit=crop', bg:'var(--gll)', border:'#9FE1CB', emoji:'🥤', title:'Beverages', sub:'Bushera, Stoney, Novida', cat:'all'},
-    {img:'https://images.unsplash.com/photo-1632171927336-1ca4b53a0b57?w=640&q=60&auto=format&fit=crop', bg:'#FFF3E0', border:'#FFCC80', emoji:'🧺', title:'African Crafts', sub:'Wooden art, clay cups, mats', cat:'all'},
+    {img:'https://images.unsplash.com/photo-1524230572899-a752b3835840?w=640&q=60&auto=format&fit=crop', bg:'#FFF3E0', border:'#FFCC80', emoji:'🧺', title:'African Crafts', sub:'Wooden art, clay cups, mats', cat:'all'},
   ]
   return (
     <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(150px, 1fr))', gap:10, padding:'10px 14px'}}>
@@ -310,6 +310,7 @@ export default function HomePage({ initialData }) {
   const [featured, setFeatured] = useState(initialData?.featured || [])
   const [bundles, setBundles] = useState(initialData?.bundles || [])
   const [topRated, setTopRated] = useState(initialData?.topRated || [])
+  const router = useRouter()
 
   useEffect(() => {
     // Skip if server already gave us data
