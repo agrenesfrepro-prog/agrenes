@@ -3,6 +3,24 @@ import Shell from './_layout/Shell'
 import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { GoogleAnalytics } from '@next/third-parties/google'
+import { Plus_Jakarta_Sans, Fraunces } from 'next/font/google'
+
+// Self-hosted, preloaded, latin-subset — replaces the render-blocking
+// @import url('...fonts.googleapis.com/...') that used to live in global.css.
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-jakarta',
+  display: 'swap',
+})
+
+const fraunces = Fraunces({
+  subsets: ['latin'],
+  weight: ['700', '800'],
+  style: ['normal', 'italic'],
+  variable: '--font-fraunces',
+  display: 'swap',
+})
 
 export const metadata = {
   title: 'AGRENES · Fresh Ugandan Produce Delivered UK-Wide',
@@ -30,7 +48,7 @@ export const metadata = {
     description: 'Fresh Ugandan produce, air-freighted weekly to your door across the UK. GAP & UNBS certified.',
     images: ['/og-image.png'],
   },
-      icons: {
+  icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },
       { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
@@ -58,7 +76,7 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${jakarta.variable} ${fraunces.variable}`}>
       <body>
         <Shell>{children}</Shell>
         <Analytics />
