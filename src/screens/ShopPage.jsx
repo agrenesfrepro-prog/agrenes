@@ -39,13 +39,24 @@ export default function ShopPage({ initialProducts } = {}) {
   const searchQ = params.get('q') || ''
   const flashOnly = params.get('flash') === '1'
   const bulkOnly = params.get('bulk') === '1'
+  const featuredOnly = params.get('featured') === '1'
+  const sortParam = params.get('sort')
 
   const [products, setProducts] = useState(initialProducts || [])
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(0)
   const [hasMore, setHasMore] = useState(false)
   const PAGE_SIZE = 12
-  const [sort, setSort] = useState('sales_count.desc')
+
+  // Honor ?sort= from URL on first load
+  const [sort, setSort] = useState(() => {
+    if (sortParam === 'rating') return 'rating.desc'
+    if (sortParam === 'newest') return 'created_at.desc'
+    if (sortParam === 'price_asc') return 'price.asc'
+    if (sortParam === 'price_desc') return 'price.desc'
+    return 'sales_count.desc'
+  })
+
   const [showFilters, setShowFilters] = useState(false)
   const [priceMax, setPriceMax] = useState(50)
   const [selectedCerts, setSelectedCerts] = useState([])
@@ -75,7 +86,10 @@ export default function ShopPage({ initialProducts } = {}) {
       .from('products')
       .select('*, vendors(name, is_verified), product_variants(price,is_active)')
       .eq('is_active', true)
+      // Featured products always bubble up first — merchandising priority
+      .order('is_featured', { ascending: false })
       .order(sortCol, { ascending: sortDir === 'asc' })
+      .order('created_at', { ascending: false })  // deterministic tiebreaker
       .lte('price', priceMax)
       .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1)
 
@@ -85,6 +99,7 @@ export default function ShopPage({ initialProducts } = {}) {
     if (searchQ) query = query.ilike('name', `%${searchQ}%`)
     if (flashOnly) query = query.eq('is_flash_deal', true)
     if (bulkOnly) query = query.not('bulk_price', 'is', null)
+    if (featuredOnly) query = query.eq('is_featured', true)
     if (inStock) query = query.gt('stock_qty', 0)
     if (selectedCerts.length > 0) query = query.overlaps('certifications', selectedCerts)
 
@@ -97,20 +112,21 @@ export default function ShopPage({ initialProducts } = {}) {
       setHasMore(mapped.length === PAGE_SIZE)
       setLoading(false)
     })
-  }, [catSlug, searchQ, sort, priceMax, selectedCerts, inStock, flashOnly, bulkOnly, catMap, page])
+  }, [catSlug, searchQ, sort, priceMax, selectedCerts, inStock, flashOnly, bulkOnly, featuredOnly, catMap, page])
 
   // Reset to first page when any filter changes
   useEffect(() => {
     setPage(0)
-  }, [catSlug, searchQ, sort, priceMax, selectedCerts, inStock, flashOnly, bulkOnly])
+  }, [catSlug, searchQ, sort, priceMax, selectedCerts, inStock, flashOnly, bulkOnly, featuredOnly])
 
   const toggleCert = (c) =>
     setSelectedCerts(prev => prev.includes(c) ? prev.filter(x=>x!==c) : [...prev, c])
 
   const activeFilterCount = [
-    priceMax < 50, selectedCerts.length > 0, inStock, flashOnly, bulkOnly
+    priceMax < 50, selectedCerts.length > 0, inStock, flashOnly, bulkOnly, featuredOnly
   ].filter(Boolean).length
-return (
+
+  return (
     <div className="page-enter">
       <SEO
         title="Shop All Ugandan Produce"
@@ -123,10 +139,11 @@ return (
         background:'var(--wh)'
       }}>
         <h1 style={{fontSize:18, marginBottom:4, display:'flex', alignItems:'center', gap:8}}>
+          {featuredOnly && '🔥 Best Sellers'}
           {flashOnly && '⚡ Flash Deals'}
           {bulkOnly && '📦 Bulk / Wholesale'}
           {searchQ && `Results for "${searchQ}"`}
-          {!flashOnly && !bulkOnly && !searchQ && (
+          {!featuredOnly && !flashOnly && !bulkOnly && !searchQ && (
             catSlug === 'all' ? '🥬 All Fresh Produce' : `${categories.find(c=>c.slug===catSlug)?.emoji} ${categories.find(c=>c.slug===catSlug)?.name}`
           )}
         </h1>
@@ -160,6 +177,7 @@ return (
         </button>
 
         {/* Active filter chips */}
+        {featuredOnly && <Chip label="🔥 Best Sellers" onRemove={() => router.push(pathname)} />}
         {flashOnly && <Chip label="⚡ Flash" onRemove={() => router.push(pathname)} />}
         {bulkOnly && <Chip label="📦 Bulk" onRemove={() => router.push(pathname)} />}
         {inStock && <Chip label="In Stock" onRemove={() => setInStock(false)} />}
