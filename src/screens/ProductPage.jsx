@@ -21,12 +21,20 @@ const CULTURAL_NOTES = {
   "passion": "Uganda produces some of the world's finest passion fruit. The fragrant golden pulp is a favourite in fresh juices across East Africa.",
   "sweet potato": "The orange-fleshed sweet potato was introduced to Uganda and has become a vital crop.",
   "sour sop": "Soursop (kitafeeri) is valued across Uganda for its uniquely sweet-tart flavour.",
+  "pepper": "Ugandan hot peppers are prized across East Africa for their deep aroma and sharp heat, hand-picked at peak ripeness.",
 }
 function getCulturalNote(name) {
   if (!name) return null
   const n = name.toLowerCase()
   for (const [k, v] of Object.entries(CULTURAL_NOTES)) if (n.includes(k)) return v
   return null
+}
+
+// Tier display config — one entry per tier_type
+const TIER_META = {
+  bag:       { icon: '🛍️', label: 'Bag',       unit: 'kg',      caption: 'Try a small portion' },
+  box:       { icon: '📦', label: 'Box',       unit: 'box',     caption: 'Best value — save 10%' },
+  wholesale: { icon: '🏢', label: 'Wholesale', unit: 'bundle',  caption: 'Serious volume — save 25%' },
 }
 
 export default function ProductPage({ initialData } = {}) {
@@ -39,24 +47,45 @@ export default function ProductPage({ initialData } = {}) {
   const [product, setProduct] = useState(initialData?.product || null)
   const [reviews, setReviews] = useState(initialData?.reviews || [])
   const [variants, setVariants] = useState(initialData?.variants || [])
-  const [selectedVariant, setSelectedVariant] = useState(null)
+  // selectedTierType: 'bag' | 'box' | 'wholesale' | null
+  const [selectedTierType, setSelectedTierType] = useState(null)
+  // qtyByTier: { bag: 1, box: 1, wholesale: 1 } — independent qty per lane
+  const [qtyByTier, setQtyByTier] = useState({})
   const [related, setRelated] = useState(initialData?.related || [])
   const [imgIndex, setImgIndex] = useState(0)
-  const [qty, setQty] = useState(1)
+  const [qty, setQty] = useState(1) // legacy for non-variant products
   const [loading, setLoading] = useState(true)
   const [showReview, setShowReview] = useState(false)
   const [deliveryCountry, setDeliveryCountry] = useState(cartCountry || 'UK')
 
+  // Initialise tier state from fetched variants
+  const initialiseTierState = (vs) => {
+    if (!vs?.length) return
+    const typed = vs.filter(v => v.tier_type)
+    if (typed.length) {
+      // Prefer 'box' as default (sweet spot), else first available
+      const defaultTier = typed.find(v => v.tier_type === 'box')?.tier_type || typed[0].tier_type
+      setSelectedTierType(defaultTier)
+      const q = {}
+      typed.forEach(v => { q[v.tier_type] = Number(v.min_qty) || 1 })
+      setQtyByTier(q)
+    }
+  }
+
   useEffect(() => {
-    if (initialData) { setLoading(false); if (initialData.variants?.length) setSelectedVariant(initialData.variants[0]); return }
-    setLoading(true); setImgIndex(0); setQty(1); setSelectedVariant(null)
+    if (initialData) {
+      setLoading(false)
+      initialiseTierState(initialData.variants)
+      return
+    }
+    setLoading(true); setImgIndex(0); setQty(1); setSelectedTierType(null); setQtyByTier({})
     Promise.all([
       supabase.from('products').select('*, categories(name,slug), vendors(name,is_verified)').eq('id', id).single(),
       supabase.from('reviews').select('*, profiles(full_name)').eq('product_id', id).order('created_at', { ascending: false }).limit(10),
       supabase.from('product_variants').select('*').eq('product_id', id).eq('is_active', true).order('sort_order'),
     ]).then(([{ data: p }, { data: r }, { data: v }]) => {
       setProduct(p); setReviews(r || []); setVariants(v || [])
-      if (v?.length) setSelectedVariant(v[0])
+      initialiseTierState(v)
       if (p?.category_id) {
         supabase.from('products')
           .select('*, categories(name), vendors(name), product_variants(price,is_active)')
@@ -69,18 +98,65 @@ export default function ProductPage({ initialData } = {}) {
 
   useEffect(() => { if (deliveryCountry) setCountry(deliveryCountry) }, [deliveryCountry, setCountry])
 
+  // Derived: do we have proper tier variants (with tier_type)?
+  const tierVariants = useMemo(() => (variants || []).filter(v => v.tier_type), [variants])
+  const hasTiers = tierVariants.length > 0
+
+  // Currently selected variant (based on selectedTierType)
+  const selectedVariant = useMemo(
+    () => tierVariants.find(v => v.tier_type === selectedTierType) || null,
+    [tierVariants, selectedTierType]
+  )
+
+  // Current qty for the active tier (or legacy qty for non-variant products)
+  const activeQty = hasTiers
+    ? (qtyByTier[selectedTierType] || 1)
+    : qty
+
+  // Build an "effective product" the pricing + delivery helpers can consume
   const activeProduct = useMemo(() => {
     if (!product) return null
-    if (selectedVariant) return { ...product, price: Number(selectedVariant.price), bulk_price: null, bulk_min_qty: null, weight_kg: product.weight_kg }
+    if (hasTiers && selectedVariant) {
+      // For tier products: price is per-UNIT of this tier (per kg for bag, per box for box, per bundle for wholesale)
+      // weight_kg is weight PER unit of this tier
+      return {
+        ...product,
+        price: Number(selectedVariant.price),
+        bulk_price: null,
+        bulk_min_qty: null,
+        weight_kg: Number(selectedVariant.weight_kg) || product.weight_kg || 1,
+      }
+    }
     return product
-  }, [product, selectedVariant])
+  }, [product, hasTiers, selectedVariant])
 
-  const pricing = priceFor(activeProduct, qty)
+  const pricing = priceFor(activeProduct, activeQty)
   const tiers = tiersFor(activeProduct)
-  const deliveryEstimate = activeProduct ? estimateDeliveryForProduct(activeProduct, qty, deliveryCountry) : 0
+  const deliveryEstimate = activeProduct ? estimateDeliveryForProduct(activeProduct, activeQty, deliveryCountry) : 0
   const deliveryInfo = activeProduct
-    ? computeDeliveryInfo([{ ...activeProduct, qty }], pricing.line_total, deliveryCountry)
+    ? computeDeliveryInfo([{ ...activeProduct, qty: activeQty }], pricing.line_total, deliveryCountry)
     : { cost: 0, label: '', bulkContact: false, totalWeightKg: 0 }
+
+  // Per-kg display math (for savings badge etc)
+  const perKgPrice = useMemo(() => {
+    if (!selectedVariant) return null
+    const w = Number(selectedVariant.weight_kg) || 0
+    if (w <= 0) return null
+    return Number(selectedVariant.price) / w
+  }, [selectedVariant])
+
+  // Reference "bag" per-kg price (for % savings comparison)
+  const bagPerKg = useMemo(() => {
+    const bag = tierVariants.find(v => v.tier_type === 'bag')
+    if (!bag) return null
+    const w = Number(bag.weight_kg) || 1
+    return w > 0 ? Number(bag.price) / w : null
+  }, [tierVariants])
+
+  const savingsPctVsBag = useMemo(() => {
+    if (!perKgPrice || !bagPerKg || perKgPrice >= bagPerKg) return 0
+    return Math.round((1 - perKgPrice / bagPerKg) * 100)
+  }, [perKgPrice, bagPerKg])
 
   if (loading) return <div style={{ padding: 16 }}><div className="card skel" style={{ height: 320, marginBottom: 12 }} /><div className="card skel" style={{ height: 160 }} /></div>
   if (!product) return <div style={{ padding: 40, textAlign: 'center' }}><div style={{ fontSize: 44 }}>🥬</div><h2>Product not found</h2><button onClick={() => router.push('/shop')} className="btn-primary">Browse Shop</button></div>
@@ -90,15 +166,50 @@ export default function ProductPage({ initialData } = {}) {
   const compare = Number(product.compare_price) || 0
   const savingsPct = compare && compare > pricing.unit_price ? Math.round((1 - pricing.unit_price / compare) * 100) : 0
 
+  // Stock check: when variants exist, check VARIANT stock, not product stock
+  const effectiveStock = hasTiers
+    ? (selectedVariant ? Number(selectedVariant.stock_qty) || 0 : 0)
+    : Number(product.stock_qty) || 0
+  const inStock = effectiveStock > 0
+
+  // Build the add-to-cart item
+  const buildCartItem = () => {
+    if (hasTiers && selectedVariant) {
+      const meta = TIER_META[selectedVariant.tier_type] || { label: selectedVariant.label, unit: 'unit' }
+      const qtyLabel = `${activeQty} ${meta.unit}${activeQty > 1 ? 's' : ''}`
+      return {
+        ...product,
+        id: `${product.id}-${selectedVariant.id}-${activeQty}`,
+        price: Number(selectedVariant.price),
+        name: `${product.name} — ${meta.label} (${qtyLabel})`,
+        variant_id: selectedVariant.id,
+        variant_label: selectedVariant.label,
+        tier_type: selectedVariant.tier_type,
+        weight_kg: Number(selectedVariant.weight_kg) || 1,
+      }
+    }
+    return { ...product, price: pricing.unit_price }
+  }
+
   const handleAddToCart = () => {
-    const cartItem = selectedVariant
-      ? { ...product, id: product.id + '-' + selectedVariant.id, price: pricing.unit_price, name: product.name + ' (' + selectedVariant.label + ')', variant_id: selectedVariant.id }
-      : { ...product, price: pricing.unit_price }
-    addItem(cartItem, qty)
-    toast.success(`${qty}× ${product.name} added to cart`)
+    if (!inStock) { toast.error('Out of stock'); return }
+    const cartItem = buildCartItem()
+    // For tier variants, each (variant, qty) combo is a distinct line
+    addItem(cartItem, hasTiers ? activeQty : qty)
+    toast.success(`Added to cart`)
   }
   const handleBuyNow = () => { handleAddToCart(); openCart?.() }
   const inWishlist = wishlist.has(product.id)
+
+  // Update qty for a specific tier
+  const setTierQty = (tier, nextQty) => {
+    const v = tierVariants.find(x => x.tier_type === tier)
+    const min = Number(v?.min_qty) || 1
+    const max = Number(v?.max_qty) || 99
+    const stockMax = Number(v?.stock_qty) || max
+    const clamped = Math.max(min, Math.min(nextQty, max, stockMax))
+    setQtyByTier(prev => ({ ...prev, [tier]: clamped }))
+  }
 
   return (
     <div className="page-enter" style={{ paddingBottom: 96 }}>
@@ -111,11 +222,11 @@ export default function ProductPage({ initialData } = {}) {
           type="product"
           price={product.price}
           productBrand={product.vendors?.name}
-          availability={product.stock_qty > 0 ? 'in stock' : 'out of stock'}
+          availability={inStock ? 'in stock' : 'out of stock'}
         />
       )}
       <div style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
-        <button onClick={() => router.push(-1)} style={{ background: 'var(--wh)', border: '1px solid var(--br)', borderRadius: 10, width: 40, height: 40, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <button onClick={() => router.back()} style={{ background: 'var(--wh)', border: '1px solid var(--br)', borderRadius: 10, width: 40, height: 40, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <ChevronLeft size={20} />
         </button>
         <div style={{ flex: 1, fontSize: 12, color: 'var(--mu)' }}>{product.categories?.name}</div>
@@ -136,7 +247,7 @@ export default function ProductPage({ initialData } = {}) {
               </>
             )}
             {savingsPct > 0 && <span style={{ position: 'absolute', top: 12, left: 12, background: 'var(--rd)', color: '#fff', fontSize: 12, fontWeight: 800, padding: '4px 10px', borderRadius: 20 }}>−{savingsPct}%</span>}
-            {pricing.bulk_applied && <span style={{ position: 'absolute', top: 12, right: 12, background: 'var(--g2)', color: '#fff', fontSize: 11, fontWeight: 800, padding: '4px 10px', borderRadius: 20 }}>BULK PRICE</span>}
+            {hasTiers && savingsPctVsBag > 0 && <span style={{ position: 'absolute', top: 12, right: 12, background: 'var(--g2)', color: '#fff', fontSize: 11, fontWeight: 800, padding: '4px 10px', borderRadius: 20 }}>SAVE {savingsPctVsBag}%</span>}
           </div>
 
           {images.length > 1 && (
@@ -160,35 +271,127 @@ export default function ProductPage({ initialData } = {}) {
             </div>
           )}
 
-          {/* Size variants (if any) */}
-          {variants.length > 0 && (
-            <div style={{ marginBottom: 14 }}>
-              <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: .5, color: 'var(--mu)', marginBottom: 8 }}>Select Size</div>
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                {variants.map(v => (
-                  <button key={v.id} onClick={() => { setSelectedVariant(v); setQty(1) }} style={{
-                    padding: '9px 18px', borderRadius: 10, fontSize: 13.5, fontWeight: 700,
-                    background: selectedVariant?.id === v.id ? 'var(--g2)' : 'var(--wh)',
-                    color: selectedVariant?.id === v.id ? '#fff' : 'var(--tx)',
-                    border: '1.5px solid ' + (selectedVariant?.id === v.id ? 'var(--g2)' : 'var(--br)'),
-                    cursor: 'pointer'
-                  }}>{v.label}<span style={{ display: 'block', fontSize: 11, fontWeight: 600, opacity: .8 }}>£{Number(v.price).toFixed(2)}</span></button>
-                ))}
+          {/* ── TIER-BASED PRICING UI (new) ────────────────────────── */}
+          {hasTiers && (
+            <div style={{ marginBottom: 18 }}>
+              {/* From £X/kg headline when tier not yet selected */}
+              {bagPerKg !== null && (
+                <div style={{ fontSize: 13, color: 'var(--mu)', marginBottom: 10 }}>
+                  From <span style={{ fontWeight: 700, color: 'var(--g2)' }}>£{bagPerKg.toFixed(2)}/kg</span>
+                  {savingsPctVsBag > 0 && <span style={{ marginLeft: 8, color: 'var(--g3)', fontWeight: 600 }}>· save up to 25% in wholesale</span>}
+                </div>
+              )}
+
+              {/* Three tier lanes */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {tierVariants.map(v => {
+                  const meta = TIER_META[v.tier_type] || { icon: '•', label: v.label, unit: 'unit', caption: '' }
+                  const isSelected = selectedTierType === v.tier_type
+                  const vQty = qtyByTier[v.tier_type] || Number(v.min_qty) || 1
+                  const vStock = Number(v.stock_qty) || 0
+                  const vMin = Number(v.min_qty) || 1
+                  const vMax = Math.min(Number(v.max_qty) || 99, vStock || 99)
+                  const vWeight = Number(v.weight_kg) || 1
+                  const vUnitPrice = Number(v.price) || 0
+                  const vLineTotal = vUnitPrice * vQty
+                  const vTotalKg = vWeight * vQty
+                  const vPerKg = vWeight > 0 ? vUnitPrice / vWeight : null
+                  const soldOut = vStock <= 0
+
+                  return (
+                    <div
+                      key={v.id}
+                      onClick={() => !soldOut && setSelectedTierType(v.tier_type)}
+                      style={{
+                        padding: 14,
+                        borderRadius: 14,
+                        border: '2px solid ' + (isSelected ? 'var(--g2)' : 'var(--br)'),
+                        background: isSelected ? 'var(--gll)' : 'var(--wh)',
+                        cursor: soldOut ? 'not-allowed' : 'pointer',
+                        opacity: soldOut ? 0.5 : 1,
+                        transition: 'all .15s',
+                        position: 'relative',
+                      }}
+                    >
+                      {/* Header row */}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: isSelected ? 10 : 4 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <span style={{ fontSize: 22 }}>{meta.icon}</span>
+                          <div>
+                            <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--tx)' }}>
+                              {meta.label}
+                              {v.tier_type === 'box' && <span style={{ marginLeft: 8, background: 'var(--am)', color: 'var(--amd)', fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 20 }}>BEST VALUE</span>}
+                            </div>
+                            <div style={{ fontSize: 11.5, color: 'var(--mu)', marginTop: 2 }}>{meta.caption}</div>
+                          </div>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontFamily: 'Fraunces,serif', fontSize: 18, fontWeight: 700, color: 'var(--g2)' }}>
+                            £{vUnitPrice.toFixed(2)}
+                            <span style={{ fontSize: 11, color: 'var(--mu)', fontWeight: 500 }}> /{meta.unit}</span>
+                          </div>
+                          {vPerKg !== null && (
+                            <div style={{ fontSize: 11, color: 'var(--mu)' }}>
+                              £{vPerKg.toFixed(2)}/kg · {vWeight} kg per {meta.unit}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {soldOut && (
+                        <div style={{ fontSize: 12, color: 'var(--rd)', fontWeight: 700, marginTop: 4 }}>Out of stock</div>
+                      )}
+
+                      {/* Qty stepper + line total — only when selected */}
+                      {isSelected && !soldOut && (
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 10, borderTop: '1px dashed var(--br)' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--mu)' }}>HOW MANY</span>
+                            <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--br)', borderRadius: 10, overflow: 'hidden', background: 'var(--wh)' }}>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setTierQty(v.tier_type, vQty - 1) }}
+                                disabled={vQty <= vMin}
+                                style={{ width: 36, height: 36, background: 'var(--wh)', border: 'none', cursor: vQty <= vMin ? 'not-allowed' : 'pointer', opacity: vQty <= vMin ? 0.4 : 1 }}
+                              ><Minus size={14} /></button>
+                              <div style={{ minWidth: 48, textAlign: 'center', fontWeight: 700, fontSize: 15 }}>{vQty}</div>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setTierQty(v.tier_type, vQty + 1) }}
+                                disabled={vQty >= vMax}
+                                style={{ width: 36, height: 36, background: 'var(--wh)', border: 'none', cursor: vQty >= vMax ? 'not-allowed' : 'pointer', opacity: vQty >= vMax ? 0.4 : 1 }}
+                              ><Plus size={14} /></button>
+                            </div>
+                            <span style={{ fontSize: 11, color: 'var(--mu)' }}>
+                              {vMin}–{vMax} {meta.unit}{vMax > 1 ? 's' : ''}
+                            </span>
+                          </div>
+                          <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontFamily: 'Fraunces,serif', fontSize: 22, fontWeight: 700, color: 'var(--g2)' }}>£{vLineTotal.toFixed(2)}</div>
+                            <div style={{ fontSize: 11, color: 'var(--mu)' }}>{vTotalKg} kg total</div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             </div>
           )}
 
-          {/* Price header */}
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 6 }}>
-            <span style={{ fontFamily: 'Fraunces,serif', fontSize: 32, fontWeight: 700, color: 'var(--g2)' }}>£{pricing.unit_price.toFixed(2)}</span>
-            {compare > pricing.unit_price && <span style={{ fontSize: 15, color: 'var(--mu)', textDecoration: 'line-through' }}>£{compare.toFixed(2)}</span>}
-            <span style={{ fontSize: 13, color: 'var(--mu)' }}>per {product.unit || 'unit'}</span>
-          </div>
-          {product.stock_qty === 0 && <div style={{ color: 'var(--rd)', fontSize: 13, fontWeight: 700, marginBottom: 10 }}>Out of stock</div>}
-          {product.stock_qty > 0 && product.stock_qty <= 10 && <div style={{ color: 'var(--am, #B87333)', fontSize: 12.5, fontWeight: 600, marginBottom: 10 }}>Only {product.stock_qty} left</div>}
+          {/* ── Legacy price header (hidden when tiers exist) ────── */}
+          {!hasTiers && (
+            <>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 6 }}>
+                <span style={{ fontFamily: 'Fraunces,serif', fontSize: 32, fontWeight: 700, color: 'var(--g2)' }}>£{pricing.unit_price.toFixed(2)}</span>
+                {compare > pricing.unit_price && <span style={{ fontSize: 15, color: 'var(--mu)', textDecoration: 'line-through' }}>£{compare.toFixed(2)}</span>}
+                <span style={{ fontSize: 13, color: 'var(--mu)' }}>per {product.unit || 'unit'}</span>
+              </div>
+              {product.stock_qty === 0 && <div style={{ color: 'var(--rd)', fontSize: 13, fontWeight: 700, marginBottom: 10 }}>Out of stock</div>}
+              {product.stock_qty > 0 && product.stock_qty <= 10 && <div style={{ color: 'var(--am, #B87333)', fontSize: 12.5, fontWeight: 600, marginBottom: 10 }}>Only {product.stock_qty} left</div>}
+            </>
+          )}
 
           {/* Retail preset tiers — hidden when variants exist */}
-          {variants.length === 0 && tiers.retail.length > 0 && (
+          {!hasTiers && tiers.retail.length > 0 && (
             <div style={{ marginBottom: 14 }}>
               <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: .5, color: 'var(--mu)', marginBottom: 8 }}>Choose amount</div>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -209,7 +412,7 @@ export default function ProductPage({ initialData } = {}) {
           )}
 
           {/* Bulk tier ladder — hidden when variants exist */}
-          {variants.length === 0 && tiers.bulk.length > 0 && (
+          {!hasTiers && tiers.bulk.length > 0 && (
             <div style={{ marginBottom: 14, padding: 12, borderRadius: 12, background: 'var(--gll)', border: '1px solid var(--g5, #C8E6D5)' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
                 <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--g2)' }}>💰 BULK — 20% OFF (from {product.bulk_min_qty} {product.unit || 'units'})</div>
@@ -231,18 +434,20 @@ export default function ProductPage({ initialData } = {}) {
             </div>
           )}
 
-          {/* Fine qty adjuster */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
-            <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--mu)' }}>QTY</div>
-            <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--br)', borderRadius: 10, overflow: 'hidden' }}>
-              <button onClick={() => setQty(q => Math.max(1, q - 1))} style={{ width: 40, height: 40, background: 'var(--wh)', border: 'none', cursor: 'pointer' }}><Minus size={16} /></button>
-              <div style={{ width: 50, textAlign: 'center', fontWeight: 700 }}>{qty}</div>
-              <button onClick={() => setQty(q => q + 1)} style={{ width: 40, height: 40, background: 'var(--wh)', border: 'none', cursor: 'pointer' }}><Plus size={16} /></button>
+          {/* Fine qty adjuster — hidden when tiers exist (each tier has its own) */}
+          {!hasTiers && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
+              <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--mu)' }}>QTY</div>
+              <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--br)', borderRadius: 10, overflow: 'hidden' }}>
+                <button onClick={() => setQty(q => Math.max(1, q - 1))} style={{ width: 40, height: 40, background: 'var(--wh)', border: 'none', cursor: 'pointer' }}><Minus size={16} /></button>
+                <div style={{ width: 50, textAlign: 'center', fontWeight: 700 }}>{qty}</div>
+                <button onClick={() => setQty(q => q + 1)} style={{ width: 40, height: 40, background: 'var(--wh)', border: 'none', cursor: 'pointer' }}><Plus size={16} /></button>
+              </div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--g2)' }}>= £{pricing.line_total.toFixed(2)}</div>
             </div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--g2)' }}>= £{pricing.line_total.toFixed(2)}</div>
-          </div>
+          )}
 
-          {/* Live delivery estimator (Jumia move) */}
+          {/* Live delivery estimator */}
           <div style={{ marginBottom: 18, padding: 14, borderRadius: 12, background: 'var(--brl)', border: '1px solid var(--br)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
               <MapPin size={16} color="var(--g3)" />
@@ -284,8 +489,8 @@ export default function ProductPage({ initialData } = {}) {
 
           {/* Desktop CTAs */}
           <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
-            <button onClick={handleAddToCart} disabled={product.stock_qty === 0} className="btn-outline" style={{ flex: 1, justifyContent: 'center', height: 48, fontSize: 14, fontWeight: 700 }}>Add to Cart</button>
-            <button onClick={handleBuyNow} disabled={product.stock_qty === 0} className="btn-primary" style={{ flex: 1, justifyContent: 'center', height: 48, fontSize: 14, fontWeight: 700 }}>Buy Now</button>
+            <button onClick={handleAddToCart} disabled={!inStock} className="btn-outline" style={{ flex: 1, justifyContent: 'center', height: 48, fontSize: 14, fontWeight: 700 }}>Add to Cart</button>
+            <button onClick={handleBuyNow} disabled={!inStock} className="btn-primary" style={{ flex: 1, justifyContent: 'center', height: 48, fontSize: 14, fontWeight: 700 }}>Buy Now</button>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 18 }}>
@@ -344,11 +549,11 @@ export default function ProductPage({ initialData } = {}) {
 
       <div className="pdp-sticky" style={{ position: 'fixed', left: 0, right: 0, bottom: 56, background: 'var(--wh)', borderTop: '1px solid var(--br)', padding: '10px 14px', display: 'flex', gap: 10, alignItems: 'center', zIndex: 500, boxShadow: '0 -6px 20px rgba(0,0,0,.06)' }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 11, color: 'var(--mu)' }}>Total ({qty})</div>
+          <div style={{ fontSize: 11, color: 'var(--mu)' }}>Total ({hasTiers ? `${activeQty} ${TIER_META[selectedTierType]?.unit || ''}` : activeQty})</div>
           <div style={{ fontFamily: 'Fraunces,serif', fontSize: 20, fontWeight: 700, color: 'var(--g2)' }}>£{pricing.line_total.toFixed(2)}</div>
         </div>
-        <button onClick={handleAddToCart} disabled={product.stock_qty === 0} className="btn-outline" style={{ flex: 1, justifyContent: 'center', height: 46, fontSize: 13.5, fontWeight: 700 }}>Add to Cart</button>
-        <button onClick={handleBuyNow} disabled={product.stock_qty === 0} className="btn-primary" style={{ flex: 1, justifyContent: 'center', height: 46, fontSize: 13.5, fontWeight: 700 }}>Buy Now</button>
+        <button onClick={handleAddToCart} disabled={!inStock} className="btn-outline" style={{ flex: 1, justifyContent: 'center', height: 46, fontSize: 13.5, fontWeight: 700 }}>Add to Cart</button>
+        <button onClick={handleBuyNow} disabled={!inStock} className="btn-primary" style={{ flex: 1, justifyContent: 'center', height: 46, fontSize: 13.5, fontWeight: 700 }}>Buy Now</button>
       </div>
 
       <style>{`@media (min-width: 768px) { .pdp-sticky { display: none !important; } }`}</style>
