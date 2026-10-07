@@ -1,8 +1,8 @@
 import { createClient } from '../src/lib/supabase-ssr/server'
 import HomePage from '../src/screens/HomePage'
 
-// Rebuild every hour so product changes propagate without redeploy.
-export const revalidate = 3600
+// Rebuild every 5 min so featured/stock/prices stay fresh.
+export const revalidate = 300
 
 export default async function Home() {
   const supabase = await createClient()
@@ -21,12 +21,16 @@ export default async function Home() {
       .eq('is_flash_deal', true)
       .eq('is_active', true)
       .limit(8),
+    // Best Sellers — sorted by actual sales, then rating, then newest (future-proof).
     supabase
       .from('products')
       .select('*')
       .eq('is_featured', true)
       .eq('is_active', true)
-      .limit(6),
+      .order('sales_count', { ascending: false })
+      .order('rating', { ascending: false })
+      .order('created_at', { ascending: false })
+      .limit(12),
     supabase
       .from('products')
       .select('*')
@@ -58,7 +62,7 @@ export default async function Home() {
       addressLocality: 'Kampala',
       addressCountry: 'UG',
     },
-       sameAs: [
+    sameAs: [
       'https://www.facebook.com/agrenesltd',
       'https://www.instagram.com/agrenesmarket',
       'https://x.com/agrenesmarket',
