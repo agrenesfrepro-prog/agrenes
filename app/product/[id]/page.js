@@ -2,7 +2,20 @@ import { createClient } from '../../../src/lib/supabase-ssr/server'
 import ProductPage from '../../../src/screens/ProductPage'
 import { notFound } from 'next/navigation'
 
-export const revalidate = 3600
+// Rebuild each product page every 5 min in background (was 1 hour).
+// Keeps stock + prices fresh enough for an active store without hammering the DB.
+export const revalidate = 300
+
+// Build-time pre-render ALL active products so first-ever visit is instant from edge CDN.
+// Vercel runs this once per deploy, caches the HTML on edge nodes worldwide.
+export async function generateStaticParams() {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('products')
+    .select('id')
+    .eq('is_active', true)
+  return (data || []).map(p => ({ id: p.id }))
+}
 
 export async function generateMetadata({ params }) {
   const { id } = await params
