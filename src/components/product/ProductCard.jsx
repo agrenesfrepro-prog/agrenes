@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Heart, Plus, Star } from 'lucide-react'
 import { useCartStore, useWishlistStore } from '../../lib/store'
@@ -10,6 +11,7 @@ export default function ProductCard({ product }) {
   const { addItem } = useCartStore()
   const { toggle, has } = useWishlistStore()
   const [adding, setAdding] = useState(false)
+  const [imgHover, setImgHover] = useState(false)
   const wished = has(product.id)
 
   const discount = product.compare_price
@@ -19,6 +21,11 @@ export default function ProductCard({ product }) {
   const variantPrices = (product.product_variants || []).filter(v => v.is_active !== false).map(v => Number(v.price)).filter(n => !isNaN(n))
   const hasVariants = variantPrices.length > 0
   const displayPrice = hasVariants ? Math.min(...variantPrices) : product.price
+
+  // Real image source: product.images[0] (Supabase) or product.img (legacy).
+  // If neither exists, we show a text placeholder instead of a stock-photo URL
+  // (Unsplash fallback would require adding that domain to next.config remotePatterns).
+  const realImageUrl = product.images?.[0] || product.img || null
 
   const handleAdd = async (e) => {
     e.stopPropagation()
@@ -51,16 +58,33 @@ export default function ProductCard({ product }) {
         e.currentTarget.style.boxShadow = 'var(--sh1)'
       }}
     >
-      {/* Image */}
-      <div style={{height:160, overflow:'hidden', position:'relative', background:'var(--brl)'}}>
-        <img
-          src={product.images?.[0] || product.img || `https://source.unsplash.com/400x300/?${encodeURIComponent(product.name)}`}
-          alt={product.name}
-          loading="lazy"
-          style={{width:'100%', height:'100%', objectFit:'cover', transition:'transform .3s'}}
-          onMouseEnter={e => e.target.style.transform='scale(1.06)'}
-          onMouseLeave={e => e.target.style.transform=''}
-        />
+      {/* Image container (position:relative required for Next <Image fill />) */}
+      <div
+        style={{height:160, overflow:'hidden', position:'relative', background:'var(--brl)'}}
+        onMouseEnter={() => setImgHover(true)}
+        onMouseLeave={() => setImgHover(false)}
+      >
+        {realImageUrl ? (
+          <Image
+            src={realImageUrl}
+            alt={product.name}
+            fill
+            sizes="(max-width: 480px) 50vw, (max-width: 768px) 33vw, (max-width: 1200px) 25vw, 200px"
+            style={{
+              objectFit: 'cover',
+              transition: 'transform .3s',
+              transform: imgHover ? 'scale(1.06)' : 'none',
+            }}
+          />
+        ) : (
+          <div style={{
+            position:'absolute', inset:0,
+            display:'flex', alignItems:'center', justifyContent:'center',
+            fontSize:36, color:'var(--mu)', background:'var(--brl)'
+          }}>
+            🥬
+          </div>
+        )}
 
         {/* Badges */}
         {discount > 0 && (
@@ -111,7 +135,8 @@ export default function ProductCard({ product }) {
           position:'absolute', top:6, right:6,
           background:'rgba(255,255,255,.9)', border:'none', borderRadius:50,
           width:30, height:30, display:'flex', alignItems:'center', justifyContent:'center',
-          backdropFilter:'blur(4px)'
+          backdropFilter:'blur(4px)',
+          cursor:'pointer',
         }}>
           <Heart size={15} fill={wished ? '#E63946' : 'none'} color={wished ? '#E63946' : '#6B6960'} />
         </button>

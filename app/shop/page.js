@@ -1,7 +1,8 @@
 import { createClient } from '../../src/lib/supabase-ssr/server'
 import ShopPage from '../../src/screens/ShopPage'
 
-export const revalidate = 3600
+// Rebuild every 5 min so featured/stock/prices stay fresh (was 1 hour)
+export const revalidate = 300
 
 export const metadata = {
   title: 'Shop Fresh Ugandan Produce - AGRENES',
@@ -33,14 +34,19 @@ export default async function ShopRoute({ searchParams }) {
     if (cat) query = query.eq('category_id', cat.id)
   }
   if (params.flash) query = query.eq('is_flash_deal', true)
-  if (params.bulk) query = query.eq('bulk_available', true)
+  // Bulk filter: products that have a bulk_price set (not products with a boolean column)
+  if (params.bulk) query = query.not('bulk_price', 'is', null)
   if (params.featured) query = query.eq('is_featured', true)
   if (params.q) query = query.ilike('name', `%${params.q}%`)
 
-  // Sort
+  // Sort — featured products ALWAYS bubble up first (merchandising priority).
+  // Then user's chosen sort. Then created_at as deterministic tiebreaker.
   const sort = params.sort || 'sales_count.desc'
   const [sortCol, sortDir] = sort.split('.')
-  query = query.order(sortCol, { ascending: sortDir === 'asc' })
+  query = query
+    .order('is_featured', { ascending: false })
+    .order(sortCol, { ascending: sortDir === 'asc' })
+    .order('created_at', { ascending: false })
 
   // Limit for first paint
   query = query.limit(48)
