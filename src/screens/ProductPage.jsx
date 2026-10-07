@@ -187,8 +187,8 @@ export default function ProductPage({ initialData } = {}) {
           {product.stock_qty === 0 && <div style={{ color: 'var(--rd)', fontSize: 13, fontWeight: 700, marginBottom: 10 }}>Out of stock</div>}
           {product.stock_qty > 0 && product.stock_qty <= 10 && <div style={{ color: 'var(--am, #B87333)', fontSize: 12.5, fontWeight: 600, marginBottom: 10 }}>Only {product.stock_qty} left</div>}
 
-          {/* Retail preset tiers */}
-          {tiers.retail.length > 0 && (
+          {/* Retail preset tiers — hidden when variants exist */}
+          {variants.length === 0 && tiers.retail.length > 0 && (
             <div style={{ marginBottom: 14 }}>
               <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: .5, color: 'var(--mu)', marginBottom: 8 }}>Choose amount</div>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -208,8 +208,8 @@ export default function ProductPage({ initialData } = {}) {
             </div>
           )}
 
-          {/* Bulk tier ladder */}
-          {tiers.bulk.length > 0 && (
+          {/* Bulk tier ladder — hidden when variants exist */}
+          {variants.length === 0 && tiers.bulk.length > 0 && (
             <div style={{ marginBottom: 14, padding: 12, borderRadius: 12, background: 'var(--gll)', border: '1px solid var(--g5, #C8E6D5)' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
                 <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--g2)' }}>💰 BULK — 20% OFF (from {product.bulk_min_qty} {product.unit || 'units'})</div>
