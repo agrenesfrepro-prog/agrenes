@@ -39,7 +39,7 @@ export default async function ShopRoute({ searchParams }) {
   if (params.featured) query = query.eq('is_featured', true)
   if (params.q) query = query.ilike('name', `%${params.q}%`)
 
-  // Sort â€” featured products ALWAYS bubble up first (merchandising priority).
+  // Sort — featured products ALWAYS bubble up first (merchandising priority).
   // Then user's chosen sort. Then created_at as deterministic tiebreaker.
   const sort = params.sort || 'sales_count.desc'
   const [sortCol, sortDir] = sort.split('.')

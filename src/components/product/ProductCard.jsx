@@ -85,7 +85,7 @@ export default function ProductCard({ product }) {
             display:'flex', alignItems:'center', justifyContent:'center',
             fontSize:36, color:'var(--mu)', background:'var(--brl)'
           }}>
-            ðŸ¥¬
+            🥬
           </div>
         )}
 
@@ -102,7 +102,7 @@ export default function ProductCard({ product }) {
             position:'absolute', top:8, left:8,
             background:'var(--rd)', color:'#fff',
             fontSize:10, fontWeight:700, padding:'3px 8px', borderRadius:5
-          }}>âš¡ Flash</span>
+          }}>⚡ Flash</span>
         )}
         {product.stock_qty === 0 && (
           <div style={{
@@ -171,11 +171,11 @@ export default function ProductCard({ product }) {
         <div style={{display:'flex', alignItems:'baseline', gap:6, marginBottom:8}}>
           <span style={{fontFamily:'Fraunces, serif', fontSize:17, fontWeight:700, color:'var(--g2)'}}>
             {hasVariants && <span style={{fontSize:11, fontWeight:600, color:'var(--mu)', fontFamily:'Plus Jakarta Sans, sans-serif'}}>From </span>}
-            Â£{displayPrice?.toFixed(2)}
+            £{displayPrice?.toFixed(2)}
           </span>
           {product.compare_price && (
             <span style={{fontSize:11, color:'var(--lt)', textDecoration:'line-through'}}>
-              Â£{product.compare_price?.toFixed(2)}
+              £{product.compare_price?.toFixed(2)}
             </span>
           )}
           <span style={{fontSize:10, color:'var(--mu)', marginLeft:'auto'}}>{product.unit}</span>
@@ -187,7 +187,7 @@ export default function ProductCard({ product }) {
             background:'var(--pul)', borderRadius:6, padding:'4px 8px',
             fontSize:10, color:'var(--pu)', fontWeight:600, marginBottom:8
           }}>
-            Bulk: Â£{product.bulk_price}/{product.unit} (min {product.bulk_min_qty}{product.unit})
+            Bulk: £{product.bulk_price}/{product.unit} (min {product.bulk_min_qty}{product.unit})
           </div>
         )}
 
