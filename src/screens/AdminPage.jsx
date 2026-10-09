@@ -161,6 +161,7 @@ function ProductForm({ product, categories, vendors, onSave, onClose }) {
     return () => document.removeEventListener('paste', onPaste)
   }, [])
   const [variants, setVariants] = useState([])
+  const [variantsDirty, setVariantsDirty] = useState(false)
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
   // When category changes on a NEW product, auto-suggest defaults
@@ -188,7 +189,7 @@ function ProductForm({ product, categories, vendors, onSave, onClose }) {
         .then(({ data }) => setVariants(data || []))
     }
   }, [product?.id])
-  const addVariant = () => setVariants(v => [...v, { label: '', price: '', stock_qty: '', _new: true }])
+  const addVariant = () => { setVariants(v => [...v, { label: '', price: '', stock_qty: '', _new: true }]); setVariantsDirty(true
   const updateVariant = (i, k, val) => setVariants(v => v.map((x, idx) => idx === i ? { ...x, [k]: val } : x))
   const removeVariant = (i) => setVariants(v => v.filter((_, idx) => idx !== i))
 
@@ -222,7 +223,7 @@ function ProductForm({ product, categories, vendors, onSave, onClose }) {
         const { data: newProd } = await supabase.from('products').select('id').eq('slug', payload.slug).single()
         productId = newProd?.id
       }
-      if (productId && variants.length > 0) {
+      if (productId && variantsDirty) {
         await supabase.from('product_variants').delete().eq('product_id', productId)
         const valid = variants.filter(v => v.label && v.price)
         if (valid.length) {
