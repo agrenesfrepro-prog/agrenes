@@ -352,16 +352,32 @@ function ProductForm({ product, categories, vendors, onSave, onClose }) {
           </div>
 
           <div className="form-group">
-            <label>Size Options (e.g. 500g, 1kg, 2kg â€” optional)</label>
+            <label>Tier Variants (Bag / Box / Wholesale — leave empty for single-price product)</label>
             {variants.map((v, i) => (
-              <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 8, alignItems: 'center' }}>
-                <input className="form-input" placeholder="Label e.g. 500g" style={{ flex: 2 }} value={v.label} onChange={e => updateVariant(i, 'label', e.target.value)} />
-                <input className="form-input" type="number" step="0.01" placeholder="Price Â£" style={{ flex: 2 }} value={v.price} onChange={e => updateVariant(i, 'price', e.target.value)} />
-                <input className="form-input" type="number" placeholder="Stock" style={{ flex: 1 }} value={v.stock_qty} onChange={e => updateVariant(i, 'stock_qty', e.target.value)} />
-                <button type="button" onClick={() => removeVariant(i)} style={{ background: 'var(--rdl)', border: '1px solid #F4B0B4', borderRadius: 8, width: 34, height: 40, cursor: 'pointer', color: 'var(--rd)', flexShrink: 0, fontSize: 16 }}>Ã—</button>
+              <div key={i} style={{ border: '1px solid var(--br)', borderRadius: 8, padding: 10, marginBottom: 8, background: 'var(--brl)' }}>
+                <div style={{ display: 'flex', gap: 8, marginBottom: 6, alignItems: 'center' }}>
+                  <input className="form-input" placeholder="Label e.g. Bag (1kg) or Retail (1-14 kg)" style={{ flex: 3 }} value={v.label} onChange={e => updateVariant(i, 'label', e.target.value)} />
+                  <select className="form-input" style={{ flex: 1 }} value={v.tier_type || ''} onChange={e => updateVariant(i, 'tier_type', e.target.value)}>
+                    <option value="">Tier type</option>
+                    <option value="bag">bag (retail)</option>
+                    <option value="box">box (mid-bulk)</option>
+                    <option value="wholesale">wholesale</option>
+                    <option value="single">single</option>
+                    <option value="pack">pack</option>
+                    <option value="bulk">bulk</option>
+                  </select>
+                  <button type="button" onClick={() => removeVariant(i)} style={{ background: 'var(--rdl)', border: '1px solid #F4B0B4', borderRadius: 8, width: 34, height: 34, cursor: 'pointer', color: 'var(--rd)', flexShrink: 0, fontSize: 16 }}>×</button>
+                </div>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <input className="form-input" type="number" step="0.01" placeholder="Price £" style={{ flex: 1 }} value={v.price} onChange={e => updateVariant(i, 'price', e.target.value)} />
+                  <input className="form-input" type="number" step="0.1" placeholder="Weight (kg)" style={{ flex: 1 }} value={v.weight_kg || ''} onChange={e => updateVariant(i, 'weight_kg', e.target.value)} />
+                  <input className="form-input" type="number" placeholder="Min qty" style={{ flex: 1 }} value={v.min_qty || ''} onChange={e => updateVariant(i, 'min_qty', e.target.value)} />
+                  <input className="form-input" type="number" placeholder="Max qty" style={{ flex: 1 }} value={v.max_qty || ''} onChange={e => updateVariant(i, 'max_qty', e.target.value)} />
+                  <input className="form-input" type="number" placeholder="Stock" style={{ flex: 1 }} value={v.stock_qty} onChange={e => updateVariant(i, 'stock_qty', e.target.value)} />
+                </div>
               </div>
             ))}
-            <button type="button" onClick={addVariant} style={{ background: 'var(--gll)', border: '1px dashed var(--g4)', borderRadius: 8, padding: '9px 16px', fontSize: 12.5, fontWeight: 700, color: 'var(--g2)', cursor: 'pointer', width: '100%' }}>+ Add Size Option</button>
+            <button type="button" onClick={addVariant} style={{ background: 'var(--gll)', border: '1px dashed var(--g4)', borderRadius: 8, padding: '9px 16px', fontSize: 12.5, fontWeight: 700, color: 'var(--g2)', cursor: 'pointer', width: '100%' }}>+ Add Tier Variant</button>
           </div>
 
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 20 }}>
