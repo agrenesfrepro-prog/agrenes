@@ -189,7 +189,7 @@ function ProductForm({ product, categories, vendors, onSave, onClose }) {
         .then(({ data }) => setVariants(data || []))
     }
   }, [product?.id])
-  const addVariant = () => { setVariants(v => [...v, { label: '', price: '', stock_qty: '', _new: true }]); setVariantsDirty(true) }
+  const addVariant = () => { setVariants(v => [...v, { label: '', price: '', stock_qty: '', tier_type: '', weight_kg: '', min_qty: '', max_qty: '', _new: true }]); setVariantsDirty(true) }
   const updateVariant = (i, k, val) => { setVariants(v => v.map((x, idx) => idx === i ? { ...x, [k]: val } : x)); setVariantsDirty(true) }
   const removeVariant = (i) => { setVariants(v => v.filter((_, idx) => idx !== i)); setVariantsDirty(true) }
 
@@ -235,10 +235,10 @@ function ProductForm({ product, categories, vendors, onSave, onClose }) {
               stock_qty: parseFloat(v.stock_qty) || 0,
               sort_order: i,
               is_active: v.is_active !== false,
-              tier_type: v.tier_type ?? null,
-              weight_kg: v.weight_kg ?? null,
-              min_qty: v.min_qty ?? null,
-              max_qty: v.max_qty ?? null,
+              tier_type: v.tier_type || null,
+              weight_kg: v.weight_kg !== '' && v.weight_kg != null ? parseFloat(v.weight_kg) : null,
+              min_qty: v.min_qty !== '' && v.min_qty != null ? parseFloat(v.min_qty) : null,
+              max_qty: v.max_qty !== '' && v.max_qty != null ? parseFloat(v.max_qty) : null,
             }))
           )
         }
