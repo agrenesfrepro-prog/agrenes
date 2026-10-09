@@ -21,7 +21,7 @@ export default async function ShopRoute({ searchParams }) {
   // Base query: all active products, joined with category, vendor, variants for pricing
   let query = supabase
     .from('products')
-    .select('*, categories(name,slug), vendors(name), product_variants(price,is_active,min_qty)')
+    .select('*, categories(name,slug), vendors(name), product_variants(price,is_active)')
     .eq('is_active', true)
 
   // Apply URL filters
@@ -39,7 +39,7 @@ export default async function ShopRoute({ searchParams }) {
   if (params.featured) query = query.eq('is_featured', true)
   if (params.q) query = query.ilike('name', `%${params.q}%`)
 
-  // Sort â€” featured products ALWAYS bubble up first (merchandising priority).
+  // Sort — featured products ALWAYS bubble up first (merchandising priority).
   // Then user's chosen sort. Then created_at as deterministic tiebreaker.
   const sort = params.sort || 'sales_count.desc'
   const [sortCol, sortDir] = sort.split('.')
