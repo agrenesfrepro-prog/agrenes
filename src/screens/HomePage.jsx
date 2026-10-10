@@ -196,7 +196,7 @@ function PromoGrid() {
         >
           <div style={{height:96, background:c.bg, position:'relative', overflow:'hidden'}}>
             <img src={img(c.img, 400)} alt={c.title} width="200" height="96" loading="lazy" decoding="async"
-              style={{width:'100%', height:'100%', objectFit:'cover', display:'block'}}
+              style={{width:'100%', height:'100%', objectFit:'contain', display:'block'}}
               onError={e => { e.currentTarget.style.display='none'; e.currentTarget.nextSibling.style.display='flex' }} />
             <span style={{
               display:'none', position:'absolute', inset:0,
