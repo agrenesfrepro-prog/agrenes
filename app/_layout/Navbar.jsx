@@ -64,7 +64,7 @@ export default function Navbar({ onMenuOpen }) {
           ✈️ Free delivery on orders over <strong style={{color:'var(--am)'}}>£75</strong>
           &nbsp;·&nbsp; 4× weekly flights from Entebbe to Gatwick
           &nbsp;·&nbsp; GAP & UNBS Certified
-          <button onClick={() => setAnnounceVisible(false)} style={{
+          <button onClick={() => setAnnounceVisible(false)} aria-label="Dismiss announcement" style={{
             background:'transparent', border:'none', color:'rgba(255,255,255,.5)',
             fontSize:16, marginLeft:'auto', cursor:'pointer', lineHeight:1
           }}>×</button>
