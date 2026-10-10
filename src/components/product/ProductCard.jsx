@@ -74,7 +74,7 @@ export default function ProductCard({ product }) {
             fill
             sizes="(max-width: 480px) 50vw, (max-width: 768px) 33vw, (max-width: 1200px) 25vw, 200px"
             style={{
-              objectFit: 'cover',
+              objectFit: 'contain',
               transition: 'transform .3s',
               transform: imgHover ? 'scale(1.06)' : 'none',
             }}

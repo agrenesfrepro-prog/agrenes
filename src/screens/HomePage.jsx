@@ -234,8 +234,8 @@ function FlashRow({ products }) {
             onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='var(--sh2)' }}
             onMouseLeave={e => { e.currentTarget.style.transform=''; e.currentTarget.style.boxShadow='var(--sh1)' }}
           >
-            <div style={{height:105, overflow:'hidden', position:'relative'}}>
-              <img src={img(p.images?.[0], 400)} alt={p.name} width="240" height="105" style={{width:'100%',height:'100%',objectFit:'cover'}} loading="lazy"/>
+            <div style={{height:160, overflow:'hidden', position:'relative', background:'var(--brl)'}}>
+              <img src={img(p.images?.[0], 400)} alt={p.name} width="240" height="160" style={{width:'100%',height:'100%',objectFit:'contain'}} loading="lazy"/>
               <span style={{
                 position:'absolute',top:6,left:6,
                 background:'var(--rd)',color:'#fff',
