@@ -52,14 +52,14 @@ export default function CartDrawer() {
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 0, border: '1px solid var(--br)', borderRadius: 8, overflow: 'hidden' }}>
-                    <button onClick={() => updateQty(item.id, item.qty - 1)} style={{ background: 'var(--brl)', border: 'none', width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--tx)' }}><Minus size={12} /></button>
+                    <button onClick={() => updateQty(item.id, item.qty - 1)} aria-label="Decrease quantity" style={{ background: 'var(--brl)', border: 'none', width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--tx)' }}><Minus size={12} /></button>
                     <span style={{ width: 32, textAlign: 'center', fontSize: 13, fontWeight: 700 }}>{item.qty}</span>
-                    <button onClick={() => updateQty(item.id, item.qty + 1)} style={{ background: 'var(--brl)', border: 'none', width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--tx)' }}><Plus size={12} /></button>
+                    <button onClick={() => updateQty(item.id, item.qty + 1)} aria-label="Increase quantity" style={{ background: 'var(--brl)', border: 'none', width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--tx)' }}><Plus size={12} /></button>
                   </div>
                   <div style={{ fontFamily: 'Fraunces, serif', fontSize: 16, fontWeight: 700, color: 'var(--g2)' }}>
                     £{(item.price * item.qty).toFixed(2)}
                   </div>
-                  <button onClick={() => removeItem(item.id)} style={{ background: 'var(--rdl)', border: 'none', color: 'var(--rd)', borderRadius: 7, width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Trash2 size={13} /></button>
+                  <button onClick={() => removeItem(item.id)} aria-label="Remove from cart" style={{ background: 'var(--rdl)', border: 'none', color: 'var(--rd)', borderRadius: 7, width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Trash2 size={13} /></button>
                 </div>
               </div>
             </div>
