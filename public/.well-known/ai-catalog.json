@@ -1,0 +1,31 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "AGRENES Market",
+    "documentationUrl": "https://agrenesmarket.com/llms.txt",
+    "logoUrl": "https://agrenesmarket.com/logo.png"
+  },
+  "entries": [
+    {
+      "identifier": "urn:air:agrenesmarket.com:docs:llms",
+      "displayName": "AGRENES Market Site Documentation",
+      "type": "text/markdown",
+      "url": "https://agrenesmarket.com/llms.txt",
+      "representativeQueries": [
+        "What products does AGRENES Market sell?",
+        "What are AGRENES Market's shipping and delivery policies?",
+        "How does AGRENES Market tiered pricing work?"
+      ]
+    },
+    {
+      "identifier": "urn:air:agrenesmarket.com:catalog:shop",
+      "displayName": "AGRENES Market Product Catalog",
+      "type": "text/html",
+      "url": "https://agrenesmarket.com/shop",
+      "representativeQueries": [
+        "Browse Ugandan fresh produce available for UK delivery",
+        "What dried goods and spices can I order from AGRENES?"
+      ]
+    }
+  ]
+}
