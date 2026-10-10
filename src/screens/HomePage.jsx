@@ -122,7 +122,7 @@ function HeroCarousel() {
 
       {/* Arrows */}
       {['‹','›'].map((arrow, ai) => (
-        <button key={arrow} onClick={() => { go(idx + (ai ? 1 : -1)); reset() }}
+        <button key={arrow} onClick={() => { go(idx + (ai ? 1 : -1)); reset() }} aria-label={ai ? 'Next slide' : 'Previous slide'}
           style={{
             position:'absolute', top:'50%', transform:'translateY(-50%)',
             [ai ? 'right' : 'left']: 10,
@@ -137,7 +137,7 @@ function HeroCarousel() {
       {/* Dots */}
       <div style={{display:'flex', gap:5, justifyContent:'center', padding:'10px 0 14px'}}>
         {SLIDES.map((_, i) => (
-          <button key={i} onClick={() => { go(i); reset() }} style={{
+          <button key={i} onClick={() => { go(i); reset() }} aria-label={`Go to slide ${i + 1}`} aria-current={i === idx ? 'true' : undefined} style={{
             width: i === idx ? 20 : 7,
             height:7, borderRadius: i === idx ? 4 : '50%',
             background: i === idx ? 'var(--am)' : 'rgba(255,255,255,.3)',
