@@ -23,5 +23,22 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start"
+  },
+  "browserslist": {
+    "production": [
+      ">0.3%",
+      "not dead",
+      "not op_mini all",
+      "not IE 11",
+      "Chrome >= 90",
+      "Firefox >= 88",
+      "Safari >= 14",
+      "Edge >= 90"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }
