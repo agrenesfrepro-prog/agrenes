@@ -34,7 +34,7 @@ function getCulturalNote(name) {
 const TIER_META = {
   bag:       { icon: '🛍️', label: 'Bag',       unit: 'kg',      caption: 'Try a small portion' },
   box:       { icon: '📦', label: 'Box',       unit: 'box',     caption: 'Best value — save 10%' },
-  wholesale: { icon: '🏢', label: 'Wholesale', unit: 'bundle',  caption: 'Serious volume — save 25%' },
+  wholesale: { icon: '🏢', label: 'Wholesale', unit: 'box',     caption: 'Serious volume — save 25%' },
 }
 
 export default function ProductPage({ initialData } = {}) {
@@ -333,6 +333,11 @@ export default function ProductPage({ initialData } = {}) {
                           {vPerKg !== null && (
                             <div style={{ fontSize: 11, color: 'var(--mu)' }}>
                               £{vPerKg.toFixed(2)}/kg · {vWeight} kg per {meta.unit}
+                            </div>
+                          )}
+                          {(v.tier_type === 'wholesale' || v.tier_type === 'bulk') && vMin > 1 && (
+                            <div style={{ fontSize: 11, color: 'var(--g2)', fontWeight: 700, marginTop: 3 }}>
+                              Min {vMin} {meta.unit}{meta.unit === 'box' ? 'es' : 's'}
                             </div>
                           )}
                         </div>
