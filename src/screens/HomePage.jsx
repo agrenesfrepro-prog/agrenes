@@ -195,7 +195,7 @@ function PromoGrid() {
           onMouseLeave={e => { e.currentTarget.style.transform=''; e.currentTarget.style.boxShadow='var(--sh1)' }}
         >
           <div style={{height:96, background:c.bg, position:'relative', overflow:'hidden'}}>
-            <img src={img(c.img, 640)} alt={c.title} loading="lazy" decoding="async"
+            <img src={img(c.img, 400)} alt={c.title} width="200" height="96" loading="lazy" decoding="async"
               style={{width:'100%', height:'100%', objectFit:'cover', display:'block'}}
               onError={e => { e.currentTarget.style.display='none'; e.currentTarget.nextSibling.style.display='flex' }} />
             <span style={{
@@ -204,7 +204,7 @@ function PromoGrid() {
             }}>{c.emoji}</span>
           </div>
           <div style={{padding:'10px 12px 12px'}}>
-            <h4 style={{fontSize:13.5, fontWeight:700, color:'var(--tx)', marginBottom:2}}>{c.title}</h4>
+            <h2 style={{fontSize:13.5, fontWeight:700, color:'var(--tx)', marginBottom:2}}>{c.title}</h2>
             <p style={{fontSize:11, color:'var(--mu)'}}>{c.sub}</p>
           </div>
         </div>
@@ -235,7 +235,7 @@ function FlashRow({ products }) {
             onMouseLeave={e => { e.currentTarget.style.transform=''; e.currentTarget.style.boxShadow='var(--sh1)' }}
           >
             <div style={{height:105, overflow:'hidden', position:'relative'}}>
-              <img src={p.images?.[0]} alt={p.name} style={{width:'100%',height:'100%',objectFit:'cover'}} loading="lazy"/>
+              <img src={img(p.images?.[0], 400)} alt={p.name} width="240" height="105" style={{width:'100%',height:'100%',objectFit:'cover'}} loading="lazy"/>
               <span style={{
                 position:'absolute',top:6,left:6,
                 background:'var(--rd)',color:'#fff',
