@@ -77,7 +77,7 @@ function ImageUploader({ images, onChange, exposePaste }) {
         const contentType = isJpeg ? 'image/jpeg' : (file.type || 'image/jpeg')
         const { error } = await supabase.storage
           .from('product-images')
-          .upload(path, blob, { contentType, upsert: true })
+          .upload(path, blob, { contentType, upsert: true, cacheControl: '31536000' })
         if (error) toast.error('Upload failed: ' + error.message)
         else {
           const { data: urlData } = supabase.storage.from('product-images').getPublicUrl(path)
