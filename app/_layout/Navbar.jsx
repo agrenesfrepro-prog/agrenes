@@ -82,7 +82,7 @@ export default function Navbar({ onMenuOpen }) {
         <button onClick={onMenuOpen} style={{
           background: 'none', border: 'none', color: 'var(--tx)',
           display: 'flex', padding: 4
-        }}>
+        }} aria-label="Open menu">
           <Menu size={22} />
         </button>
 
@@ -112,7 +112,7 @@ export default function Navbar({ onMenuOpen }) {
               background:'var(--g2)', border:'none', padding:'0 18px',
               color:'#fff', fontWeight:700, fontSize:13, height:42,
               display:'flex', alignItems:'center', gap:5
-            }}>
+            }} aria-label="Search">
               <Search size={15} />
             </button>
           </form>

@@ -27,7 +27,7 @@ export default function CartDrawer() {
             <ShoppingBag size={20} color="var(--g3)" />
             My Cart {items.length > 0 && `(${items.reduce((s, i) => s + i.qty, 0)})`}
           </h2>
-          <button onClick={closeCart} style={{ background: 'none', border: 'none', color: 'var(--mu)' }}>
+          <button onClick={closeCart} style={{ background: 'none', border: 'none', color: 'var(--mu)' }} aria-label="Close">
             <X size={22} />
           </button>
         </div>

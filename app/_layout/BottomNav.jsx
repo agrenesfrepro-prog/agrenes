@@ -62,7 +62,7 @@ export function SideMenu({ open, onClose }) {
               background: 'rgba(255,255,255,.15)', border: 'none', color: '#fff',
               borderRadius: 8, width: 32, height: 32, display: 'flex',
               alignItems: 'center', justifyContent: 'center', cursor: 'pointer'
-            }}>
+            }} aria-label="Close">
               <X size={18} />
             </button>
           </div>

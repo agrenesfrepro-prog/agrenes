@@ -57,7 +57,7 @@ export default function WriteReview({ productId, onSubmit, onClose }) {
           display: 'flex', alignItems: 'center', justifyContent: 'space-between'
         }}>
           <h2 style={{ fontSize: 16 }}>Write a Review</h2>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--mu)' }}>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--mu)' }} aria-label="Close">
             <X size={20} />
           </button>
         </div>

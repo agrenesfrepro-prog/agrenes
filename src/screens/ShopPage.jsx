@@ -283,7 +283,7 @@ function Chip({ label, onRemove }) {
       display:'flex', alignItems:'center', gap:4
     }}>
       {label}
-      <button onClick={onRemove} style={{background:'none',border:'none',color:'var(--g2)',cursor:'pointer',lineHeight:1}}>
+      <button onClick={onRemove} style={{background:'none',border:'none',color:'var(--g2)',cursor:'pointer',lineHeight:1}} aria-label="Close">
         <X size={11}/>
       </button>
     </span>

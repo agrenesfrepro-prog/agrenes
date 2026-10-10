@@ -140,7 +140,7 @@ export default function ProductCard({ product }) {
           width:30, height:30, display:'flex', alignItems:'center', justifyContent:'center',
           backdropFilter:'blur(4px)',
           cursor:'pointer',
-        }}>
+        }} aria-label="Toggle wishlist">
           <Heart size={15} fill={wished ? '#E63946' : 'none'} color={wished ? '#E63946' : '#6B6960'} />
         </button>
       </div>
