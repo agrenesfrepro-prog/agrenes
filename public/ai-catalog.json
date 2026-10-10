@@ -1,40 +1,31 @@
-{
-  "$schema": "https://agentic-web.org/schemas/ai-catalog/v1.json",
-  "name": "AGRENES Market",
-  "url": "https://agrenesmarket.com",
-  "description": "Uganda's farm-fresh produce exporter to the UK. Direct from certified farms, air-freighted weekly, delivered UK-wide.",
-  "organization": {
-    "legalName": "Agriculture Environment & Ecosystems Ltd",
-    "country": "UG",
-    "founded": "2014",
-    "certifications": ["Global G.A.P.", "HACCP", "UNBS"]
+﻿{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "AGRENES Market",
+    "documentationUrl": "https://agrenesmarket.com/llms.txt",
+    "logoUrl": "https://agrenesmarket.com/logo.png"
   },
-  "contact": { "email": "support@agrenes.co.uk" },
-  "catalog": {
-    "type": "ecommerce",
-    "currency": "GBP",
-    "locale": "en-GB",
-    "feed": "https://agrenesmarket.com/sitemap.xml",
-    "endpoints": {
-      "products": "https://agrenesmarket.com/shop",
-      "product_detail": "https://agrenesmarket.com/product/{id}"
+  "entries": [
+    {
+      "identifier": "urn:air:agrenesmarket.com:docs:llms",
+      "displayName": "AGRENES Market Site Documentation",
+      "type": "text/markdown",
+      "url": "https://agrenesmarket.com/llms.txt",
+      "representativeQueries": [
+        "What products does AGRENES Market sell?",
+        "What are AGRENES Market's shipping and delivery policies?",
+        "How does AGRENES Market tiered pricing work?"
+      ]
+    },
+    {
+      "identifier": "urn:air:agrenesmarket.com:catalog:shop",
+      "displayName": "AGRENES Market Product Catalog",
+      "type": "text/html",
+      "url": "https://agrenesmarket.com/shop",
+      "representativeQueries": [
+        "Browse Ugandan fresh produce available for UK delivery",
+        "What dried goods and spices can I order from AGRENES?"
+      ]
     }
-  },
-  "pricing_model": {
-    "tiers": [
-      {"name": "Retail", "qty_min": 1, "qty_max": 14, "discount_pct": 0},
-      {"name": "Bulk", "qty_min": 15, "qty_max": 25, "discount_pct": 10},
-      {"name": "Wholesale", "qty_min": 26, "qty_max": null, "discount_pct": 25}
-    ]
-  },
-  "policies": {
-    "free_delivery_threshold_gbp": 75,
-    "shipping_regions": ["GB"],
-    "shipping_courier": "Evri"
-  },
-  "ai_access": {
-    "crawl_allowed": true,
-    "training_allowed": false,
-    "contact_for_api": "support@agrenes.co.uk"
-  }
+  ]
 }
