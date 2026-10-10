@@ -154,7 +154,7 @@ export default function Navbar({ onMenuOpen }) {
         {/* Nav actions */}
         <div style={{display:'flex', gap:8, alignItems:'center', marginLeft:'auto'}}>
           {/* Wishlist */}
-          <Link href="/wishlist" style={{
+          <Link href="/wishlist" aria-label={`Wishlist${wishlist.length > 0 ? ` (${wishlist.length} items)` : ''}`} style={{
             background:'var(--gll)', border:'1px solid var(--gl)',
             borderRadius:10, padding:'8px 12px', color:'var(--g2)',
             display:'flex', alignItems:'center', gap:6, fontSize:13, fontWeight:600,
