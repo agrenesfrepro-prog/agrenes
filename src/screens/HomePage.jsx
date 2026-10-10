@@ -177,9 +177,9 @@ function PromoGrid() {
   const cards = [
     {img:'https://ierviwtmdqerdmwtnimn.supabase.co/storage/v1/object/public/product-images/products/1784272182381-usc22b751rp.jpg', bg:'var(--gl)', border:'#9FE1CB', emoji:'📦', title:'Food Boxes', sub:'Avocado, plantain, sweet potato', cat:'all'},
     {img:'https://ierviwtmdqerdmwtnimn.supabase.co/storage/v1/object/public/product-images/products/1784273521387-tkpq9h8jan.jpg', bg:'var(--aml)', border:'#FAC775', emoji:'🥦', title:'Fresh Vegetables', sub:'Peppers, tomatoes, cabbage', cat:'vegetables'},
-    {img:'https://ierviwtmdqerdmwtnimn.supabase.co/storage/v1/object/public/product-images/Canva%20AI%20Image%20Oct%2010,%202026,%204_04_39%20PM.jpg', bg:'var(--pul)', border:'#C8B5F0', emoji:'🫘', pos:'center top', title:'Beans & Nuts', sub:'Red beans, yellow beans, cashews', cat:'legumes'},
-    {img:'https://ierviwtmdqerdmwtnimn.supabase.co/storage/v1/object/public/product-images/products/1784274303524-g5grofoo6w.jpeg', bg:'var(--rdl)', border:'#F4B0B4', emoji:'🌾', pos:'center bottom', title:'Dried Foods', sub:'Cassava, yam, sweet potato', cat:'dried'},
-    {img:'https://ierviwtmdqerdmwtnimn.supabase.co/storage/v1/object/public/product-images/WhatsApp%20Image%202026-10-10%20at%2016.55.13.jpeg', bg:'var(--gll)', border:'#9FE1CB', emoji:'🥤', pos:'right center', title:'Beverages', sub:'Bushera, Stoney, Novida', cat:'all'},
+    {img:'https://ierviwtmdqerdmwtnimn.supabase.co/storage/v1/object/public/product-images/Canva%20AI%20Image%20Oct%2010,%202026,%204_04_39%20PM.jpg', bg:'var(--pul)', border:'#C8B5F0', emoji:'🫘', title:'Beans & Nuts', sub:'Red beans, yellow beans, cashews', cat:'legumes'},
+    {img:'https://ierviwtmdqerdmwtnimn.supabase.co/storage/v1/object/public/product-images/products/1784274303524-g5grofoo6w.jpeg', bg:'var(--rdl)', border:'#F4B0B4', emoji:'🌾', title:'Dried Foods', sub:'Cassava, yam, sweet potato', cat:'dried'},
+    {img:'https://ierviwtmdqerdmwtnimn.supabase.co/storage/v1/object/public/product-images/WhatsApp%20Image%202026-10-10%20at%2016.55.13.jpeg', bg:'var(--gll)', border:'#9FE1CB', emoji:'🥤', title:'Beverages', sub:'Bushera, Stoney, Novida', cat:'all'},
     {img:'https://ierviwtmdqerdmwtnimn.supabase.co/storage/v1/object/public/product-images/10c2ebb5-aaa7-414a-bd4d-133a0d3b1963.jpg', bg:'#FFF3E0', border:'#FFCC80', emoji:'🧺', title:'African Crafts', sub:'Wooden art, clay cups, mats', cat:'all'},
   ]
   return (
@@ -196,7 +196,7 @@ function PromoGrid() {
         >
           <div style={{height:96, background:c.bg, position:'relative', overflow:'hidden'}}>
             <img src={img(c.img, 400)} alt={c.title} width="200" height="96" loading="lazy" decoding="async"
-              style={{width:'100%', height:'100%', objectFit:'cover', objectPosition: c.pos || 'center', display:'block'}}
+              style={{width:'100%', height:'100%', objectFit:'cover', display:'block'}}
               onError={e => { e.currentTarget.style.display='none'; e.currentTarget.nextSibling.style.display='flex' }} />
             <span style={{
               display:'none', position:'absolute', inset:0,
