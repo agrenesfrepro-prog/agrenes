@@ -9,9 +9,7 @@
     "founded": "2014",
     "certifications": ["Global G.A.P.", "HACCP", "UNBS"]
   },
-  "contact": {
-    "email": "support@agrenes.co.uk"
-  },
+  "contact": { "email": "support@agrenes.co.uk" },
   "catalog": {
     "type": "ecommerce",
     "currency": "GBP",
