@@ -1,0 +1,33 @@
+# AGRENES Market
+
+Uganda's farm-fresh produce exporter to the UK. Direct from certified farms (Global G.A.P. + UNBS), air-freighted weekly via 4x Entebbe→Gatwick flights. Serves both retail diaspora customers and B2B restaurants/distributors nationwide.
+
+## About
+- Company: Agriculture Environment & Ecosystems Ltd (AGRENES), est. 2014
+- Operations: ~12 tonnes/week export; packhouse in Ndeeba Kabowa, Uganda
+- Partner network: 1,500+ outgrower farmers
+- Certifications: Global G.A.P., HACCP, UNBS
+
+## Core sections
+- [Shop all produce](https://agrenesmarket.com/shop)
+- [Fresh Vegetables](https://agrenesmarket.com/shop?cat=vegetables)
+- [Fruits](https://agrenesmarket.com/shop?cat=fruits)
+- [Bananas & Plantain](https://agrenesmarket.com/shop?cat=bananas)
+- [Roots & Tubers](https://agrenesmarket.com/shop?cat=tubers)
+- [Dried Goods](https://agrenesmarket.com/shop?cat=dried)
+- [Legumes](https://agrenesmarket.com/shop?cat=legumes)
+- [Herbs & Spices](https://agrenesmarket.com/shop?cat=herbs)
+- [Beverages](https://agrenesmarket.com/shop?cat=beverages)
+- [African Crafts](https://agrenesmarket.com/shop?cat=crafts)
+- [Bulk Orders](https://agrenesmarket.com/shop?bulk=1)
+- [Flash Deals](https://agrenesmarket.com/shop?flash=1)
+
+## Policies
+- Free UK delivery on orders over £75
+- Pricing: Retail (1-14 units), Bulk (15-25, 10% off), Wholesale (26+, 25% off)
+- Payment: Stripe (card)
+- Shipping: Evri UK delivery, calculated at checkout by order weight
+
+## Contact
+- Email: support@agrenes.co.uk
+- Site: https://agrenesmarket.com
