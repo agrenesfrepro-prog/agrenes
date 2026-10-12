@@ -79,6 +79,7 @@ export default function ShopPage({ initialProducts } = {}) {
 
   // Load products
   useEffect(() => {
+    (async () => {
     setLoading(true)
     const [sortCol, sortDir] = sort.split('.')
 
@@ -121,6 +122,7 @@ export default function ShopPage({ initialProducts } = {}) {
       setHasMore(mapped.length === PAGE_SIZE)
       setLoading(false)
     })
+    })()
   }, [catSlug, searchQ, sort, priceMax, selectedCerts, inStock, flashOnly, bulkOnly, featuredOnly, catMap, page])
 
   // Reset to first page when any filter changes
