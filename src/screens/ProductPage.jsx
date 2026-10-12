@@ -12,6 +12,26 @@ import ProductCard from '../components/product/ProductCard'
 import WriteReview from '../components/product/WriteReview'
 import toast from 'react-hot-toast'
 
+// Collapsible product description (first paragraph by default; Read more expands)
+function AboutProduct({ description }) {
+  const [expanded, setExpanded] = useState(false)
+  const paras = (description || '').split(/\n\n+/)
+  const first = paras[0]
+  const hasMore = paras.length > 1
+  const shown = expanded ? description : first
+  return (
+    <>
+      <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: .6, color: 'var(--mu)', marginBottom: 8 }}>About this product</div>
+      <p style={{ fontSize: 13.5, lineHeight: 1.65, color: 'var(--tx)', whiteSpace: 'pre-wrap', margin: 0 }}>{shown}</p>
+      {hasMore && (
+        <button onClick={() => setExpanded(!expanded)} style={{ marginTop: 10, background: 'none', border: 'none', color: 'var(--g2)', fontSize: 12, fontWeight: 700, cursor: 'pointer', padding: 0 }}>
+          {expanded ? '- Read less' : '+ Read more'}
+        </button>
+      )}
+    </>
+  )
+}
+
 const CULTURAL_NOTES = {
   "matoke":  "Matoke (green cooking banana) is Uganda's national dish. Steamed in banana leaves and mashed, it's served at virtually every Ugandan family table.",
   "plantain":"Plantain (gonja) is a Ugandan staple - sliced and deep-fried into golden chips, roasted whole over charcoal, or boiled as a starchy side dish.",
@@ -505,8 +525,7 @@ export default function ProductPage({ initialData } = {}) {
 
           {product.description && (
             <div className="card" style={{ padding: 18, marginBottom: 12 }}>
-              <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: .6, color: 'var(--mu)', marginBottom: 8 }}>About this product</div>
-              <p style={{ fontSize: 13.5, lineHeight: 1.65, color: 'var(--tx)', whiteSpace: 'pre-wrap' }}>{product.description}</p>
+              <AboutProduct description={product.description} />
             </div>
           )}
 
