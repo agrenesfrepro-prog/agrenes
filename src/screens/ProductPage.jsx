@@ -530,12 +530,6 @@ export default function ProductPage({ initialData } = {}) {
             </div>
           )}
 
-          {getCulturalNote(product?.name) && (
-            <div className="card" style={{ padding: 18, marginBottom: 12, background: 'linear-gradient(135deg,var(--gll),var(--gl))', border: '1px solid var(--g5)' }}>
-              <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: .6, color: 'var(--g2)', marginBottom: 6 }}>🌍 Did You Know?</div>
-              <p style={{ fontSize: 13.5, lineHeight: 1.7, color: 'var(--g1)', margin: 0 }}>{getCulturalNote(product?.name)}</p>
-            </div>
-          )}
 
           {reviews.length > 0 && (
             <div className="card" style={{ padding: 18, marginBottom: 12 }}>
@@ -571,6 +565,13 @@ export default function ProductPage({ initialData } = {}) {
           <div className="pgrid">{related.map(p => <ProductCard key={p.id} product={p} />)}</div>
         </div>
       )}
+
+          {getCulturalNote(product?.name) && (
+            <div className="card" style={{ padding: 18, marginBottom: 12, background: 'linear-gradient(135deg,var(--gll),var(--gl))', border: '1px solid var(--g5)' }}>
+              <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: .6, color: 'var(--g2)', marginBottom: 6 }}>🌍 Did You Know?</div>
+              <p style={{ fontSize: 13.5, lineHeight: 1.7, color: 'var(--g1)', margin: 0 }}>{getCulturalNote(product?.name)}</p>
+            </div>
+          )}
 
       <div className="pdp-sticky" style={{ position: 'fixed', left: 0, right: 0, bottom: 56, background: 'var(--wh)', borderTop: '1px solid var(--br)', padding: '10px 14px', display: 'flex', gap: 10, alignItems: 'center', zIndex: 500, boxShadow: '0 -6px 20px rgba(0,0,0,.06)' }}>
         <div style={{ flex: 1, minWidth: 0 }}>
