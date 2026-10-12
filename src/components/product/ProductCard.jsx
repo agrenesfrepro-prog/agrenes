@@ -181,6 +181,15 @@ export default function ProductCard({ product }) {
           <span style={{fontSize:10, color:'var(--mu)', marginLeft:'auto'}}>{product.unit}</span>
         </div>
 
+        {/* Tier breakdown pull — shows buyer the box + wholesale options at a glance */}
+        {(boxV || wsV) && (
+          <div style={{fontSize:10.5, color:'var(--mu)', fontWeight:600, marginTop:-4, marginBottom:8, lineHeight:1.5}}>
+            {boxV && <span>Box: £{boxV.price?.toFixed(2)}</span>}
+            {boxV && wsV && <span> · </span>}
+            {wsV && <span>Wholesale: £{wsV.price?.toFixed(2)}+</span>}
+          </div>
+        )}
+
         {/* Bulk info */}
         {product.bulk_price && (
           <div style={{

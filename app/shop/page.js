@@ -21,7 +21,7 @@ export default async function ShopRoute({ searchParams }) {
   // Base query: all active products, joined with category, vendor, variants for pricing
   let query = supabase
     .from('products')
-    .select('*, categories(name,slug), vendors(name), product_variants(price,is_active,min_qty)')
+    .select('*, categories(name,slug), vendors(name), product_variants(*)')
     .eq('is_active', true)
 
   // Apply URL filters

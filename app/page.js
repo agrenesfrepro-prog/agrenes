@@ -24,7 +24,7 @@ export default async function Home() {
     // Best Sellers — sorted by actual sales, then rating, then newest (future-proof).
     supabase
       .from('products')
-      .select('*')
+      .select('*, product_variants(*)')
       .eq('is_featured', true)
       .eq('is_active', true)
       .order('sales_count', { ascending: false })
@@ -33,7 +33,7 @@ export default async function Home() {
       .limit(12),
     supabase
       .from('products')
-      .select('*')
+      .select('*, product_variants(*)')
       .eq('is_active', true)
       .order('rating', { ascending: false })
       .limit(8),
