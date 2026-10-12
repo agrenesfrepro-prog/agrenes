@@ -153,8 +153,9 @@ export default function ShopPage({ initialProducts } = {}) {
           {featuredOnly && '🔥 Best Sellers'}
           {flashOnly && '⚡ Flash Deals'}
           {bulkOnly && '📦 Bulk / Wholesale'}
+          {catSlug === 'boxes' && '📦 Food Boxes'}
           {searchQ && `Results for "${searchQ}"`}
-          {!featuredOnly && !flashOnly && !bulkOnly && !searchQ && (
+          {!featuredOnly && !flashOnly && !bulkOnly && !searchQ && catSlug !== 'boxes' && (
             catSlug === 'all' ? '🥬 All Fresh Produce' : `${categories.find(c=>c.slug===catSlug)?.emoji} ${categories.find(c=>c.slug===catSlug)?.name}`
           )}
         </h1>
@@ -191,6 +192,7 @@ export default function ShopPage({ initialProducts } = {}) {
         {featuredOnly && <Chip label="🔥 Best Sellers" onRemove={() => router.push(pathname)} />}
         {flashOnly && <Chip label="⚡ Flash" onRemove={() => router.push(pathname)} />}
         {bulkOnly && <Chip label="📦 Bulk" onRemove={() => router.push(pathname)} />}
+        {catSlug === 'boxes' && <Chip label="📦 Food Boxes" onRemove={() => router.push(pathname)} />}
         {inStock && <Chip label="In Stock" onRemove={() => setInStock(false)} />}
         {selectedCerts.map(c => <Chip key={c} label={c} onRemove={() => toggleCert(c)} />)}
 
