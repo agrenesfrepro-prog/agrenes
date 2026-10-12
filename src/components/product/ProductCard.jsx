@@ -20,6 +20,9 @@ export default function ProductCard({ product }) {
 
   const activeVariants = (product.product_variants || []).filter(v => v.is_active !== false)
   const hasVariants = activeVariants.length > 0
+  const bagV = activeVariants.find(v => v.tier_type === 'bag' || v.tier_type === 'single')
+  const boxV = activeVariants.find(v => v.tier_type === 'box' || v.tier_type === 'pack')
+  const wsV  = activeVariants.find(v => v.tier_type === 'wholesale' || v.tier_type === 'bulk')
   // Prefer the retail tier price (stored on product.price). Fallback to lowest variant price.
   const displayPrice = hasVariants
     ? (product.price || Math.min(...activeVariants.map(v => Number(v.price)).filter(n => !isNaN(n))))
