@@ -2,7 +2,7 @@ import '../src/styles/global.css'
 import Shell from './_layout/Shell'
 import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
-import { GoogleAnalytics } from '@next/third-parties/google'
+import ConditionalAnalytics from './_layout/ConditionalAnalytics'
 import { Plus_Jakarta_Sans, Fraunces } from 'next/font/google'
 
 // Self-hosted, preloaded, latin-subset — replaces the render-blocking
@@ -81,7 +81,7 @@ export default function RootLayout({ children }) {
         <Shell>{children}</Shell>
         <Analytics />
         <SpeedInsights />
-        <GoogleAnalytics gaId="G-FTZQ3S7CSN" />
+        <ConditionalAnalytics gaId="G-FTZQ3S7CSN" />
       </body>
     </html>
   )

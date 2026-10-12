@@ -63,7 +63,8 @@ export default function Footer() {
             <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1, color: 'rgba(255,255,255,.4)', marginBottom: 12 }}>Help</div>
             {[
               { label: 'My Orders', to: '/orders' },
-              { label: 'Returns & Refunds', to: '/returns' },
+              { label: 'Returns & Refunds', to: '/refund' },
+              { label: 'Cookies Policy', to: '/cookies' },
               { label: 'Terms & Conditions', to: '/terms' },
               { label: 'Privacy Policy', to: '/privacy' },
             ].map(l => (
@@ -91,7 +92,8 @@ export default function Footer() {
             {[
               { label: 'Terms', to: '/terms' },
               { label: 'Privacy', to: '/privacy' },
-              { label: 'Returns', to: '/returns' },
+              { label: 'Returns', to: '/refund' },
+              { label: 'Cookies', to: '/cookies' },
               { label: 'Contact', to: '/contact' },
             ].map(l => (
               <Link key={l.label} href={l.to} style={{ fontSize: 12, color: 'rgba(255,255,255,.45)' }}>

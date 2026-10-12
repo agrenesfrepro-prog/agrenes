@@ -7,6 +7,7 @@ import Footer from './Footer'
 import CartDrawer from './CartDrawer'
 import { BottomNav, SideMenu } from './BottomNav'
 import WhatsAppButton from './WhatsAppButton'
+import CookieBanner from './CookieBanner'
 import HydrationTrigger from '../../src/components/HydrationTrigger'
 import { useAuthStore } from '../../src/lib/store'
 
@@ -39,6 +40,7 @@ export default function Shell({ children }) {
         <SideMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
         <WhatsAppButton />
       </div>
+      <CookieBanner />
     </>
   )
 }
