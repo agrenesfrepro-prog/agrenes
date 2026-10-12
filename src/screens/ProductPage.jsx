@@ -15,10 +15,11 @@ import toast from 'react-hot-toast'
 // Collapsible product description (first paragraph by default; Read more expands)
 function AboutProduct({ description }) {
   const [expanded, setExpanded] = useState(false)
-  const paras = (description || '').split(/\n\n+/)
-  const first = paras[0]
-  const hasMore = paras.length > 1
-  const shown = expanded ? description : first
+  const PREVIEW_LEN = 220
+  const d = description || ''
+  const hasMore = d.length > PREVIEW_LEN
+  const first = hasMore ? d.substring(0, PREVIEW_LEN).replace(/\s+\S*$/, '') + '…' : d
+  const shown = expanded ? d : first
   return (
     <>
       <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: .6, color: 'var(--mu)', marginBottom: 8 }}>About this product</div>
