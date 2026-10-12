@@ -17,7 +17,7 @@ export default async function Home() {
       .limit(6),
     supabase
       .from('products')
-      .select('*')
+      .select('*, product_variants(*)')
       .eq('is_flash_deal', true)
       .eq('is_active', true)
       .limit(8),
