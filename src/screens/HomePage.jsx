@@ -175,10 +175,10 @@ function TrustStrip() {
 function PromoGrid() {
   const router = useRouter()
   const cards = [
-    {img:'https://ierviwtmdqerdmwtnimn.supabase.co/storage/v1/object/public/product-images/products/1784272182381-usc22b751rp.jpg', bg:'var(--gl)', border:'#9FE1CB', emoji:'📦', title:'Food Boxes', sub:'Avocado, plantain, sweet potato', cat:'all'},
-    {img:'https://ierviwtmdqerdmwtnimn.supabase.co/storage/v1/object/public/product-images/products/1784273521387-tkpq9h8jan.jpg', bg:'var(--aml)', border:'#FAC775', emoji:'🥦', title:'Fresh Vegetables', sub:'Peppers, tomatoes, cabbage', cat:'vegetables'},
-    {img:'https://ierviwtmdqerdmwtnimn.supabase.co/storage/v1/object/public/product-images/Canva%20AI%20Image%20Oct%2010,%202026,%204_04_39%20PM.jpg', bg:'var(--pul)', border:'#C8B5F0', emoji:'🌾', title:'Grains', sub:'Millet, soya, groundnuts, seeds', cat:'legumes'},
-    {img:'https://ierviwtmdqerdmwtnimn.supabase.co/storage/v1/object/public/product-images/products/1784274303524-g5grofoo6w.jpeg', bg:'var(--rdl)', border:'#F4B0B4', emoji:'🥣', title:'Flour & Powdered Foods', sub:'Cassava flour, fufu, millet flour', cat:'dried'},
+    {img:'https://ierviwtmdqerdmwtnimn.supabase.co/storage/v1/render/image/public/product-images/products/1785832901688-zqqhmlc9rhk.png?width=800&quality=75&resize=contain', bg:'var(--gl)', border:'#9FE1CB', emoji:'📦', title:'Food Boxes', sub:'Avocado, plantain, sweet potato', cat:'all'},
+    {img:'https://ierviwtmdqerdmwtnimn.supabase.co/storage/v1/render/image/public/product-images/products/1784116819845-m4r70ek7fm.jpg?width=800&quality=75&resize=contain', bg:'var(--aml)', border:'#FAC775', emoji:'🥦', title:'Fresh Vegetables', sub:'Peppers, tomatoes, cabbage', cat:'vegetables'},
+    {img:'https://ierviwtmdqerdmwtnimn.supabase.co/storage/v1/render/image/public/product-images/products/1786192169743-0w6wav6lplr.jpg?width=800&quality=75&resize=contain', bg:'var(--pul)', border:'#C8B5F0', emoji:'🌾', title:'Grains', sub:'Millet, soya, groundnuts, seeds', cat:'legumes'},
+    {img:'https://ierviwtmdqerdmwtnimn.supabase.co/storage/v1/render/image/public/product-images/products/1786207997736-n9o2dwqj1pa.png?width=800&quality=75&resize=contain', bg:'var(--rdl)', border:'#F4B0B4', emoji:'🥣', title:'Flour & Powdered Foods', sub:'Cassava flour, fufu, millet flour', cat:'dried'},
     {img:'https://ierviwtmdqerdmwtnimn.supabase.co/storage/v1/object/public/product-images/WhatsApp%20Image%202026-10-10%20at%2016.55.13.jpeg', bg:'var(--gll)', border:'#9FE1CB', emoji:'🥤', title:'Beverages', sub:'Bushera, Stoney, Novida', cat:'beverages'},
     {img:'https://ierviwtmdqerdmwtnimn.supabase.co/storage/v1/object/public/product-images/10c2ebb5-aaa7-414a-bd4d-133a0d3b1963.jpg', bg:'#FFF3E0', border:'#FFCC80', emoji:'🧺', title:'African Crafts', sub:'Wooden art, clay cups, mats', cat:'crafts'},
   ]
