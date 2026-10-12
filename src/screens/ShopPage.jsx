@@ -97,6 +97,15 @@ export default function ShopPage({ initialProducts } = {}) {
       query = query.eq('category_id', catMap[catSlug])
     }
     if (searchQ) query = query.ilike('name', `%${searchQ}%`)
+    if (catSlug === 'boxes') {
+      const { data: boxV } = await supabase
+        .from('product_variants')
+        .select('product_id')
+        .eq('tier_type', 'box')
+        .eq('is_active', true)
+      const boxIds = [...new Set((boxV || []).map(v => v.product_id))]
+      query = query.in('id', boxIds.length ? boxIds : ['00000000-0000-0000-0000-000000000000'])
+    }
     if (flashOnly) query = query.eq('is_flash_deal', true)
     if (bulkOnly) query = query.not('bulk_price', 'is', null)
     if (featuredOnly) query = query.eq('is_featured', true)

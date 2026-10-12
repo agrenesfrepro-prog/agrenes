@@ -175,7 +175,7 @@ function TrustStrip() {
 function PromoGrid() {
   const router = useRouter()
   const cards = [
-    {img:'https://ierviwtmdqerdmwtnimn.supabase.co/storage/v1/render/image/public/product-images/products/1785823647884-510hh0ul5q.png?width=800&quality=75&resize=contain', bg:'var(--gl)', border:'#9FE1CB', emoji:'📦', title:'Food Boxes', sub:'Avocado, plantain, sweet potato', cat:'all'},
+    {img:'https://ierviwtmdqerdmwtnimn.supabase.co/storage/v1/render/image/public/product-images/products/1785823647884-510hh0ul5q.png?width=800&quality=75&resize=contain', bg:'var(--gl)', border:'#9FE1CB', emoji:'📦', title:'Food Boxes', sub:'Avocado, plantain, sweet potato', cat:'boxes'},
     {img:'https://ierviwtmdqerdmwtnimn.supabase.co/storage/v1/render/image/public/product-images/products/1784116819845-m4r70ek7fm.jpg?width=800&quality=75&resize=contain', bg:'var(--aml)', border:'#FAC775', emoji:'🥦', title:'Fresh Vegetables', sub:'Peppers, tomatoes, cabbage', cat:'vegetables'},
     {img:'https://ierviwtmdqerdmwtnimn.supabase.co/storage/v1/render/image/public/product-images/products/1786192169743-0w6wav6lplr.jpg?width=800&quality=75&resize=contain', bg:'var(--pul)', border:'#C8B5F0', emoji:'🌾', title:'Grains', sub:'Millet, soya, groundnuts, seeds', cat:'legumes'},
     {img:'https://ierviwtmdqerdmwtnimn.supabase.co/storage/v1/render/image/public/product-images/products/1786207997736-n9o2dwqj1pa.png?width=800&quality=75&resize=contain', bg:'var(--rdl)', border:'#F4B0B4', emoji:'🥣', title:'Flour & Powdered Foods', sub:'Cassava flour, fufu, millet flour', cat:'dried'},

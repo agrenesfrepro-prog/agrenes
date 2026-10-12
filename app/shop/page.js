@@ -25,7 +25,16 @@ export default async function ShopRoute({ searchParams }) {
     .eq('is_active', true)
 
   // Apply URL filters
-  if (params.cat) {
+  if (params.cat === 'boxes') {
+    // Food Boxes: products with an active box-tier variant
+    const { data: boxV } = await supabase
+      .from('product_variants')
+      .select('product_id')
+      .eq('tier_type', 'box')
+      .eq('is_active', true)
+    const boxIds = [...new Set((boxV || []).map(v => v.product_id))]
+    query = query.in('id', boxIds.length ? boxIds : ['00000000-0000-0000-0000-000000000000'])
+  } else if (params.cat) {
     const { data: cat } = await supabase
       .from('categories')
       .select('id')
