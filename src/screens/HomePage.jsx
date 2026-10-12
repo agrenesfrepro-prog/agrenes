@@ -244,10 +244,31 @@ function FlashRow({ products }) {
             </div>
             <div style={{padding:'9px 10px'}}>
               <div style={{fontSize:11.5, fontWeight:500, marginBottom:4, lineHeight:1.3}}>{p.name}</div>
-              <div style={{display:'flex', alignItems:'baseline', gap:5}}>
-                <span style={{fontFamily:'Fraunces,serif',fontSize:15,fontWeight:700,color:'var(--g2)'}}>£{p.price?.toFixed(2)}</span>
-                {p.compare_price && <span style={{fontSize:10,color:'var(--lt)',textDecoration:'line-through'}}>£{p.compare_price?.toFixed(2)}</span>}
-              </div>
+              {(() => {
+                const vs = p.product_variants || []
+                const bag = vs.find(v => v.tier_type === 'bag' || v.tier_type === 'single')
+                const box = vs.find(v => v.tier_type === 'box' || v.tier_type === 'pack')
+                const ws  = vs.find(v => v.tier_type === 'wholesale' || v.tier_type === 'bulk')
+                const basePrice = bag?.price ?? p.price ?? 0
+                const unit = bag?.tier_type === 'bag' ? '/kg' : ''
+                return (
+                  <>
+                    <div style={{display:'flex', alignItems:'baseline', gap:5}}>
+                      <span style={{fontFamily:'Fraunces,serif',fontSize:14,fontWeight:700,color:'var(--g2)'}}>
+                        {(bag || box) && 'From '}£{basePrice.toFixed(2)}{unit}
+                      </span>
+                      {p.compare_price && <span style={{fontSize:10,color:'var(--lt)',textDecoration:'line-through'}}>£{p.compare_price?.toFixed(2)}</span>}
+                    </div>
+                    {(box || ws) && (
+                      <div style={{fontSize:9.5, color:'var(--mu)', marginTop:2, fontWeight:600}}>
+                        {box && (<>Box £{box.price?.toFixed(2)}</>)}
+                        {box && ws && ' · '}
+                        {ws && (<>WS £{ws.price?.toFixed(2)}+</>)}
+                      </div>
+                    )}
+                  </>
+                )
+              })()}
             </div>
           </div>
         ))}
@@ -319,7 +340,7 @@ export default function HomePage({ initialData }) {
     // Bridge path: fetch on client
     supabase.from('bundles').select('id,slug,name,tagline,price,compare_price,hero_emoji,hero_image').eq('is_active', true).eq('is_featured', true).order('sort_order').limit(6).then(({ data }) => setBundles(data || []))
 
-    supabase.from('products').select('*').eq('is_flash_deal', true).eq('is_active', true).limit(8)
+    supabase.from('products').select('*, product_variants(*)').eq('is_flash_deal', true).eq('is_active', true).limit(8)
       .then(({ data }) => setFlashDeals(data || []))
 
     supabase.from('products').select('*').eq('is_featured', true).eq('is_active', true).limit(6)
