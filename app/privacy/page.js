@@ -5,7 +5,13 @@ export default function PrivacyPage() {
       <h1 style={{fontFamily:'Fraunces,serif', fontSize:32, marginBottom:8}}>Privacy Policy</h1>
       <p style={{color:'#666', marginBottom:24}}>Last updated: 12 October 2026</p>
       <h2>1. Who we are</h2>
-      <p>AGRENES Market is operated by Agriculture Environment & Ecosystems Ltd, registered in Uganda under Company No. 179759, packhouse at Ndeeba Kabowa, Uganda. UK logistics are handled by our UK-based partner. Contact: support@agrenes.co.uk</p>
+      <p><strong>Data Controller:</strong> Agriculture Environment & Ecosystems Ltd (Company No. 179759), a Ugandan company registered in 2014, with packhouse at Ndeeba Kabowa, Uganda. UK logistics are handled by our UK-based partner.</p>
+      <p>We operate two trading sites on one corporate and operational system:</p>
+      <ul>
+        <li><strong>AGRENES Market</strong> (agrenesmarket.com) — UK direct-to-consumer retail</li>
+        <li><strong>AGRENES Fresh Produce</strong> (<a href="https://agrenesfrepro.com">agrenesfrepro.com</a>) — wholesale export</li>
+      </ul>
+      <p>Both sites share one data controller and one privacy regime. Contact for data protection matters: <a href="mailto:support@agrenes.co.uk">support@agrenes.co.uk</a></p>
       <h2>2. Data we collect</h2>
       <ul><li>Account: name, email, delivery address, phone number</li><li>Orders: items purchased, order history, delivery preferences</li><li>Payment: handled by Stripe — we do NOT store full card details</li><li>Browsing: pages viewed and products searched (only with analytics consent)</li><li>Communications: emails and messages you send us</li></ul>
       <h2>3. How we use your data</h2>

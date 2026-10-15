@@ -87,6 +87,12 @@ export default function Footer() {
         <div style={{ borderTop: '1px solid rgba(255,255,255,.1)', paddingTop: 20, display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
           <p style={{ fontSize: 12, color: 'rgba(255,255,255,.4)' }}>
             © {new Date().getFullYear()} Agriculture Environment & Ecosystems Ltd · Reg. No. 179759 (Uganda)
+          <br />
+          <span style={{ fontStyle: 'italic', opacity: 0.75, display: 'block', marginTop: 6, fontSize: 12 }}>
+            AGRENES Market is a trading brand of the same company that runs{' '}
+            <a href="https://agrenesfrepro.com" style={{ color: 'inherit', textDecoration: 'underline' }} target="_blank" rel="noopener noreferrer">agrenesfrepro.com</a>
+            {' '}— same packhouse, same team, same supply chain, a different storefront.
+          </span>
           </p>
           <div style={{ display: 'flex', gap: 16 }}>
             {[

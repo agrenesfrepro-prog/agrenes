@@ -5,7 +5,9 @@ export default function TermsPage() {
       <h1 style={{fontFamily:'Fraunces,serif', fontSize:32, marginBottom:8}}>Terms & Conditions</h1>
       <p style={{color:'#666', marginBottom:24}}>Last updated: 12 October 2026</p>
       <h2>1. About us</h2>
-      <p>AGRENES Market is operated by Agriculture Environment & Ecosystems Ltd, Company No. 179759, packhouse at Ndeeba Kabowa, Uganda. UK logistics via our UK partner.</p>
+      <p>These terms govern your use of agrenesmarket.com, operated by Agriculture Environment & Ecosystems Ltd (Company No. 179759), a Ugandan company trading since 2014, with packhouse at Ndeeba Kabowa, Uganda. UK logistics via our UK partner.</p>
+      <p>AGRENES Market is the direct-to-consumer storefront of the same operation that runs AGRENES Fresh Produce (<a href="https://agrenesfrepro.com">agrenesfrepro.com</a>) — one company, one packhouse, one supply chain, two trading brands serving different customers.</p>
+      <p>In these terms, &ldquo;we&rdquo;, &ldquo;us&rdquo; and &ldquo;our&rdquo; refer to Agriculture Environment & Ecosystems Ltd.</p>
       <h2>2. These terms</h2>
       <p>By placing an order through agrenesmarket.com you agree to these terms. The version on the Site at the time of your order applies to that order.</p>
       <h2>3. Products and pricing</h2>
