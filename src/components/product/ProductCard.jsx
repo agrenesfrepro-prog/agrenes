@@ -184,16 +184,6 @@ export default function ProductCard({ product }) {
           <span style={{fontSize:10, color:'var(--mu)', marginLeft:'auto'}}>{boxV ? (product.weight_kg ? '(' + product.weight_kg + 'kg box)' : 'per box') : '/' + product.unit}</span>
         </div>
 
-        {/* Bulk info */}
-        {product.bulk_price && (
-          <div style={{
-            background:'var(--pul)', borderRadius:6, padding:'4px 8px',
-            fontSize:10, color:'var(--pu)', fontWeight:600, marginBottom:8
-          }}>
-            Bulk: £{product.bulk_price}/{product.unit} (min {product.bulk_min_qty}{product.unit})
-          </div>
-        )}
-
         {/* Add to cart */}
         <button onClick={product.stock_qty === 0 ? undefined : handleAdd}
           disabled={product.stock_qty === 0}
