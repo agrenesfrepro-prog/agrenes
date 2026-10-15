@@ -181,7 +181,7 @@ export default function ProductCard({ product }) {
               £{product.compare_price?.toFixed(2)}
             </span>
           )}
-          <span style={{fontSize:10, color:'var(--mu)', marginLeft:'auto'}}>{product.unit}</span>
+          <span style={{fontSize:10, color:'var(--mu)', marginLeft:'auto'}}>/{product.unit}</span>
         </div>
 
         {/* Bulk info */}
