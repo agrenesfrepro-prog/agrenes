@@ -247,7 +247,7 @@ function FlashRow({ products }) {
               {(() => {
                 const vs = p.product_variants || []
                 const bag = vs.find(v => v.tier_type === 'bag' || v.tier_type === 'single')
-                const box = vs.find(v => v.tier_type === 'box' || v.tier_type === 'pack')
+                const box = bag?.tier_type === 'bag' ? vs.find(v => v.tier_type === 'box' || v.tier_type === 'pack') : null
                 const ws  = vs.find(v => v.tier_type === 'wholesale' || v.tier_type === 'bulk')
                 const basePrice = box?.price ?? bag?.price ?? p.price ?? 0
                 const unit = box ? (p.weight_kg ? ' (' + p.weight_kg + 'kg box)' : ' per box') : (bag?.tier_type === 'bag' ? '/kg' : '')
