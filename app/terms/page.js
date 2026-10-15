@@ -17,7 +17,7 @@ export default function TermsPage() {
       <h2>5. Payment</h2>
       <p>Payment is processed by Stripe. We accept major UK debit and credit cards. Payment is taken at order placement.</p>
       <h2>6. Delivery</h2>
-      <p>UK deliveries via Evri, typically 2-4 working days from dispatch. Free delivery on orders over £75. Risk and title pass to you on delivery.</p>
+      <p>UK deliveries via Evri, typically 2-4 working days from dispatch. Free delivery on orders over £40. Risk and title pass to you on delivery.</p>
       <h2>7. Your right to cancel</h2>
       <p>Under the UK Consumer Contracts Regulations 2013 you have 14 days from receipt to cancel most orders. This right does NOT apply to perishable goods (fresh fruit, vegetables, fresh prepared boxes) under Regulation 28(1)(d). See our <a href="/refund" style={{color:'#063D32', textDecoration:'underline'}}>Refund Policy</a>.</p>
       <h2>8. Faulty or damaged items</h2>

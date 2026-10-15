@@ -261,9 +261,6 @@ function FlashRow({ products }) {
                     </div>
                     {(box || ws) && (
                       <div style={{fontSize:9.5, color:'var(--mu)', marginTop:2, fontWeight:600}}>
-                        {box && (<>Box: £{box.price?.toFixed(2)}</>)}
-                        {box && ws && ' · '}
-                        {ws && (<>Wholesale: £{ws.price?.toFixed(2)}+</>)}
                       </div>
                     )}
                   </>

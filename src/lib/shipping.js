@@ -38,7 +38,7 @@ function ukDeliveryByWeight(kg) {
   return 0
 }
 
-const FREE_UK_OVER   = Infinity
+const FREE_UK_OVER   = 40
 const FREE_INTL_OVER = Infinity
 const INTL_FLAT      = 24.99
 
