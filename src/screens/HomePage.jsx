@@ -153,7 +153,7 @@ function HeroCarousel() {
 function TrustStrip() {
   const items = [
     '🇺🇬 Grown in Uganda', '✈️ Flown to Gatwick', '✅ GAP Certified',
-    '🏛️ UNBS & MAAIF', '🇬🇧 Prices in GBP', '🚚 UK + International',
+    '🏛️ UNBS & MAAIF', '🇬🇧 Prices in GBP', '🚚 UK Delivery',
     '🌡️ Cold Chain Maintained', '♻️ Sustainable Farms'
   ]
   return (

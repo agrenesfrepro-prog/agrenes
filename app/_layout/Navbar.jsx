@@ -61,7 +61,7 @@ export default function Navbar({ onMenuOpen }) {
           fontSize: 11.5, textAlign: 'center', padding: '8px 16px',
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8
         }}>
-          ✈️ UK free over <strong style={{color:'var(--am)'}}>£40</strong> · International £24.99 flat
+          ✈️ UK free over <strong style={{color:'var(--am)'}}>£40</strong> · Ships worldwide
           &nbsp;·&nbsp; 4× weekly flights from Entebbe to Gatwick
           &nbsp;·&nbsp; GAP & UNBS Certified
           <button onClick={() => setAnnounceVisible(false)} aria-label="Dismiss announcement" style={{
