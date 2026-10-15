@@ -175,7 +175,7 @@ export default async function OGImage({ params }) {
             }}
           >
             <div style={{ display: 'flex', gap: 8 }}>🇺🇬 Fresh from Uganda · ✈️ Air-freighted UK-Wide</div>
-            <div style={{ display: 'flex', color: '#F5A623', fontWeight: 700 }}>🚚 Free delivery over £75</div>
+            <div style={{ display: 'flex', color: '#F5A623', fontWeight: 700 }}>🚚 Free delivery over £40</div>
           </div>
         </div>
       </div>
