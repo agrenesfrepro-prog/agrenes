@@ -25,7 +25,7 @@ export default function ProductCard({ product }) {
   const wsV  = activeVariants.find(v => v.tier_type === 'wholesale' || v.tier_type === 'bulk')
   // Prefer the retail tier price (stored on product.price). Fallback to lowest variant price.
   const displayPrice = hasVariants
-    ? (product.price || Math.min(...activeVariants.map(v => Number(v.price)).filter(n => !isNaN(n))))
+    ? (boxV?.price || product.price || Math.min(...activeVariants.map(v => Number(v.price)).filter(n => !isNaN(n))))
     : product.price
 
   // Real image source: product.images[0] (Supabase) or product.img (legacy).
@@ -173,7 +173,7 @@ export default function ProductCard({ product }) {
         {/* Price */}
         <div style={{display:'flex', alignItems:'baseline', gap:6, marginBottom:8}}>
           <span style={{fontFamily:'Fraunces, serif', fontSize:17, fontWeight:700, color:'var(--g2)'}}>
-            {hasVariants && <span style={{fontSize:11, fontWeight:600, color:'var(--mu)', fontFamily:'Plus Jakarta Sans, sans-serif'}}>From </span>}
+            {hasVariants && !boxV && <span style={{fontSize:11, fontWeight:600, color:'var(--mu)', fontFamily:'Plus Jakarta Sans, sans-serif'}}>From </span>}
             £{displayPrice?.toFixed(2)}
           </span>
           {product.compare_price && (
@@ -181,7 +181,7 @@ export default function ProductCard({ product }) {
               £{product.compare_price?.toFixed(2)}
             </span>
           )}
-          <span style={{fontSize:10, color:'var(--mu)', marginLeft:'auto'}}>/{product.unit}</span>
+          <span style={{fontSize:10, color:'var(--mu)', marginLeft:'auto'}}>{boxV ? (product.weight_kg ? '(' + product.weight_kg + 'kg box)' : 'per box') : '/' + product.unit}</span>
         </div>
 
         {/* Bulk info */}

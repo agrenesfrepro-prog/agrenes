@@ -249,13 +249,13 @@ function FlashRow({ products }) {
                 const bag = vs.find(v => v.tier_type === 'bag' || v.tier_type === 'single')
                 const box = vs.find(v => v.tier_type === 'box' || v.tier_type === 'pack')
                 const ws  = vs.find(v => v.tier_type === 'wholesale' || v.tier_type === 'bulk')
-                const basePrice = bag?.price ?? p.price ?? 0
-                const unit = bag?.tier_type === 'bag' ? '/kg' : ''
+                const basePrice = box?.price ?? bag?.price ?? p.price ?? 0
+                const unit = box ? (p.weight_kg ? ' (' + p.weight_kg + 'kg box)' : ' per box') : (bag?.tier_type === 'bag' ? '/kg' : '')
                 return (
                   <>
                     <div style={{display:'flex', alignItems:'baseline', gap:5}}>
                       <span style={{fontFamily:'Fraunces,serif',fontSize:14,fontWeight:700,color:'var(--g2)'}}>
-                        {(bag || box) && 'From '}£{basePrice.toFixed(2)}{unit}
+                        {bag && !box && 'From '}£{basePrice.toFixed(2)}{unit}
                       </span>
                       {p.compare_price && <span style={{fontSize:10,color:'var(--lt)',textDecoration:'line-through'}}>£{p.compare_price?.toFixed(2)}</span>}
                     </div>
