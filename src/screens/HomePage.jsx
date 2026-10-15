@@ -153,7 +153,7 @@ function HeroCarousel() {
 function TrustStrip() {
   const items = [
     '🇺🇬 Grown in Uganda', '✈️ Flown to Gatwick', '✅ GAP Certified',
-    '🏛️ UNBS & MAAIF', '🇬🇧 Prices in GBP', '🚚 UK-wide Delivery',
+    '🏛️ UNBS & MAAIF', '🇬🇧 Prices in GBP', '🚚 UK + International',
     '🌡️ Cold Chain Maintained', '♻️ Sustainable Farms'
   ]
   return (
@@ -299,7 +299,7 @@ function StatsBanner() {
     { icon: <Users size={22} color="var(--g3)"/>, n: '1,500+', l: 'Partner Farmers' },
     { icon: <Star size={22} color="var(--am)"/>, n: '4.8★', l: 'Average Rating' },
     { icon: <TrendingUp size={22} color="var(--pu)"/>, n: '12 tonnes', l: 'Exported Weekly' },
-    { icon: '🌍', n: 'UK, USA,\nCanada, EU', l: 'Markets Served' },
+    { icon: '🌍', n: 'UK, USA, Canada,\nEU & Middle East', l: 'Markets Served' },
   ]
   return (
     <div style={{
@@ -399,7 +399,7 @@ export default function HomePage({ initialData }) {
         </div>
         <p style={{fontSize:13, color:'rgba(255,255,255,.8)', lineHeight:1.7, maxWidth:480, margin:'0 auto 16px'}}>
           Agriculture Environment & Ecosystems Ltd — registered in Uganda since 2014.
-          We connect over 1,500 smallholder farmers directly to UK, USA, Canada and European markets.
+          We connect over 1,500 smallholder farmers directly to UK, USA, Canada, European and Middle Eastern markets.
           GAP certified, HACCP compliant, cold-chain maintained.
         </p>
         <div style={{display:'flex', gap:8, justifyContent:'center', flexWrap:'wrap'}}>

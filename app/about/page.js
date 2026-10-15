@@ -12,7 +12,7 @@ export default function AboutPage() {
 
       <p>Through our wholesale division <strong>AGRENES Fresh Produce</strong> (<a href="https://agrenesfrepro.com" target="_blank" rel="noopener noreferrer">agrenesfrepro.com</a>), we have supplied UK, European, North American and Canadian markets with approximately 12 tonnes of hand-selected fresh produce weekly, from a network of over 1,500 outgrower farmers across Uganda.</p>
 
-      <p>AGRENES Market runs on the same packhouse, same team, same farmer network and same four-weekly flights from Entebbe to the UK as agrenesfrepro — Global G.A.P. certified and HACCP-compliant. The only difference is who we serve: Market is built for UK households and independent retailers; Fresh Produce handles wholesale export.</p>
+      <p>AGRENES Market runs on the same packhouse, same team, same farmer network and same four-weekly flights from Entebbe to the UK as agrenesfrepro — Global G.A.P. certified and HACCP-compliant. The only difference is who we serve: Market is built for consumers and independent retailers — primarily UK, with international shipping to the USA, Canada, Europe and the Middle East; Fresh Produce handles wholesale export.</p>
 
       <h2>What we grow</h2>
       <p>Hot peppers, eggplant, chilli, tomatoes, ginger, matoke, cassava flour, and over fifty other fresh and dried lines from the fertile soils of central and eastern Uganda — picked, packed and air-freighted to the UK within 72 hours.</p>
