@@ -91,7 +91,7 @@ export default function Footer() {
           <span style={{ fontStyle: 'italic', opacity: 0.75, display: 'block', marginTop: 6, fontSize: 12 }}>
             AGRENES Market is a trading brand of the same company that runs{' '}
             <a href="https://agrenesfrepro.com" style={{ color: 'inherit', textDecoration: 'underline' }} target="_blank" rel="noopener noreferrer">agrenesfrepro.com</a>
-            {' '}— same packhouse, same team, same supply chain, a different storefront. Shipping to 🇬🇧 UK, 🇺🇸 USA, 🇨🇦 Canada and the Middle East.
+            {' '}— same packhouse, same team, same supply chain, a different storefront. Retail delivery to 🇬🇧 UK and 🇦🇪 UAE. Wholesale to the USA, Canada, EU and wider GCC available via agrenesfrepro.com.
           </span>
           </p>
           <div style={{ display: 'flex', gap: 16 }}>
