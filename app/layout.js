@@ -77,6 +77,10 @@ export const viewport = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${jakarta.variable} ${fraunces.variable}`}>
+      <head>
+        <link rel="preconnect" href="https://ierviwtmdqerdmwtnimn.supabase.co" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://ierviwtmdqerdmwtnimn.supabase.co" />
+      </head>
       <body>
         <Shell>{children}</Shell>
         <Analytics />
