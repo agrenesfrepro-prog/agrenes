@@ -185,7 +185,7 @@ function PromoGrid() {
   ]
   return (
     <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(150px, 1fr))', gap:10, padding:'10px 14px'}}>
-      {cards.map(c => (
+      {cards.map((c, i) => (
         <div key={c.title} onClick={() => router.push(`/shop?cat=${c.cat}`)}
           style={{
             background:'var(--wh)', border:`.5px solid ${c.border}`, borderRadius:14,
@@ -196,7 +196,7 @@ function PromoGrid() {
           onMouseLeave={e => { e.currentTarget.style.transform=''; e.currentTarget.style.boxShadow='var(--sh1)' }}
         >
           <div style={{height:180, background:c.bg, position:'relative', overflow:'hidden'}}>
-            <img src={img(c.img, 300)} alt={c.title} width="200" height="180" fetchPriority="high" decoding="async"
+            <img src={img(c.img, 300)} alt={c.title} width="200" height="180" fetchPriority={i === 0 ? "high" : "auto"} loading={i === 0 ? "eager" : "lazy"} decoding="async"
               style={{width:'100%', height:'100%', objectFit:'cover', display:'block'}}
               onError={e => { e.currentTarget.style.display='none'; e.currentTarget.nextSibling.style.display='flex' }} />
             <span style={{
