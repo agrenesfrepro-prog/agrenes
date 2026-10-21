@@ -7,6 +7,7 @@ import { Search, ShoppingCart, Heart, User, Menu, ChevronDown } from 'lucide-rea
 import { useCartStore, useAuthStore, useWishlistStore } from '../../src/lib/store'
 import { supabase } from '../../src/lib/supabase'
 
+import Image from 'next/image'
 const LOGO_URL = '/logo.png'
 
 export default function Navbar({ onMenuOpen }) {
@@ -88,7 +89,7 @@ export default function Navbar({ onMenuOpen }) {
 
         {/* Logo */}
         <Link href="/" style={{ display:'flex', alignItems:'center', flexShrink:0 }}>
-          <img src={LOGO_URL} alt="AGRENES" width={140} height={40} style={{ height: 40, width: 'auto', objectFit:'contain' }} />
+          <Image src={LOGO_URL} alt="AGRENES" width={140} height={40} priority style={{ height: 40, width: 'auto', objectFit:'contain' }} />
         </Link>
 
         {/* Search */}
