@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { Mail, MapPin } from 'lucide-react'
 
 export default function Footer() {
@@ -13,7 +14,7 @@ export default function Footer() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 28, marginBottom: 32 }}>
           {/* Brand */}
           <div>
-            <img src="/logo.png" alt="AGRENES" style={{ height: 40, marginBottom: 12, filter: 'brightness(0) invert(1)' }} />
+            <Image src="/logo.png" alt="AGRENES" width={140} height={40} style={{ height: 40, width: 'auto', marginBottom: 12, filter: 'brightness(0) invert(1)' }} />
             <p style={{ fontSize: 12.5, lineHeight: 1.7, color: 'rgba(255,255,255,.6)' }}>
               Fresh Ugandan produce air-freighted to the UK. Retail & bulk orders. GAP & UNBS certified.
             </p>

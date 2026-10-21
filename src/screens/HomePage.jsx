@@ -196,7 +196,7 @@ function PromoGrid() {
           onMouseLeave={e => { e.currentTarget.style.transform=''; e.currentTarget.style.boxShadow='var(--sh1)' }}
         >
           <div style={{height:180, background:c.bg, position:'relative', overflow:'hidden'}}>
-            <img src={img(c.img, 400)} alt={c.title} width="200" height="180" loading="lazy" decoding="async"
+            <img src={img(c.img, 300)} alt={c.title} width="200" height="180" fetchPriority="high" decoding="async"
               style={{width:'100%', height:'100%', objectFit:'cover', display:'block'}}
               onError={e => { e.currentTarget.style.display='none'; e.currentTarget.nextSibling.style.display='flex' }} />
             <span style={{
