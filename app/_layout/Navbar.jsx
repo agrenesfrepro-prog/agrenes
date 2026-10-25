@@ -9,6 +9,7 @@ import { supabase } from '../../src/lib/supabase'
 
 import Image from 'next/image'
 const LOGO_URL = '/logo.png'
+const MASTER_LOGO_URL = '/agrenes-master.png'
 
 export default function Navbar({ onMenuOpen }) {
   const router = useRouter()
@@ -89,7 +90,11 @@ export default function Navbar({ onMenuOpen }) {
 
         {/* Logo */}
         <Link href="/" style={{ display:'flex', alignItems:'center', flexShrink:0 }}>
-          <Image src={LOGO_URL} alt="AGRENES" width={140} height={40} priority style={{ height: 40, width: 'auto', objectFit:'contain' }} />
+          <Image src={MASTER_LOGO_URL} alt="AGRENES" width={140} height={40} priority style={{ height: 40, width: 'auto', objectFit:'contain' }} />
+          <div style={{ display:'flex', alignItems:'center', gap:6, marginLeft:10, paddingLeft:10, borderLeft:'1.5px solid var(--brl)' }}>
+            <Image src={LOGO_URL} alt="Market cart emblem" width={30} height={30} style={{ height: 30, width: 'auto', objectFit:'contain' }} />
+            <span style={{ fontSize:11, fontWeight:700, letterSpacing:'0.1em', color:'var(--am)', textTransform:'uppercase' }}>Market</span>
+          </div>
         </Link>
 
         {/* Search */}
