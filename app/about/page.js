@@ -26,7 +26,7 @@ export default function AboutPage() {
       </ul>
 
       <h2>Company</h2>
-      <p>Agriculture Environment &amp; Ecosystems Ltd (Company No. 179759), registered in Uganda in 2014. Trading brands: AGRENES Market (retail) and AGRENES Fresh Produce (wholesale).</p>
+      <p><strong>UK operating entity:</strong> FRE PRO LIMITED (Companies House 12671150), registered in England and Wales, with registered office at 5 Pembury Road, London N17 6SR. Operates both AGRENES Market (agrenesmarket.com) retail and AGRENES Fresh Produce (agrenesfrepro.com) wholesale.</p><p><strong>Uganda sourcing partner:</strong> Agriculture Environment &amp; Ecosystems Ltd (Company No. 179759), registered in Uganda in 2014. Runs the packhouse at Ndeeba Kabowa and the outgrower farmer network of over 1,500 farmers.</p>
 
       <p style={{ marginTop: 32, fontStyle: 'italic', opacity: 0.8 }}>Twelve years of export operation. One supply chain. Now direct to your door.</p>
     </main>

@@ -5,7 +5,7 @@ export default function PrivacyPage() {
       <h1 style={{fontFamily:'Fraunces,serif', fontSize:32, marginBottom:8}}>Privacy Policy</h1>
       <p style={{color:'#666', marginBottom:24}}>Last updated: 12 October 2026</p>
       <h2>1. Who we are</h2>
-      <p><strong>Data Controller:</strong> Agriculture Environment & Ecosystems Ltd (Company No. 179759), a Ugandan company registered in 2014, with packhouse at Ndeeba Kabowa, Uganda. UK logistics are handled by our UK-based partner.</p>
+      <p><strong>UK Data Controller:</strong> FRE PRO LIMITED (Companies House 12671150), registered in England and Wales, with registered office at 5 Pembury Road, London N17 6SR. FRE PRO LIMITED is the UK trading entity operating both agrenesmarket.com and agrenesfrepro.com, and is the data controller responsible for your personal data under UK GDPR.</p><p><strong>Sourcing partner:</strong> Produce is grown and packed by Agriculture Environment & Ecosystems Ltd (Company No. 179759), a Ugandan farming and export company established in 2014, with packhouse at Ndeeba Kabowa, Uganda.</p>
       <p>We operate two trading sites on one corporate and operational system:</p>
       <ul>
         <li><strong>AGRENES Market</strong> (agrenesmarket.com) — UK direct-to-consumer retail</li>

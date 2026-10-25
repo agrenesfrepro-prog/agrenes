@@ -87,7 +87,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div style={{ borderTop: '1px solid rgba(255,255,255,.1)', paddingTop: 20, display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
           <p style={{ fontSize: 12, color: 'rgba(255,255,255,.4)' }}>
-            © {new Date().getFullYear()} Agriculture Environment & Ecosystems Ltd · Reg. No. 179759 (Uganda)
+            © {new Date().getFullYear()} FRE PRO LIMITED · Companies House 12671150 · 5 Pembury Road, London N17 6SR · Sourcing: Agriculture Environment & Ecosystems Ltd (Co. 179759, Uganda)
           <br />
           <span style={{ fontStyle: 'italic', opacity: 0.75, display: 'block', marginTop: 6, fontSize: 12 }}>
             AGRENES Market is a trading brand of the same company that runs{' '}
