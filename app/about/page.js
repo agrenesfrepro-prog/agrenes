@@ -1,6 +1,6 @@
 export const metadata = {
   title: 'About - AGRENES Market',
-  description: 'AGRENES Market is the UK direct-to-consumer brand of Agriculture Environment & Ecosystems Ltd, a Ugandan fresh produce exporter trading since 2014.'
+  description: 'AGRENES Market is a UK direct-to-consumer brand operated by FRE PRO LIMITED, delivering fresh Ugandan produce sourced from the AGRENES farming network established 2014.'
 }
 
 export default function AboutPage() {
@@ -8,7 +8,7 @@ export default function AboutPage() {
     <main style={{ maxWidth: 760, margin: '0 auto', padding: '48px 20px', lineHeight: 1.65 }}>
       <h1>About AGRENES Market</h1>
 
-      <p>AGRENES Market is the UK direct-to-consumer brand of <strong>Agriculture Environment &amp; Ecosystems Ltd</strong>, a Ugandan fresh produce exporter trading since 2014.</p>
+      <p>AGRENES Market is a direct-to-consumer trading arm of <strong>FRE PRO LIMITED</strong> (UK Companies House 12671150), a specialist Ugandan-produce importer and wholesaler registered in England and Wales, with registered office at 5 Pembury Road, London N17 6SR. We also operate <a href="https://agrenesfrepro.com" target="_blank" rel="noopener noreferrer">agrenesfrepro.com</a> for wholesale buyers across the UK, Europe, North America and GCC.</p><p>Both sites deliver fresh Ugandan produce sourced from our farming partner <strong>Agriculture Environment &amp; Ecosystems Ltd</strong> (Uganda, Company No. 179759, established 2014), who run the packhouse at Ndeeba Kabowa and the 1,500-farmer outgrower network.</p>
 
       <p>Through our wholesale division <strong>AGRENES Fresh Produce</strong> (<a href="https://agrenesfrepro.com" target="_blank" rel="noopener noreferrer">agrenesfrepro.com</a>), we have supplied UK, European, North American and Canadian markets with approximately 12 tonnes of hand-selected fresh produce weekly, from a network of over 1,500 outgrower farmers across Uganda.</p>
 
