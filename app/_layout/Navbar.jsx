@@ -75,7 +75,7 @@ export default function Navbar({ onMenuOpen }) {
 
       {/* Main nav */}
       <div style={{ background:'#f5f3ef', borderBottom:'1px solid rgba(0,0,0,0.08)', padding:'6px 20px', fontSize:11, color:'#6b6558', textAlign:'center', lineHeight:1.4 }}>
-        This site is operated by <strong>FRE PRO LIMITED</strong> &middot; UK Companies House 12671150 &middot; 5 Pembury Road, London N17 6SR
+        This site is operated by <strong>AGRENES UK LIMITED</strong> &middot; UK Companies House 16391212 &middot; 263 Longheath Gardens, Croydon CR0 7TZ
       </div>
       <nav style={{
         background: '#fff', height: 64, padding: '0 16px',
