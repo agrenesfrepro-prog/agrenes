@@ -75,7 +75,7 @@ export default function BundleDetailPage() {
               </>
             )}
           </div>
-          <p style={{ fontSize: 12.5, color: 'var(--mu)' }}>All prices in GBP. Free UK delivery on orders over £40.</p>
+          <p style={{ fontSize: 12.5, color: 'var(--mu)' }}>All prices in GBP.</p>
         </div>
 
         <h3 style={{ fontSize: 14, textTransform: 'uppercase', letterSpacing: .6, color: 'var(--mu)', fontWeight: 800, marginBottom: 10 }}>What's inside</h3>

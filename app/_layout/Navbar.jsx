@@ -20,7 +20,6 @@ export default function Navbar({ onMenuOpen }) {
   const [suggestions, setSuggestions] = useState([])
   const [showSug, setShowSug] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
-  const [announceVisible, setAnnounceVisible] = useState(true)
   const searchRef = useRef(null)
   const cartCount = items.reduce((s, i) => s + i.qty, 0)
 
@@ -56,23 +55,7 @@ export default function Navbar({ onMenuOpen }) {
 
   return (
     <>
-      {/* Announcement bar */}
-      {announceVisible && (
-        <div style={{
-          background: 'var(--g1)', color: 'rgba(255,255,255,.9)',
-          fontSize: 11.5, textAlign: 'center', padding: '8px 16px',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8
-        }}>
-          ✈️ Free UK delivery on orders over <strong style={{color:'var(--am)'}}>£40</strong>
-          &nbsp;·&nbsp; 4× weekly flights from Entebbe to Gatwick
-          &nbsp;·&nbsp; GAP & UNBS Certified
-          <button onClick={() => setAnnounceVisible(false)} aria-label="Dismiss announcement" style={{
-            background:'transparent', border:'none', color:'rgba(255,255,255,.5)',
-            fontSize:16, marginLeft:'auto', cursor:'pointer', lineHeight:1
-          }}>×</button>
-        </div>
-      )}
-
+      
       {/* Main nav */}
       <div style={{ background:'#f5f3ef', borderBottom:'1px solid rgba(0,0,0,0.08)', padding:'6px 20px', fontSize:11, color:'#6b6558', textAlign:'center', lineHeight:1.4 }}>
         This site is operated by <strong>AGRENES UK LIMITED</strong> &middot; UK Companies House 16391212 &middot; 263 Longheath Gardens, Croydon CR0 7TZ
@@ -80,7 +63,7 @@ export default function Navbar({ onMenuOpen }) {
       <nav style={{
         background: '#fff', height: 64, padding: '0 16px',
         display: 'flex', alignItems: 'center', gap: 12,
-        position: 'sticky', top: announceVisible ? 37 : 0, zIndex: 500,
+        position: 'sticky', top: 0, zIndex: 500,
         boxShadow: '0 2px 12px rgba(0,0,0,.08)', borderBottom: '1px solid var(--br)'
       }}>
         {/* Mobile menu */}

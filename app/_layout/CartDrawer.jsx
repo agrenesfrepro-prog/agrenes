@@ -78,10 +78,7 @@ export default function CartDrawer() {
                 ? <span style={{ color: 'var(--g3)', fontWeight: 700 }}>FREE 🎉</span>
                 : <span style={{ fontWeight: 600 }}>£{deliveryFee.toFixed(2)}</span>
               }
-            </div>
-            {showFreeNudge && (
-              <div style={{ background: 'var(--aml)', border: '1px solid #FAC775', borderRadius: 8, padding: '8px 12px', fontSize: 12, color: 'var(--amd)', marginBottom: 12, fontWeight: 500 }}>
-                Add £{amountToFreeUK(total).toFixed(2)} more for free UK delivery!
+            </div> more for free UK delivery!
               </div>
             )}
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 14, fontFamily: 'Fraunces, serif', fontSize: 20, fontWeight: 700 }}>
