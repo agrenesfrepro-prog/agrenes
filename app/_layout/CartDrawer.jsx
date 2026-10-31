@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { X, Plus, Minus, Trash2, ShoppingBag } from 'lucide-react'
 import { useCartStore } from '../../src/lib/store'
-import { amountToFreeUK, isUKCountry } from '../../src/lib/shipping'
+import { isUKCountry } from '../../src/lib/shipping'
 
 export default function CartDrawer() {
   const router = useRouter()
@@ -11,8 +11,6 @@ export default function CartDrawer() {
   // Pull dynamic delivery from the store — respects weight, country, and free-over threshold
   const deliveryFee = useCartStore.getState().deliveryFee()
   const finalTotal = total + deliveryFee
-  const showFreeNudge = isUKCountry(country) && deliveryFee > 0
-
   const goCheckout = () => {
     closeCart()
     router.push('/checkout')
