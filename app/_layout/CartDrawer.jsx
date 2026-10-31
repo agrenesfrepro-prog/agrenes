@@ -76,9 +76,7 @@ export default function CartDrawer() {
                 ? <span style={{ color: 'var(--g3)', fontWeight: 700 }}>FREE 🎉</span>
                 : <span style={{ fontWeight: 600 }}>£{deliveryFee.toFixed(2)}</span>
               }
-            </div> more for free UK delivery!
-              </div>
-            )}
+            </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 14, fontFamily: 'Fraunces, serif', fontSize: 20, fontWeight: 700 }}>
               <span>Total</span>
               <span style={{ color: 'var(--g2)' }}>£{finalTotal.toFixed(2)}</span>
