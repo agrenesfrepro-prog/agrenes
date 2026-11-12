@@ -4,13 +4,13 @@
 // Data source: get_order_tracking(p_token) Supabase RPC
 //
 // IMPORTANT — Supabase client import:
-// This file assumes a server client factory at @/lib/supabase/server.
+// This file assumes a server client factory at ../../../src/lib/supabase-ssr/server.
 // If your project uses a different path (e.g. @/utils/supabase/server),
 // adjust the import line below. The factory should wrap @supabase/ssr's
 // createServerClient with your cookies() reader, the same pattern already
 // used by app/page.js, app/shop/page.js, and app/product/[id]/page.js.
 
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '../../../src/lib/supabase-ssr/server';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 
