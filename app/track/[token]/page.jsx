@@ -2,13 +2,7 @@
 // AGRENES Market — customer-facing order tracking page
 // Access: public, gated by unguessable 32-char token in URL
 // Data source: get_order_tracking(p_token) Supabase RPC
-//
-// IMPORTANT — Supabase client import:
-// This file assumes a server client factory at ../../../src/lib/supabase-ssr/server.
-// If your project uses a different path (e.g. @/utils/supabase/server),
-// adjust the import line below. The factory should wrap @supabase/ssr's
-// createServerClient with your cookies() reader, the same pattern already
-// used by app/page.js, app/shop/page.js, and app/product/[id]/page.js.
+// Styling: inline styles (framework-independent)
 
 import { createClient } from '../../../src/lib/supabase-ssr/server';
 import { notFound } from 'next/navigation';
@@ -35,10 +29,210 @@ const STAGES = [
   { key: 'delivered',        emoji: '🎉', label: 'Delivered' },
 ];
 
+// ============================================================================
+// Style tokens — AGRENES brand palette
+// ============================================================================
+const C = {
+  forest:    '#074031',
+  emerald:   '#047857',
+  emeraldMid:'#059669',
+  emeraldLight: '#ecfdf5',
+  emeraldBorder: '#a7f3d0',
+  amber:     '#d4af37',
+  amberLight:'#fef3c7',
+  amberBright: '#fbbf24',
+  mint:      '#a7d7c5',
+  slate900:  '#0f172a',
+  slate700:  '#334155',
+  slate500:  '#64748b',
+  slate400:  '#94a3b8',
+  slate200:  '#e2e8f0',
+  slate100:  '#f1f5f9',
+  white:     '#ffffff',
+};
+
+const S = {
+  main: {
+    minHeight: '100vh',
+    background: `linear-gradient(to bottom, ${C.emeraldLight}, ${C.white} 40%, ${C.amberLight})`,
+    padding: '32px 16px',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    color: C.slate700,
+  },
+  container: {
+    maxWidth: '640px',
+    margin: '0 auto',
+  },
+  brandHeader: {
+    textAlign: 'center',
+    marginBottom: '24px',
+  },
+  brandWordmark: {
+    fontSize: '24px',
+    fontWeight: 700,
+    letterSpacing: '-0.5px',
+    color: C.forest,
+    textDecoration: 'none',
+  },
+  brandWordmarkAmber: {
+    color: C.amber,
+  },
+  card: {
+    backgroundColor: C.white,
+    borderRadius: '16px',
+    border: `1px solid ${C.emeraldBorder}`,
+    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
+    padding: '24px',
+    marginBottom: '24px',
+  },
+  headlineCard: {
+    textAlign: 'center',
+    padding: '28px 24px',
+  },
+  headlineTitle: {
+    fontSize: '22px',
+    fontWeight: 700,
+    color: C.forest,
+    margin: 0,
+    lineHeight: 1.3,
+  },
+  headlineTitleCancelled: {
+    fontSize: '22px',
+    fontWeight: 700,
+    color: C.slate900,
+    margin: 0,
+    lineHeight: 1.3,
+  },
+  headlineSub: {
+    fontSize: '14px',
+    color: C.slate500,
+    marginTop: '8px',
+    marginBottom: 0,
+  },
+  orderCodeMono: {
+    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+    fontWeight: 600,
+  },
+  sectionLabel: {
+    fontSize: '12px',
+    fontWeight: 600,
+    textTransform: 'uppercase',
+    letterSpacing: '1.5px',
+    color: C.slate500,
+    marginBottom: '20px',
+  },
+  pipelineList: {
+    listStyle: 'none',
+    margin: 0,
+    padding: 0,
+    paddingLeft: '28px',
+    borderLeft: `2px solid ${C.slate200}`,
+    position: 'relative',
+  },
+  pipelineItem: {
+    position: 'relative',
+    marginBottom: '24px',
+  },
+  pipelineItemLast: {
+    position: 'relative',
+    marginBottom: 0,
+  },
+  bullet: {
+    position: 'absolute',
+    left: '-42px',
+    width: '28px',
+    height: '28px',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '14px',
+    top: 0,
+  },
+  bulletDone: {
+    backgroundColor: C.emeraldMid,
+    color: C.white,
+  },
+  bulletCurrent: {
+    backgroundColor: C.amberBright,
+    color: C.forest,
+    boxShadow: `0 0 0 4px ${C.amberLight}`,
+    animation: 'agrenes-pulse 2s infinite',
+  },
+  bulletFuture: {
+    backgroundColor: C.slate200,
+    color: C.slate400,
+  },
+  stageLabel: {
+    fontSize: '15px',
+    fontWeight: 600,
+    color: C.slate900,
+    margin: 0,
+  },
+  stageTimestamp: {
+    fontSize: '12px',
+    color: C.slate500,
+    marginTop: '2px',
+    marginBottom: 0,
+  },
+  stageNote: {
+    fontStyle: 'italic',
+    color: C.slate700,
+    display: 'block',
+    marginTop: '2px',
+  },
+  detailsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, 1fr)',
+    gap: '16px 24px',
+  },
+  dt: {
+    fontSize: '12px',
+    color: C.slate500,
+    margin: 0,
+  },
+  dd: {
+    fontSize: '15px',
+    color: C.slate900,
+    margin: '4px 0 0 0',
+    fontWeight: 500,
+  },
+  ddBold: {
+    fontSize: '15px',
+    color: C.slate900,
+    margin: '4px 0 0 0',
+    fontWeight: 700,
+  },
+  reassurance: {
+    backgroundColor: C.amberLight,
+    border: `1px solid ${C.amberBright}`,
+    borderRadius: '16px',
+    padding: '18px 20px',
+    fontSize: '14px',
+    color: '#78350f',
+    marginBottom: '24px',
+    lineHeight: 1.55,
+  },
+  footer: {
+    marginTop: '32px',
+    textAlign: 'center',
+    fontSize: '12px',
+    color: C.slate500,
+  },
+  footerLink: {
+    color: C.forest,
+    textDecoration: 'underline',
+  },
+  footerLegal: {
+    marginTop: '14px',
+    fontSize: '10px',
+    color: C.slate400,
+  },
+};
+
 export default async function TrackPage({ params }) {
   const { token } = await params;
 
-  // Basic input shape check — avoid wasting a DB round-trip on garbage
   if (!token || token.length < 16 || token.length > 128) notFound();
 
   const supabase = await createClient();
@@ -52,7 +246,6 @@ export default async function TrackPage({ params }) {
   const currentIndex = STAGES.findIndex((s) => s.key === data.order_status);
   const firstName = (data.customer_name ?? '').trim().split(/\s+/)[0] || 'there';
 
-  // When was each stage reached? Map events[] into a lookup for quick render
   const eventByStage = new Map();
   for (const e of data.events ?? []) eventByStage.set(e.stage, e);
 
@@ -60,50 +253,48 @@ export default async function TrackPage({ params }) {
   const isCancelled = data.order_status === 'cancelled';
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-amber-50 px-4 py-8 md:px-8">
-      <div className="mx-auto max-w-2xl">
+    <main style={S.main}>
+      <div style={S.container}>
 
         {/* Brand header */}
-        <div className="mb-6 text-center">
-          <Link href="/" className="inline-block">
-            <span className="text-2xl font-bold tracking-tight text-emerald-900">
-              agrenes<span className="text-amber-500">market</span>
-            </span>
+        <div style={S.brandHeader}>
+          <Link href="/" style={S.brandWordmark}>
+            agrenes<span style={S.brandWordmarkAmber}>market</span>
           </Link>
         </div>
 
         {/* Headline */}
-        <header className="mb-8 rounded-2xl border border-emerald-100 bg-white px-6 py-7 text-center shadow-sm">
+        <header style={{ ...S.card, ...S.headlineCard }}>
           {isCancelled ? (
             <>
-              <h1 className="text-xl font-bold text-slate-900">Order cancelled</h1>
-              <p className="mt-2 text-sm text-slate-600">
-                Order <span className="font-mono font-semibold">{data.order_code}</span> has been cancelled.
+              <h1 style={S.headlineTitleCancelled}>Order cancelled</h1>
+              <p style={S.headlineSub}>
+                Order <span style={S.orderCodeMono}>{data.order_code}</span> has been cancelled.
                 Any charge will be refunded in 5–10 business days.
               </p>
             </>
           ) : isDelivered ? (
             <>
-              <h1 className="text-xl font-bold text-emerald-900">
+              <h1 style={S.headlineTitle}>
                 Hi {firstName} — your order is delivered 🎉
               </h1>
-              <p className="mt-2 text-sm text-slate-600">
-                Order <span className="font-mono font-semibold">{data.order_code}</span>
+              <p style={S.headlineSub}>
+                Order <span style={S.orderCodeMono}>{data.order_code}</span>
                 {' · '}
                 Delivered {formatDateTime(data.delivered_at)}
               </p>
             </>
           ) : (
             <>
-              <h1 className="text-xl font-bold text-emerald-900">
+              <h1 style={S.headlineTitle}>
                 Hi {firstName} — your order is on its way
               </h1>
-              <p className="mt-2 text-sm text-slate-600">
-                Order <span className="font-mono font-semibold">{data.order_code}</span>
+              <p style={S.headlineSub}>
+                Order <span style={S.orderCodeMono}>{data.order_code}</span>
                 {data.estimated_delivery && (
                   <>
                     {' · '}Estimated delivery{' '}
-                    <span className="font-semibold text-emerald-700">
+                    <span style={{ fontWeight: 600, color: C.emerald }}>
                       {formatDate(data.estimated_delivery)}
                     </span>
                   </>
@@ -115,11 +306,9 @@ export default async function TrackPage({ params }) {
 
         {/* 8-stage pipeline */}
         {!isCancelled && (
-          <section className="mb-8 rounded-2xl border border-emerald-100 bg-white p-6 shadow-sm">
-            <h2 className="mb-5 text-sm font-semibold uppercase tracking-wider text-slate-500">
-              Where your order is
-            </h2>
-            <ol className="relative border-l-2 border-slate-200 pl-7">
+          <section style={S.card}>
+            <h2 style={S.sectionLabel}>Where your order is</h2>
+            <ol style={S.pipelineList}>
               {STAGES.map((stage, i) => {
                 const isDone = i < currentIndex;
                 const isCurrent = i === currentIndex && !isDelivered;
@@ -127,30 +316,25 @@ export default async function TrackPage({ params }) {
                 const isFuture = i > currentIndex;
                 const ev = eventByStage.get(stage.key);
 
-                const bulletClass = [
-                  'absolute flex h-7 w-7 items-center justify-center rounded-full text-sm',
-                  '-left-[14px]',
-                  isDone || isDeliveredStage
-                    ? 'bg-emerald-600 text-white'
-                    : isCurrent
-                    ? 'bg-amber-400 text-emerald-900 ring-4 ring-amber-100 pulse-ring'
-                    : 'bg-slate-200 text-slate-400',
-                ].join(' ');
+                const bulletStyle = {
+                  ...S.bullet,
+                  ...((isDone || isDeliveredStage) ? S.bulletDone : isCurrent ? S.bulletCurrent : S.bulletFuture),
+                };
 
-                const labelClass = isFuture ? 'opacity-50' : '';
+                const itemStyle = i === STAGES.length - 1 ? S.pipelineItemLast : S.pipelineItem;
 
                 return (
-                  <li key={stage.key} className="mb-6 last:mb-0">
-                    <span className={bulletClass} aria-hidden="true">
+                  <li key={stage.key} style={itemStyle}>
+                    <span style={bulletStyle} aria-hidden="true">
                       {(isDone || isDeliveredStage) ? '✓' : stage.emoji}
                     </span>
-                    <div className={labelClass}>
-                      <h3 className="font-semibold text-slate-900">{stage.label}</h3>
+                    <div style={{ opacity: isFuture ? 0.5 : 1 }}>
+                      <h3 style={S.stageLabel}>{stage.label}</h3>
                       {ev && (
-                        <p className="mt-0.5 text-xs text-slate-500">
+                        <p style={S.stageTimestamp}>
                           {formatDateTime(ev.at)}
                           {ev.note && (
-                            <span className="block italic text-slate-600">{ev.note}</span>
+                            <span style={S.stageNote}>{ev.note}</span>
                           )}
                         </p>
                       )}
@@ -163,27 +347,23 @@ export default async function TrackPage({ params }) {
         )}
 
         {/* Order summary */}
-        <section className="mb-8 rounded-2xl border border-emerald-100 bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-500">
-            Order details
-          </h2>
-          <dl className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2">
+        <section style={S.card}>
+          <h2 style={S.sectionLabel}>Order details</h2>
+          <dl style={S.detailsGrid}>
             <div>
-              <dt className="text-xs text-slate-500">Order total</dt>
-              <dd className="text-base font-semibold text-slate-900">
+              <dt style={S.dt}>Order total</dt>
+              <dd style={S.ddBold}>
                 {formatCurrency(data.order_total, data.currency)}
               </dd>
             </div>
             <div>
-              <dt className="text-xs text-slate-500">Placed on</dt>
-              <dd className="text-base text-slate-900">
-                {formatDate(data.order_created_at)}
-              </dd>
+              <dt style={S.dt}>Placed on</dt>
+              <dd style={S.dd}>{formatDate(data.order_created_at)}</dd>
             </div>
             {data.shipping_city && (
               <div>
-                <dt className="text-xs text-slate-500">Delivering to</dt>
-                <dd className="text-base text-slate-900">
+                <dt style={S.dt}>Delivering to</dt>
+                <dd style={S.dd}>
                   {data.shipping_city}
                   {data.shipping_country ? `, ${data.shipping_country}` : ''}
                 </dd>
@@ -191,10 +371,8 @@ export default async function TrackPage({ params }) {
             )}
             {!isDelivered && data.estimated_delivery && (
               <div>
-                <dt className="text-xs text-slate-500">Estimated arrival</dt>
-                <dd className="text-base text-slate-900">
-                  {formatDate(data.estimated_delivery)}
-                </dd>
+                <dt style={S.dt}>Estimated arrival</dt>
+                <dd style={S.dd}>{formatDate(data.estimated_delivery)}</dd>
               </div>
             )}
           </dl>
@@ -202,9 +380,10 @@ export default async function TrackPage({ params }) {
 
         {/* Reassurance block — only show while in motion */}
         {!isDelivered && !isCancelled && (
-          <section className="mb-8 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
-            <p>
-              <strong>Fresh from Uganda:</strong> Your produce was picked at our Kabowa packhouse this week,
+          <section style={S.reassurance}>
+            <p style={{ margin: 0 }}>
+              <strong style={{ color: '#92400e' }}>Fresh from Uganda:</strong>{' '}
+              Your produce was picked at our Kabowa packhouse this week,
               cold-chain packed, and flown direct to Gatwick. On arrival it typically has 10–14 days of usable shelf
               life — refrigerate on receipt for maximum freshness.
             </p>
@@ -212,26 +391,24 @@ export default async function TrackPage({ params }) {
         )}
 
         {/* Footer / contact */}
-        <footer className="mt-10 text-center text-xs text-slate-500">
+        <footer style={S.footer}>
           Questions about your order?<br />
-          Email <a href="mailto:hello@agrenesmarket.com" className="underline">hello@agrenesmarket.com</a>
+          Email{' '}
+          <a href="mailto:hello@agrenesmarket.com" style={S.footerLink}>hello@agrenesmarket.com</a>
           {' '}or call Isma on{' '}
-          <a href="tel:+447947716008" className="underline">+44 7947 716008</a>
-          <p className="mt-4 text-[10px] text-slate-400">
+          <a href="tel:+447947716008" style={S.footerLink}>+44 7947 716008</a>
+          <p style={S.footerLegal}>
             AGRENES UK LIMITED · Companies House 16391212 · 263 Longheath Gardens, Croydon CR0 7TZ
           </p>
         </footer>
       </div>
 
-      {/* Pulse animation for the current stage — CSS only, no JS required */}
+      {/* Pulse animation for the current stage */}
       <style>{`
-        @keyframes pulse-ring-kf {
+        @keyframes agrenes-pulse {
           0%   { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.5); }
           70%  { box-shadow: 0 0 0 10px rgba(251, 191, 36, 0); }
           100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); }
-        }
-        .pulse-ring {
-          animation: pulse-ring-kf 2s infinite;
         }
       `}</style>
     </main>
