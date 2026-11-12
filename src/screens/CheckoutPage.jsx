@@ -1,3 +1,4 @@
+'use client'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Check, Lock, MapPin } from 'lucide-react'
