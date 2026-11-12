@@ -248,6 +248,10 @@ export default function CheckoutPage() {
         }
       }
     }
+    // CHUNK A: auto-confirm the order so DB triggers log the event and fire the Resend email
+    if (orderId) {
+      await supabase.from('orders').update({ status: 'confirmed', payment_status: 'paid' }).eq('id', orderId)
+    }
     clearCart(); setStep(2); toast.success('Payment confirmed! 🎉')
   }
 
