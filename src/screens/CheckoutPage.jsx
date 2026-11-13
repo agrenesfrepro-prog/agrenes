@@ -75,6 +75,10 @@ export default function CheckoutPage() {
   const [savedAddresses, setSavedAddresses] = useState([])
   const [selectedAddress, setSelectedAddress] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [promoInput, setPromoInput] = useState('')
+  const [promo, setPromo] = useState(null)        // { code, discount } once applied
+  const [promoBusy, setPromoBusy] = useState(false)
+  const [chargedTotal, setChargedTotal] = useState(null) // final total confirmed by the server
 
   const [delivery, setDelivery] = useState({
     fullName: profile?.full_name || '',
@@ -102,6 +106,32 @@ export default function CheckoutPage() {
   const deliveryInfo = computeDeliveryInfo(items, total, delivery.country)
   const deliveryFee = deliveryInfo.bulkContact ? 0 : deliveryInfo.cost
   const grandTotal = total + deliveryFee
+  // Promo discount comes off the items subtotal (never delivery, never bulk quotes).
+  const discount = promo && !deliveryInfo.bulkContact ? Math.min(Number(promo.discount) || 0, total) : 0
+  const payTotal = Math.max(0, Math.round((grandTotal - discount) * 100) / 100)
+
+  // If the basket changes after a code was applied, drop it so the customer re-applies.
+  useEffect(() => { setPromo(null) }, [total])
+
+  const applyPromo = async () => {
+    const code = promoInput.trim()
+    if (!code) { toast.error('Enter a promo code'); return }
+    if (!EMAIL_RE.test(delivery.email || '')) { toast.error('Enter your email address above first, then apply the code'); return }
+    setPromoBusy(true)
+    try {
+      const { data, error } = await supabase.rpc('check_promo_code', {
+        p_code: code, p_subtotal: total, p_email: delivery.email,
+      })
+      if (error) throw error
+      const row = Array.isArray(data) ? data[0] : data
+      if (!row?.ok) { setPromo(null); toast.error(row?.message || 'That promo code is not valid'); return }
+      setPromo({ code: row.promo_code, discount: Number(row.discount) || 0 })
+      toast.success(`${row.promo_code} applied — you save £${Number(row.discount).toFixed(2)}`)
+    } catch (err) {
+      setPromo(null)
+      toast.error('We could not check that code just now. Please try again.')
+    } finally { setPromoBusy(false) }
+  }
 
   // Keep cart store's country in sync
   useEffect(() => { setCountry(delivery.country) }, [delivery.country, setCountry])
@@ -158,14 +188,16 @@ export default function CheckoutPage() {
       p_items: items.map(i => ({
         product_id: i.id, vendor_id: i.vendor_id ?? null,
         name: i.name, image: i.images?.[0] || i.img || null,
-        price: i.price, qty: i.qty, unit: i.unit ?? null,
+        price: i.price, qty: i.qty,
+        // Tier products already say the size in the name ("— Box (1 box)"), so no separate unit.
+        unit: i.tier_type ? null : (i.unit ?? null),
         subtotal: i.price * i.qty,
       })),
     })
     if (error) throw error
     const row = Array.isArray(data) ? data[0] : data
     if (!row?.order_id) throw new Error('We could not create your order. Please try again.')
-    return { id: row.order_id, reference: row.order_reference }
+    return { id: row.order_id, reference: row.order_reference, total: row.order_total != null ? Number(row.order_total) : null }
   }
 
   // Bulk-order path — save the order as 'quote_pending' and open WhatsApp
@@ -212,16 +244,21 @@ export default function CheckoutPage() {
         order_type: 'retail',
         subtotal: total,
         delivery_fee: deliveryFee,
-        discount: 0,
-        total: grandTotal,
+        discount: discount,
+        total: payTotal,
+        promo_code: promo?.code || null,
         currency: 'GBP',
         payment_method: 'card',
         payment_status: 'pending',
         notes: `Delivery: ${delivery.fullName}, ${delivery.line1}, ${delivery.city}, ${delivery.postcode}, ${delivery.country}${delivery.phone ? ' · Phone: ' + delivery.phone : ''} · Email: ${delivery.email}`,
       })
 
+      // Charge exactly what the server recorded for this order.
+      const amountToCharge = order.total != null ? order.total : payTotal
+      setChargedTotal(amountToCharge)
+
       const { clientSecret: cs } = await createPaymentIntent({
-        amount: grandTotal, currency: 'gbp', orderId: order.id, customerEmail: delivery.email,
+        amount: amountToCharge, currency: 'gbp', orderId: order.id, customerEmail: delivery.email,
       })
 
       setOrderId(order.id); setOrderRef(order.reference); setClientSecret(cs); setStep(1)
@@ -394,9 +431,38 @@ export default function CheckoutPage() {
                     🚚 Your order is over 30 kg — we'll send you a shipping quote by WhatsApp before payment. Faster and cheaper than standard courier.
                   </div>
                 )}
+                {!deliveryInfo.bulkContact && (
+                  <div style={{ margin: '10px 0' }}>
+                    {promo ? (
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--gll)', border: '1px solid var(--gl)', borderRadius: 8, padding: '8px 12px', fontSize: 12.5 }}>
+                        <span style={{ fontWeight: 700, color: 'var(--g2)' }}>🏷️ {promo.code} applied</span>
+                        <button onClick={() => { setPromo(null); setPromoInput('') }} style={{ background: 'none', border: 'none', color: 'var(--mu)', fontSize: 12, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>Remove</button>
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <input
+                          className="form-input"
+                          placeholder="Promo code"
+                          value={promoInput}
+                          onChange={e => setPromoInput(e.target.value.toUpperCase())}
+                          onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); applyPromo() } }}
+                          style={{ flex: 1, height: 40, textTransform: 'uppercase' }}
+                          autoCapitalize="characters"
+                          autoComplete="off"
+                        />
+                        <button onClick={applyPromo} disabled={promoBusy} className="btn-outline" style={{ height: 40, padding: '0 16px', fontSize: 13, fontWeight: 700, opacity: promoBusy ? .6 : 1 }}>
+                          {promoBusy ? 'Checking…' : 'Apply'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {discount > 0 && (
+                  <Row label={`Discount (${promo.code})`} val={`−£${discount.toFixed(2)}`} valColor="var(--g2)" />
+                )}
                 <Row
                   label="Total"
-                  val={deliveryInfo.bulkContact ? `£${total.toFixed(2)} + shipping` : `£${grandTotal.toFixed(2)}`}
+                  val={deliveryInfo.bulkContact ? `£${total.toFixed(2)} + shipping` : `£${payTotal.toFixed(2)}`}
                   bold
                 />
               </div>
@@ -428,7 +494,7 @@ export default function CheckoutPage() {
             <div style={{ background: 'var(--gll)', border: '1px solid var(--gl)', borderRadius: 10, padding: '11px 14px', marginBottom: 18, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <div style={{ fontSize: 12, color: 'var(--mu)', fontWeight: 600 }}>Order Total</div>
-                <div style={{ fontFamily: 'Fraunces,serif', fontSize: 20, fontWeight: 700, color: 'var(--g2)' }}>£{grandTotal.toFixed(2)}</div>
+                <div style={{ fontFamily: 'Fraunces,serif', fontSize: 20, fontWeight: 700, color: 'var(--g2)' }}>£{(chargedTotal ?? payTotal).toFixed(2)}</div>
               </div>
               <div style={{ fontSize: 12, color: 'var(--mu)', textAlign: 'right' }}>
                 <div>Delivering to:</div>
@@ -439,7 +505,7 @@ export default function CheckoutPage() {
               clientSecret,
               appearance: { theme: 'stripe', variables: { colorPrimary: '#0F7A5E', colorBackground: '#ffffff', colorText: '#1A1A18', colorDanger: '#E63946', fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif', borderRadius: '10px', spacingUnit: '4px' } }
             }}>
-              <StripePaymentForm onSuccess={handlePaymentSuccess} onBack={() => setStep(0)} grandTotal={grandTotal} />
+              <StripePaymentForm onSuccess={handlePaymentSuccess} onBack={() => setStep(0)} grandTotal={chargedTotal ?? payTotal} />
             </Elements>
           </div>
         )}

@@ -58,6 +58,34 @@ const TIER_META = {
   wholesale: { icon: '🏢', label: 'Wholesale', unit: 'box',     caption: 'Serious volume — save 25%' },
 }
 
+// Packaged goods (cans, bottles, bags, packs) are sold per piece, with labels
+// like "Single can" / "Box (15-25 cans · save 10%)" / "Wholesale (26+ cans …)".
+// For those, show the label's own wording instead of the weight-based
+// Bag / Box / Wholesale wording (which reads "£1.19 /kg" for a can of soda).
+function pieceNounOf(tierVariants) {
+  const first = (tierVariants || []).find(v => v.tier_type === 'bag' || v.tier_type === 'single')
+  const m = /^single\s+(.+)$/i.exec(String(first?.label || '').trim())
+  return m ? m[1].trim().toLowerCase() : null
+}
+
+function tierMetaFor(v, pieceNoun) {
+  if (!v) return { icon: '•', label: '', unit: 'unit', caption: '' }
+  if (!pieceNoun) return TIER_META[v.tier_type] || { icon: '•', label: v.label, unit: 'unit', caption: '' }
+  const kind = (v.tier_type === 'bag' || v.tier_type === 'single') ? 'single'
+    : (v.tier_type === 'box' || v.tier_type === 'pack') ? 'box' : 'wholesale'
+  const m = /^([^(]+?)\s*\((.+)\)\s*$/.exec(String(v.label || ''))
+  const head = (m ? m[1] : String(v.label || '')).trim()
+  const fallback = { single: 'Single ' + pieceNoun, box: 'Box', wholesale: 'Wholesale' }[kind]
+  return {
+    icon: { single: '🛍️', box: '📦', wholesale: '🏢' }[kind],
+    label: head || fallback,
+    unit: pieceNoun,
+    caption: m ? m[2] : { single: 'Buy one or a few', box: 'Best value', wholesale: 'Serious volume' }[kind],
+    piece: true,
+    kind,
+  }
+}
+
 export default function ProductPage({ initialData } = {}) {
   const { id: paramId } = useParams()
   const id = initialData?.product?.id || paramId
@@ -121,6 +149,7 @@ export default function ProductPage({ initialData } = {}) {
 
   // Derived: do we have proper tier variants (with tier_type)?
   const tierVariants = useMemo(() => (variants || []).filter(v => v.tier_type), [variants])
+  const pieceNoun = useMemo(() => pieceNounOf(tierVariants), [tierVariants])
   const hasTiers = tierVariants.length > 0
 
   // Currently selected variant (based on selectedTierType)
@@ -196,13 +225,19 @@ export default function ProductPage({ initialData } = {}) {
   // Build the add-to-cart item
   const buildCartItem = () => {
     if (hasTiers && selectedVariant) {
-      const meta = TIER_META[selectedVariant.tier_type] || { label: selectedVariant.label, unit: 'unit' }
+      const meta = tierMetaFor(selectedVariant, pieceNoun)
       const qtyLabel = `${activeQty} ${meta.unit}${activeQty > 1 ? 's' : ''}`
+      // Packaged goods: "Mirinda 330ml — Single can" / "… — Box rate".
+      // Weight-based produce keeps "Matoke — Bag (3 kgs)".
+      const lineName = meta.piece
+        ? `${product.name} — ${meta.label}${meta.kind === 'single' ? '' : ' rate'}`
+        : `${product.name} — ${meta.label} (${qtyLabel})`
       return {
         ...product,
         id: `${product.id}-${selectedVariant.id}-${activeQty}`,
         price: Number(selectedVariant.price),
-        name: `${product.name} — ${meta.label} (${qtyLabel})`,
+        name: lineName,
+        unit: meta.piece ? pieceNoun : product.unit,
         variant_id: selectedVariant.id,
         variant_label: selectedVariant.label,
         tier_type: selectedVariant.tier_type,
@@ -296,7 +331,7 @@ export default function ProductPage({ initialData } = {}) {
           {hasTiers && (
             <div style={{ marginBottom: 18 }}>
               {/* From £X/kg headline when tier not yet selected */}
-              {bagPerKg !== null && (
+              {bagPerKg !== null && !pieceNoun && (
                 <div style={{ fontSize: 13, color: 'var(--mu)', marginBottom: 10 }}>
                   From <span style={{ fontWeight: 700, color: 'var(--g2)' }}>£{bagPerKg.toFixed(2)}/kg</span>
                   {savingsPctVsBag > 0 && <span style={{ marginLeft: 8, color: 'var(--g3)', fontWeight: 600 }}>· save up to 25% in wholesale</span>}
@@ -306,7 +341,7 @@ export default function ProductPage({ initialData } = {}) {
               {/* Three tier lanes */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {tierVariants.map(v => {
-                  const meta = TIER_META[v.tier_type] || { icon: '•', label: v.label, unit: 'unit', caption: '' }
+                  const meta = tierMetaFor(v, pieceNoun)
                   const isSelected = selectedTierType === v.tier_type
                   const vQty = qtyByTier[v.tier_type] || Number(v.min_qty) || 1
                   const vStock = Number(v.stock_qty) || 0
@@ -351,7 +386,7 @@ export default function ProductPage({ initialData } = {}) {
                             £{vUnitPrice.toFixed(2)}
                             <span style={{ fontSize: 11, color: 'var(--mu)', fontWeight: 500 }}> /{meta.unit}</span>
                           </div>
-                          {vPerKg !== null && (
+                          {vPerKg !== null && !meta.piece && (
                             <div style={{ fontSize: 11, color: 'var(--mu)' }}>
                               £{vPerKg.toFixed(2)}/kg · {vWeight} kg per {meta.unit}
                             </div>
@@ -392,7 +427,7 @@ export default function ProductPage({ initialData } = {}) {
                           </div>
                           <div style={{ textAlign: 'right' }}>
                             <div style={{ fontFamily: 'Fraunces,serif', fontSize: 22, fontWeight: 700, color: 'var(--g2)' }}>£{vLineTotal.toFixed(2)}</div>
-                            <div style={{ fontSize: 11, color: 'var(--mu)' }}>{vTotalKg} kg total</div>
+                            <div style={{ fontSize: 11, color: 'var(--mu)' }}>{meta.piece ? `${vQty} ${meta.unit}${vQty > 1 ? 's' : ''}` : `${Number(vTotalKg.toFixed(2))} kg total`}</div>
                           </div>
                         </div>
                       )}
@@ -575,7 +610,7 @@ export default function ProductPage({ initialData } = {}) {
 
       <div className="pdp-sticky" style={{ position: 'fixed', left: 0, right: 0, bottom: 56, background: 'var(--wh)', borderTop: '1px solid var(--br)', padding: '10px 14px', display: 'flex', gap: 10, alignItems: 'center', zIndex: 500, boxShadow: '0 -6px 20px rgba(0,0,0,.06)' }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 11, color: 'var(--mu)' }}>Total ({hasTiers ? `${activeQty} ${TIER_META[selectedTierType]?.unit || ''}` : activeQty})</div>
+          <div style={{ fontSize: 11, color: 'var(--mu)' }}>Total ({hasTiers ? `${activeQty} ${tierMetaFor(selectedVariant, pieceNoun).unit || ''}` : activeQty})</div>
           <div style={{ fontFamily: 'Fraunces,serif', fontSize: 20, fontWeight: 700, color: 'var(--g2)' }}>£{pricing.line_total.toFixed(2)}</div>
         </div>
         <button onClick={handleAddToCart} disabled={!inStock} className="btn-outline" style={{ flex: 1, justifyContent: 'center', height: 46, fontSize: 13.5, fontWeight: 700 }}>Add to Cart</button>

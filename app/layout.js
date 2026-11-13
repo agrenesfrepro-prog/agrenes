@@ -27,6 +27,10 @@ export const metadata = {
   description: 'Fresh Ugandan produce, air-freighted weekly to your door across the UK. Quality GAP & UNBS certified fruits, vegetables and staples.',
   keywords: 'ugandan food UK, matoke UK, african food delivery UK, ugandan groceries UK, african produce UK, matoke delivery, ugandan food shop, buy matoke online, kalo flour, bushera, groundnut paste, african grocery online UK',
   metadataBase: new URL('https://agrenesmarket.com'),
+  // Lets phones install the site to the home screen (opens full-screen like an app)
+  manifest: '/manifest.json',
+  applicationName: 'AGRENES Market',
+  appleWebApp: { capable: true, title: 'AGRENES', statusBarStyle: 'default' },
   openGraph: {
     type: 'website',
     siteName: 'AGRENES',
