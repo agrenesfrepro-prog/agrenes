@@ -59,6 +59,7 @@ export default function AdminOrderStagePage() {
   const { user, profile } = useAuthStore();
   const [order, setOrder] = useState(null);
   const [events, setEvents] = useState([]);
+  const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -80,10 +81,26 @@ export default function AdminOrderStagePage() {
   const refresh = async () => {
     const { data: orderData, error: orderErr } = await supabase
       .from('orders')
-      .select('*, profiles(full_name, email, phone)')
+      .select('*')
       .eq('id', orderId)
       .single();
     if (orderErr) { setError(orderErr.message); setLoading(false); return; }
+
+    // Customer profile (signed-in orders only). Fetched separately so a guest
+    // order, or a missing table relationship, never breaks the page.
+    if (orderData.user_id) {
+      const { data: prof } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', orderData.user_id)
+        .maybeSingle();
+      orderData.profiles = prof || null;
+    }
+
+    const { data: itemData } = await supabase
+      .from('order_items')
+      .select('*')
+      .eq('order_id', orderId);
 
     const { data: eventData } = await supabase
       .from('order_status_events')
@@ -93,6 +110,7 @@ export default function AdminOrderStagePage() {
 
     setOrder(orderData);
     setEvents(eventData || []);
+    setItems((itemData || []).slice().sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''))));
     setLoading(false);
   };
 
@@ -146,7 +164,13 @@ export default function AdminOrderStagePage() {
 
   const currentIndex = STAGES.findIndex((s) => s.key === order.status);
   const customerEmail = order.customer_email || order.profiles?.email || '(no email on file)';
-  const customerName = order.profiles?.full_name || '(guest)';
+  const notesName = (String(order.notes || '').match(/Delivery:\s*([^,·]+)/)?.[1] || '').trim();
+  const customerName = order.profiles?.full_name || (notesName ? `${notesName}${order.user_id ? '' : ' (guest)'}` : '(guest)');
+  const money = (n) => `£${Number(n || 0).toFixed(2)}`;
+  const qtyText = (q) => { const n = Number(q || 0); return Number.isInteger(n) ? String(n) : String(Number(n.toFixed(2))); };
+  const th = { textAlign: 'left', fontSize: 12, fontWeight: 600, color: C.slate500, padding: '0 0 8px 0', borderBottom: `1px solid ${C.slate200}` };
+  const td = { fontSize: 14, color: C.slate900, padding: '10px 0', borderBottom: `1px solid ${C.slate100}`, verticalAlign: 'top' };
+  const totalRow = { display: 'flex', justifyContent: 'space-between', fontSize: 14, color: C.slate700, padding: '4px 0' };
 
   return (
     <main style={S.main}>
@@ -194,6 +218,48 @@ export default function AdminOrderStagePage() {
               </a>
             </>
           )}
+        </section>
+
+        {/* Items ordered */}
+        <section style={S.card}>
+          <h2 style={S.sectionLabel}>Items ordered</h2>
+          {items.length > 0 ? (
+            <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 12 }}>
+              <thead>
+                <tr>
+                  <th style={th}>Product</th>
+                  <th style={{ ...th, textAlign: 'center' }}>Qty</th>
+                  <th style={{ ...th, textAlign: 'right' }}>Unit price</th>
+                  <th style={{ ...th, textAlign: 'right' }}>Line total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((it) => (
+                  <tr key={it.id}>
+                    <td style={td}>
+                      {it.name || 'Item'}
+                      {it.unit ? <span style={{ color: C.slate500 }}> ({it.unit})</span> : null}
+                    </td>
+                    <td style={{ ...td, textAlign: 'center' }}>{qtyText(it.qty)}</td>
+                    <td style={{ ...td, textAlign: 'right' }}>{money(it.price)}</td>
+                    <td style={{ ...td, textAlign: 'right' }}>{money(it.subtotal ?? Number(it.price || 0) * Number(it.qty || 0))}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p style={{ fontSize: 14, color: C.red, margin: '0 0 12px 0' }}>
+              No line items are saved for this order.
+            </p>
+          )}
+          <div style={totalRow}><span>Subtotal</span><span>{money(order.subtotal)}</span></div>
+          <div style={totalRow}><span>Delivery</span><span>{money(order.delivery_fee)}</span></div>
+          {Number(order.discount || 0) > 0 && (
+            <div style={totalRow}><span>Discount</span><span>-{money(order.discount)}</span></div>
+          )}
+          <div style={{ ...totalRow, fontSize: 16, fontWeight: 700, color: C.slate900, borderTop: `1px solid ${C.slate200}`, marginTop: 6, paddingTop: 10 }}>
+            <span>Total</span><span>{money(order.total)}</span>
+          </div>
         </section>
 
         {/* Stage advance */}

@@ -203,6 +203,47 @@ const S = {
     margin: '4px 0 0 0',
     fontWeight: 700,
   },
+  itemsTable: {
+    width: '100%',
+    borderCollapse: 'collapse',
+    marginBottom: '12px',
+  },
+  th: {
+    textAlign: 'left',
+    fontSize: '12px',
+    fontWeight: 600,
+    color: C.slate500,
+    padding: '0 0 8px 0',
+    borderBottom: `1px solid ${C.slate200}`,
+  },
+  td: {
+    fontSize: '14px',
+    color: C.slate900,
+    padding: '10px 0',
+    borderBottom: `1px solid ${C.slate100}`,
+    verticalAlign: 'top',
+  },
+  totals: {
+    margin: 0,
+  },
+  totalRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    fontSize: '14px',
+    color: C.slate700,
+    padding: '4px 0',
+  },
+  totalRowGrand: {
+    fontSize: '16px',
+    fontWeight: 700,
+    color: C.slate900,
+    borderTop: `1px solid ${C.slate200}`,
+    marginTop: '6px',
+    paddingTop: '10px',
+  },
+  totalValue: {
+    margin: 0,
+  },
   reassurance: {
     backgroundColor: C.amberLight,
     border: `1px solid ${C.amberBright}`,
@@ -250,6 +291,7 @@ export default async function TrackPage({ params }) {
   for (const e of data.events ?? []) eventByStage.set(e.stage, e);
 
   const isDelivered = data.order_status === 'delivered';
+  const items = Array.isArray(data.items) ? data.items : [];
   const isCancelled = data.order_status === 'cancelled';
 
   return (
@@ -346,20 +388,72 @@ export default async function TrackPage({ params }) {
           </section>
         )}
 
+        {/* Items in this order */}
+        <section style={S.card}>
+          <h2 style={S.sectionLabel}>Your order</h2>
+          {items.length > 0 ? (
+            <table style={S.itemsTable}>
+              <thead>
+                <tr>
+                  <th style={S.th}>Product</th>
+                  <th style={{ ...S.th, textAlign: 'center' }}>Qty</th>
+                  <th style={{ ...S.th, textAlign: 'right' }}>Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((it, idx) => (
+                  <tr key={idx}>
+                    <td style={S.td}>
+                      {it.name || 'Item'}
+                      {it.unit ? <span style={{ color: C.slate500 }}> ({it.unit})</span> : null}
+                    </td>
+                    <td style={{ ...S.td, textAlign: 'center' }}>{formatQty(it.qty)}</td>
+                    <td style={{ ...S.td, textAlign: 'right' }}>
+                      {formatCurrency(it.subtotal ?? Number(it.price ?? 0) * Number(it.qty ?? 0), data.currency)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p style={{ margin: '0 0 12px 0', fontSize: 14, color: C.slate500 }}>
+              Item details are not available for this order.
+            </p>
+          )}
+          <dl style={S.totals}>
+            {data.order_subtotal != null && (
+              <div style={S.totalRow}>
+                <dt>Subtotal</dt><dd style={S.totalValue}>{formatCurrency(data.order_subtotal, data.currency)}</dd>
+              </div>
+            )}
+            {data.order_delivery_fee != null && (
+              <div style={S.totalRow}>
+                <dt>Delivery</dt>
+                <dd style={S.totalValue}>
+                  {Number(data.order_delivery_fee) > 0 ? formatCurrency(data.order_delivery_fee, data.currency) : 'Free'}
+                </dd>
+              </div>
+            )}
+            <div style={{ ...S.totalRow, ...S.totalRowGrand }}>
+              <dt>Total</dt><dd style={S.totalValue}>{formatCurrency(data.order_total, data.currency)}</dd>
+            </div>
+          </dl>
+        </section>
+
         {/* Order summary */}
         <section style={S.card}>
           <h2 style={S.sectionLabel}>Order details</h2>
           <dl style={S.detailsGrid}>
             <div>
-              <dt style={S.dt}>Order total</dt>
-              <dd style={S.ddBold}>
-                {formatCurrency(data.order_total, data.currency)}
-              </dd>
-            </div>
-            <div>
               <dt style={S.dt}>Placed on</dt>
               <dd style={S.dd}>{formatDate(data.order_created_at)}</dd>
             </div>
+            {!isDelivered && data.estimated_delivery && (
+              <div>
+                <dt style={S.dt}>Estimated arrival</dt>
+                <dd style={S.dd}>{formatDate(data.estimated_delivery)}</dd>
+              </div>
+            )}
             {data.shipping_city && (
               <div>
                 <dt style={S.dt}>Delivering to</dt>
@@ -367,12 +461,6 @@ export default async function TrackPage({ params }) {
                   {data.shipping_city}
                   {data.shipping_country ? `, ${data.shipping_country}` : ''}
                 </dd>
-              </div>
-            )}
-            {!isDelivered && data.estimated_delivery && (
-              <div>
-                <dt style={S.dt}>Estimated arrival</dt>
-                <dd style={S.dd}>{formatDate(data.estimated_delivery)}</dd>
               </div>
             )}
           </dl>
@@ -433,6 +521,11 @@ function formatDateTime(input) {
   return d.toLocaleString('en-GB', {
     day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
   });
+}
+
+function formatQty(qty) {
+  const n = Number(qty ?? 0);
+  return Number.isInteger(n) ? String(n) : String(Number(n.toFixed(2)));
 }
 
 function formatCurrency(amount, currency) {
