@@ -1,10 +1,11 @@
 'use client'
 
 import dynamic from 'next/dynamic'
+import { usePathname } from 'next/navigation'
+import { useUrlReady } from '../../src/lib/useUrlReady'
 
-const App = dynamic(() => import('../../src/App'), {
-  ssr: false,
-  loading: () => (
+function Loading() {
+  return (
     <div style={{
       display: 'flex',
       alignItems: 'center',
@@ -16,9 +17,16 @@ const App = dynamic(() => import('../../src/App'), {
     }}>
       Loading checkout...
     </div>
-  ),
-})
+  )
+}
+
+const App = dynamic(() => import('../../src/App'), { ssr: false, loading: Loading })
 
 export default function CheckoutRoute() {
-  return <App />
+  const pathname = usePathname()
+  // Wait until the address bar matches this page before starting the inner
+  // router, then key it by path so it restarts cleanly on every change.
+  const ready = useUrlReady(pathname)
+  if (!ready) return <Loading />
+  return <App key={pathname} />
 }
