@@ -405,11 +405,94 @@ function ProductForm({ product, categories, vendors, onSave, onClose }) {
   )
 }
 
+// Expandable order details for the admin Orders tab: customer, delivery
+// details, line items and totals. Items load the first time a card is opened.
+function AdminOrderDetails({ order }) {
+  const [items, setItems] = useState(null)
+  const [err, setErr] = useState('')
+
+  useEffect(() => {
+    let live = true
+    supabase.from('order_items').select('*').eq('order_id', order.id).then(({ data, error }) => {
+      if (!live) return
+      if (error) { setErr(error.message); setItems([]); return }
+      setItems((data || []).slice().sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''))))
+    })
+    return () => { live = false }
+  }, [order.id])
+
+  const money = n => '£' + Number(n || 0).toFixed(2)
+  const qtyText = q => { const n = Number(q || 0); return Number.isInteger(n) ? String(n) : String(Number(n.toFixed(2))) }
+  const notes = String(order.notes || '')
+  const name = (notes.match(/Delivery:\s*([^,·]+)/)?.[1] || '').trim()
+  const email = order.customer_email || (notes.match(/Email:\s*(\S+)/)?.[1] || '')
+  const th = { textAlign: 'left', fontSize: 11, fontWeight: 700, color: 'var(--mu)', textTransform: 'uppercase', letterSpacing: .4, padding: '0 0 6px', borderBottom: '1px solid var(--br)' }
+  const td = { fontSize: 13, padding: '8px 0', borderBottom: '1px solid var(--brl)', verticalAlign: 'top' }
+  const row = { display: 'flex', justifyContent: 'space-between', fontSize: 13, padding: '3px 0' }
+  const label = { fontSize: 11, fontWeight: 700, color: 'var(--mu)', textTransform: 'uppercase', letterSpacing: .4, margin: '12px 0 4px' }
+
+  return (
+    <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--brl)' }}>
+      <div style={{ ...label, marginTop: 0 }}>Customer</div>
+      <div style={{ fontSize: 13 }}>
+        {name || (order.user_id ? 'Registered customer' : 'Guest')}{order.user_id ? '' : ' (guest)'}
+        {email && <> · <a href={'mailto:' + email} style={{ color: 'var(--g3)' }}>{email}</a></>}
+      </div>
+
+      <div style={label}>Items</div>
+      {items === null && <p style={{ fontSize: 13, color: 'var(--lt)', margin: 0 }}>Loading items…</p>}
+      {err && <p style={{ fontSize: 13, color: 'var(--rd)', margin: 0 }}>Could not load items: {err}</p>}
+      {items && items.length === 0 && !err && <p style={{ fontSize: 13, color: 'var(--rd)', margin: 0 }}>No line items are saved for this order.</p>}
+      {items && items.length > 0 && (
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr>
+              <th style={th}>Product</th>
+              <th style={{ ...th, textAlign: 'center' }}>Qty</th>
+              <th style={{ ...th, textAlign: 'right' }}>Price</th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map(it => (
+              <tr key={it.id}>
+                <td style={td}>{it.name || 'Item'}{it.unit ? <span style={{ color: 'var(--mu)' }}> ({it.unit})</span> : null}</td>
+                <td style={{ ...td, textAlign: 'center' }}>{qtyText(it.qty)}</td>
+                <td style={{ ...td, textAlign: 'right' }}>{money(it.subtotal ?? Number(it.price || 0) * Number(it.qty || 0))}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      <div style={{ marginTop: 10 }}>
+        <div style={row}><span>Subtotal</span><span>{money(order.subtotal)}</span></div>
+        <div style={row}><span>Delivery</span><span>{money(order.delivery_fee)}</span></div>
+        {Number(order.discount || 0) > 0 && <div style={row}><span>Discount</span><span>-{money(order.discount)}</span></div>}
+        <div style={row}><span>Payment</span><span>{[order.payment_method, order.payment_status].filter(Boolean).join(' · ').replace(/_/g, ' ')}</span></div>
+        <div style={{ ...row, fontWeight: 700, borderTop: '1px solid var(--br)', marginTop: 4, paddingTop: 8 }}><span>Total</span><span>{money(order.total)}</span></div>
+      </div>
+
+      {notes && (
+        <>
+          <div style={label}>Delivery details</div>
+          <div style={{ fontSize: 13, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{notes}</div>
+        </>
+      )}
+
+      <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginTop: 12, fontSize: 12.5, fontWeight: 600 }}>
+        <a href={'/admin/orders/' + order.id} style={{ color: 'var(--g3)' }}>Open full order page →</a>
+        {order.tracking_token && <a href={'/track/' + order.tracking_token} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--g3)' }}>Customer tracking page ↗</a>}
+      </div>
+    </div>
+  )
+}
+
 export default function AdminPage() {
   const { profile } = useAuthStore()
   const [tab, setTab] = useState('overview')
   const [products, setProducts] = useState([])
   const [orders, setOrders] = useState([])
+  const [openOrders, setOpenOrders] = useState({})
   const [vendors, setVendors] = useState([])
   const [categories, setCategories] = useState([])
   const [stats, setStats] = useState({})
@@ -444,7 +527,7 @@ export default function AdminPage() {
     await supabase.from('orders').update({ status }).eq('id', id)
     toast.success('Order status updated'); loadAll()
   }
-  const ORDER_STATUSES = ['pending','confirmed','preparing','dispatched','in_transit','customs','out_for_delivery','delivered','cancelled']
+  const ORDER_STATUSES = ['pending','quote_pending','confirmed','preparing','dispatched','in_transit','uk_customs','out_for_delivery','delivered','cancelled']
   const TABS = [
     { key: 'overview', label: '📊 Overview' },
     { key: 'products', label: '🥬 Products' },
@@ -543,6 +626,13 @@ export default function AdminPage() {
                 <select value={o.status} onChange={e => updateOrderStatus(o.id, e.target.value)} style={{ fontSize: 12, fontWeight: 600, padding: '5px 10px', borderRadius: 8, border: '1px solid var(--br)', background: 'var(--bg)', cursor: 'pointer', width: '100%' }}>
                   {ORDER_STATUSES.map(s => <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>)}
                 </select>
+                <button
+                  onClick={() => setOpenOrders(prev => ({ ...prev, [o.id]: !prev[o.id] }))}
+                  style={{ marginTop: 8, background: 'none', border: 'none', padding: 0, fontSize: 12.5, fontWeight: 600, color: 'var(--g3)', cursor: 'pointer' }}
+                >
+                  {openOrders[o.id] ? 'Hide order details ▲' : 'View order details ▼'}
+                </button>
+                {openOrders[o.id] && <AdminOrderDetails order={o} />}
               </div>
             ))}
             {orders.length === 0 && <p style={{ fontSize: 13, color: 'var(--lt)', textAlign: 'center', padding: '40px 0' }}>No orders yet</p>}

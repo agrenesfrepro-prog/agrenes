@@ -11,12 +11,13 @@ const STATUS_STEPS = [
   { key: 'preparing', label: 'Preparing', icon: '📦' },
   { key: 'dispatched', label: 'Dispatched', icon: '🚚' },
   { key: 'in_transit', label: 'In Transit', icon: '✈️' },
-  { key: 'customs', label: 'UK Customs', icon: '🛃' },
+  { key: 'uk_customs', label: 'UK Customs', icon: '🛃' },
   { key: 'out_for_delivery', label: 'Out for Delivery', icon: '🏃' },
   { key: 'delivered', label: 'Delivered', icon: '🎉' },
 ]
 
 function statusIndex(status) {
+  if (status === 'customs') status = 'uk_customs' // older orders used the short name
   return STATUS_STEPS.findIndex(s => s.key === status)
 }
 
@@ -27,6 +28,7 @@ function StatusBadge({ status }) {
     preparing: ['var(--gl)', 'var(--g2)'],
     dispatched: ['var(--pul)', 'var(--pu)'],
     in_transit: ['var(--pul)', 'var(--pu)'],
+    uk_customs: ['var(--aml)', 'var(--amd)'],
     customs: ['var(--aml)', 'var(--amd)'],
     out_for_delivery: ['var(--gl)', 'var(--g2)'],
     delivered: ['var(--gl)', 'var(--g1)'],
@@ -283,7 +285,7 @@ export default function OrdersPage() {
   if (selected) return <OrderDetail order={selected} items={selectedItems} onBack={() => setSelected(null)} />
 
   const FILTERS = ['all', 'pending', 'in_transit', 'delivered', 'cancelled']
-  const filtered = filter === 'all' ? orders : orders.filter(o => o.status === filter || (filter === 'in_transit' && ['dispatched','in_transit','customs','out_for_delivery'].includes(o.status)))
+  const filtered = filter === 'all' ? orders : orders.filter(o => o.status === filter || (filter === 'in_transit' && ['dispatched','in_transit','uk_customs','customs','out_for_delivery'].includes(o.status)))
 
   return (
     <div className="page-enter">
