@@ -105,10 +105,17 @@ function GoogleSignIn({ onSignedIn }) {
 export default function AuthPage() {
   const navigate = useNavigate()
   const { signIn, signUp } = useAuthStore()
-  const [mode, setMode] = useState('login') // login | register
+  // /login?mode=register&email=… (used by the "create an account" prompt after checkout)
+  const initial = (() => {
+    try {
+      const q = new URLSearchParams(window.location.search)
+      return { mode: q.get('mode') === 'register' ? 'register' : 'login', email: q.get('email') || '' }
+    } catch { return { mode: 'login', email: '' } }
+  })()
+  const [mode, setMode] = useState(initial.mode) // login | register
   const [loading, setLoading] = useState(false)
   const [showPass, setShowPass] = useState(false)
-  const [form, setForm] = useState({ email:'', password:'', fullName:'', phone:'' })
+  const [form, setForm] = useState({ email: initial.email, password:'', fullName:'', phone:'' })
 
   const set = (k, v) => setForm(f => ({...f, [k]: v}))
 
@@ -129,7 +136,17 @@ export default function AuthPage() {
         setMode('login')
       }
     } catch (err) {
-      toast.error(err.message)
+      const msg = String(err?.message || '')
+      if (/invalid login credentials/i.test(msg)) {
+        toast.error("That email and password don't match. If you signed up with Google, use the Google button below. Otherwise tap \"Forgot password?\" to set a new one.", { duration: 9000 })
+      } else if (/email not confirmed/i.test(msg)) {
+        toast.error('Please confirm your email first. Check your inbox (and spam) for our confirmation link.', { duration: 9000 })
+      } else if (/already registered|already been registered/i.test(msg)) {
+        toast.error('You already have an account with this email. Sign in instead, or use "Forgot password?".', { duration: 9000 })
+        setMode('login')
+      } else {
+        toast.error(msg || 'Something went wrong. Please try again.')
+      }
     } finally {
       setLoading(false)
     }

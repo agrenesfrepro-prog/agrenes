@@ -38,7 +38,7 @@ function ukDeliveryByWeight(kg) {
   return 0
 }
 
-const FREE_UK_OVER   = 40
+const FREE_UK_OVER   = Infinity   // no free-delivery threshold: delivery is always charged by weight
 const FREE_INTL_OVER = Infinity
 const INTL_FLAT      = 24.99
 
@@ -81,7 +81,7 @@ export function computeDeliveryInfo(items, subtotal, country = 'UK') {
 
   return {
     cost,
-    label: 'Standard UK delivery' + parcels + ' · 2-3 working days',
+    label: 'Standard UK delivery' + parcels + ' · 4–5 working days',
     bulkContact: false,
     band,
     totalWeightKg,

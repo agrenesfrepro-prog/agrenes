@@ -544,7 +544,7 @@ export default function ProductPage({ initialData } = {}) {
             <div style={{ fontSize: 11.5, color: 'var(--mu)' }}>
               {deliveryInfo.bulkContact
                 ? "🚚 Bulk order (over 30 kg) — we'll send you a shipping quote by WhatsApp before payment."
-                : `Air-freighted weekly from Kampala. Typical delivery ${isUKCountry(deliveryCountry) ? '2–4' : '4–7'} working days.`}
+                : `Air-freighted weekly from Kampala. Typical delivery ${isUKCountry(deliveryCountry) ? '4–5' : '7–10'} working days.`}
             </div>
           </div>
 
@@ -555,13 +555,30 @@ export default function ProductPage({ initialData } = {}) {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 18 }}>
-            <div style={{ padding: '10px 12px', background: 'var(--brl)', borderRadius: 10, fontSize: 12, display: 'flex', alignItems: 'center', gap: 8 }}><Truck size={16} color="var(--g3)" /> Delivery 2–4 days</div>
+            <div style={{ padding: '10px 12px', background: 'var(--brl)', borderRadius: 10, fontSize: 12, display: 'flex', alignItems: 'center', gap: 8 }}><Truck size={16} color="var(--g3)" /> Delivery 4–5 working days</div>
             <div style={{ padding: '10px 12px', background: 'var(--brl)', borderRadius: 10, fontSize: 12, display: 'flex', alignItems: 'center', gap: 8 }}><ShieldCheck size={16} color="var(--g3)" /> Freshness guaranteed</div>
           </div>
 
           {product.description && (
             <div className="card" style={{ padding: 18, marginBottom: 12 }}>
               <AboutProduct description={product.description} />
+            </div>
+          )}
+
+          {(product.ingredients || product.allergens) && (
+            <div className="card" style={{ padding: 18, marginBottom: 12 }}>
+              {product.ingredients && (
+                <div style={{ marginBottom: product.allergens ? 12 : 0 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: .4, color: 'var(--mu)', marginBottom: 4 }}>Ingredients</div>
+                  <div style={{ fontSize: 13.5, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{product.ingredients}</div>
+                </div>
+              )}
+              {product.allergens && (
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: .4, color: 'var(--mu)', marginBottom: 4 }}>Allergen information</div>
+                  <div style={{ fontSize: 13.5, lineHeight: 1.6 }}>Contains: <strong>{product.allergens}</strong></div>
+                </div>
+              )}
             </div>
           )}
 

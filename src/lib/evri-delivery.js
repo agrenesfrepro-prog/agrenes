@@ -52,7 +52,7 @@ export function calculateEvriDelivery(totalWeightKg) {
   if (totalWeightKg <= 1) {
     return {
       cost: 4.30,
-      label: 'Standard UK delivery (2-3 working days)',
+      label: 'Standard UK delivery (4–5 working days)',
       bulkContact: false,
       band: 'under-1kg',
     };
@@ -60,7 +60,7 @@ export function calculateEvriDelivery(totalWeightKg) {
   if (totalWeightKg <= 2) {
     return {
       cost: 5.44,
-      label: 'Standard UK delivery (2-3 working days)',
+      label: 'Standard UK delivery (4–5 working days)',
       bulkContact: false,
       band: '1-2kg',
     };
@@ -68,7 +68,7 @@ export function calculateEvriDelivery(totalWeightKg) {
   if (totalWeightKg <= 5) {
     return {
       cost: 7.58,
-      label: 'Standard UK delivery (2-3 working days)',
+      label: 'Standard UK delivery (4–5 working days)',
       bulkContact: false,
       band: '2-5kg',
     };
@@ -76,7 +76,7 @@ export function calculateEvriDelivery(totalWeightKg) {
   if (totalWeightKg <= 10) {
     return {
       cost: 7.68,
-      label: 'Standard UK delivery (2-3 working days)',
+      label: 'Standard UK delivery (4–5 working days)',
       bulkContact: false,
       band: '5-10kg',
     };
@@ -84,7 +84,7 @@ export function calculateEvriDelivery(totalWeightKg) {
   if (totalWeightKg <= 15) {
     return {
       cost: 11.29,
-      label: 'Standard UK delivery (2-3 working days)',
+      label: 'Standard UK delivery (4–5 working days)',
       bulkContact: false,
       band: '10-15kg',
     };
@@ -93,7 +93,7 @@ export function calculateEvriDelivery(totalWeightKg) {
     // Cheapest split: 2 × 10kg parcels
     return {
       cost: 15.36,
-      label: 'Standard UK delivery (2 parcels, 2-3 working days)',
+      label: 'Standard UK delivery (2 parcels, 4–5 working days)',
       bulkContact: false,
       band: '15-20kg',
     };
@@ -102,7 +102,7 @@ export function calculateEvriDelivery(totalWeightKg) {
     // Cheapest split: 15kg + 10kg parcels
     return {
       cost: 18.97,
-      label: 'Standard UK delivery (2 parcels, 2-3 working days)',
+      label: 'Standard UK delivery (2 parcels, 4–5 working days)',
       bulkContact: false,
       band: '20-25kg',
     };
@@ -111,7 +111,7 @@ export function calculateEvriDelivery(totalWeightKg) {
     // Cheapest split: 2 × 15kg parcels
     return {
       cost: 22.58,
-      label: 'Standard UK delivery (2 parcels, 2-3 working days)',
+      label: 'Standard UK delivery (2 parcels, 4–5 working days)',
       bulkContact: false,
       band: '25-30kg',
     };

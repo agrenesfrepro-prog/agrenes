@@ -18,7 +18,7 @@ export default function CookiesPage() {
       <h2>Managing cookies</h2>
       <p>Block or delete cookies via your browser settings. If you block essential cookies some features (cart, login) will stop working.</p>
       <h2>Contact</h2>
-      <p>Questions about cookies: support@agrenes.co.uk</p>
+      <p>Questions about cookies: hello@agrenesmarket.com</p>
     </main>
   )
 }

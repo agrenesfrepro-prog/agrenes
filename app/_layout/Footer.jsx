@@ -75,7 +75,7 @@ export default function Footer() {
             ))}
             <div style={{ marginTop: 14 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12.5, marginBottom: 5 }}>
-                <Mail size={13} color="var(--am)" /> support@agrenes.co.uk
+                <Mail size={13} color="var(--am)" /> hello@agrenesmarket.com
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12.5 }}>
                 <MapPin size={13} color="var(--am)" /> Ndeeba Kabowa, Kampala

@@ -55,7 +55,7 @@ export default async function Home() {
     url: 'https://agrenesmarket.com',
     logo: 'https://agrenesmarket.com/logo.png',
     description: 'Fresh Ugandan produce air-freighted to the UK. GAP & UNBS certified fruits, vegetables and staples.',
-    email: 'support@agrenes.co.uk',
+    email: 'hello@agrenesmarket.com',
     address: {
       '@type': 'PostalAddress',
       streetAddress: 'Ndeeba Kabowa',

@@ -138,6 +138,7 @@ function ProductForm({ product, categories, vendors, onSave, onClose }) {
     name: '', description: '', price: '', compare_price: '', unit: 'kg',
     stock_qty: '', bulk_price: '', bulk_min_qty: '', weight_kg: '',
     category_id: '', vendor_id: '', origin: 'Uganda',
+    ingredients: '', allergens: '',
     is_featured: false, is_flash_deal: false, is_active: true,
     images: [], certifications: [], tags: [],
     ...(product || {})
@@ -209,6 +210,8 @@ function ProductForm({ product, categories, vendors, onSave, onClose }) {
         category_id: form.category_id || null,
         vendor_id: form.vendor_id || null,
         origin: form.origin,
+        ingredients: (form.ingredients || '').trim() || null,
+        allergens: (form.allergens || '').trim() || null,
         is_featured: form.is_featured, is_flash_deal: form.is_flash_deal, is_active: form.is_active,
         images: form.images || [], certifications: form.certifications || [], tags: form.tags || [],
         updated_at: new Date().toISOString(),
@@ -349,6 +352,14 @@ function ProductForm({ product, categories, vendors, onSave, onClose }) {
           <div className="form-group">
             <label>Origin</label>
             <input className="form-input" placeholder="Kampala, Uganda" value={form.origin} onChange={e => set('origin', e.target.value)} />
+          </div>
+          <div className="form-group">
+            <label>Ingredients (packaged foods — copy from the pack label)</label>
+            <textarea className="form-input" rows={2} placeholder="e.g. Maize flour, salt" value={form.ingredients || ''} onChange={e => set('ingredients', e.target.value)} />
+          </div>
+          <div className="form-group">
+            <label>Allergens (shown as "Contains: …" — leave empty if none)</label>
+            <input className="form-input" placeholder="e.g. Peanuts, Sesame" value={form.allergens || ''} onChange={e => set('allergens', e.target.value)} />
           </div>
 
           <div className="form-group">

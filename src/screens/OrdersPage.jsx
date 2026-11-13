@@ -225,7 +225,7 @@ function OrderDetail({ order, items, onBack }) {
         }}>
           <div style={{ fontSize: 13.5, fontWeight: 600, marginBottom: 6 }}>Need help with this order?</div>
           <p style={{ fontSize: 12.5, color: 'var(--mu)', marginBottom: 12 }}>
-            Contact us at <strong>support@agrenes.co.uk</strong>
+            Contact us at <strong>hello@agrenesmarket.com</strong>
           </p>
           <button className="btn-outline" style={{ fontSize: 13 }}>Contact Support</button>
         </div>
@@ -246,9 +246,12 @@ export default function OrdersPage() {
   useEffect(() => {
     if (!user) return
 
-    // Initial load
-    supabase.from('orders').select('*').eq('user_id', user.id)
-      .order('created_at', { ascending: false })
+    // Initial load. First attach any earlier guest orders placed with this
+    // (confirmed) email address, then list everything that belongs to the customer.
+    supabase.rpc('claim_my_guest_orders')
+      .then(() => {}, () => {})
+      .then(() => supabase.from('orders').select('*').eq('user_id', user.id)
+        .order('created_at', { ascending: false }))
       .then(({ data }) => { setOrders(data || []); setLoading(false) })
 
     // Real-time subscription — status updates appear instantly

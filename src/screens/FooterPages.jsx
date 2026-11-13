@@ -68,7 +68,7 @@ export function ContactPage() {
     <PageShell title="Contact Us">
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         {[
-          { icon: <Mail size={20} color="var(--g3)" />, label: 'Email', val: 'info@agrenes.co.uk', href: 'mailto:info@agrenes.co.uk' },
+          { icon: <Mail size={20} color="var(--g3)" />, label: 'Email', val: 'hello@agrenesmarket.com', href: 'mailto:hello@agrenesmarket.com' },
           { icon: <Phone size={20} color="var(--g3)" />, label: 'Phone (UK)', val: '+44 20 0000 0000', href: 'tel:+44200000000' },
           { icon: <Phone size={20} color="var(--g3)" />, label: 'Phone (Uganda)', val: '+256 700 000 000', href: 'tel:+256700000000' },
           { icon: <MapPin size={20} color="var(--g3)" />, label: 'Packhouse', val: 'Ndeeba Kabowa, Kampala, Uganda', href: null },
@@ -141,7 +141,7 @@ export function TermsPage() {
         { h: '2. Products & Availability', p: 'All products are subject to availability. As fresh produce is perishable and air-freighted, we reserve the right to substitute products of equal or greater value if your selected item is unavailable due to seasonal or logistical reasons. We will notify you before dispatch.' },
         { h: '3. Pricing', p: 'All prices are displayed in British Pounds Sterling (GBP) and include VAT where applicable. Prices are subject to change without notice. The price at the time of your order confirmation is the price you will be charged.' },
         { h: '4. Orders & Payment', p: 'Orders are confirmed upon successful payment. We accept major credit/debit cards and Mobile Money. Payment is processed securely via our payment partners. AGRENES does not store card details.' },
-        { h: '5. Delivery', p: 'We air-freight produce from Entebbe to Gatwick 4× per week. UK delivery is estimated 2–4 working days from dispatch. Delivery fees are calculated at checkout by weight via Evri.' },
+        { h: '5. Delivery', p: 'We air-freight produce from Entebbe to Gatwick 4× per week. UK delivery is estimated at 4–5 working days from the day you order. Delivery fees are calculated at checkout by weight via Evri.' },
         { h: '6. Freshness Guarantee', p: 'We guarantee that all produce is packed fresh and dispatched within 24 hours of harvest. If your order arrives in unsatisfactory condition, please contact us within 24 hours of delivery with photographic evidence for a full refund or replacement.' },
         { h: '7. Returns & Refunds', p: 'Due to the perishable nature of fresh produce, we cannot accept returns of items that are not defective. Refunds are issued within 5 business days of approval to the original payment method.' },
         { h: '8. Bulk Orders', p: 'Bulk and wholesale orders are subject to separate quotation and payment terms agreed with the AGRENES sales team. Minimum order quantities apply.' },
@@ -167,9 +167,9 @@ export function PrivacyPage() {
         { h: 'How We Use Your Data', p: 'Your data is used to process orders, send order confirmations and tracking updates, personalise your shopping experience, and comply with legal obligations. We do not sell your personal data to third parties.' },
         { h: 'Data Storage', p: 'Your data is stored securely using Supabase (hosted on AWS). All data is encrypted at rest and in transit using industry-standard SSL/TLS.' },
         { h: 'Cookies', p: 'We use essential cookies to keep you logged in and remember your cart. We do not use advertising or tracking cookies.' },
-        { h: 'Your Rights (UK GDPR)', p: 'You have the right to access, correct, or delete your personal data at any time. To exercise these rights, contact privacy@agrenes.co.uk. You also have the right to lodge a complaint with the Information Commissioner\'s Office (ICO).' },
+        { h: 'Your Rights (UK GDPR)', p: 'You have the right to access, correct, or delete your personal data at any time. To exercise these rights, contact hello@agrenesmarket.com. You also have the right to lodge a complaint with the Information Commissioner\'s Office (ICO).' },
         { h: 'Third Parties', p: 'We share data with payment processors (Stripe, Flutterwave) solely for the purpose of processing payments, and with delivery partners for order fulfillment. These partners have their own privacy policies.' },
-        { h: 'Contact', p: 'For any privacy-related queries, contact us at privacy@agrenes.co.uk or write to: AGRENES, Ndeeba Kabowa, Kampala, Uganda.' },
+        { h: 'Contact', p: 'For any privacy-related queries, contact us at hello@agrenesmarket.com or write to: AGRENES, Ndeeba Kabowa, Kampala, Uganda.' },
       ].map(s => (
         <div key={s.h}>
           <h2 style={h2style}>{s.h}</h2>
@@ -202,7 +202,7 @@ export function ReturnsPage() {
 
         <div className="card" style={{ padding: 18, background: 'var(--gll)', border: '1px solid var(--gl)' }}>
           <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>Contact for Returns</h3>
-          <p style={{ ...prose, marginBottom: 8 }}>Email: <a href="mailto:support@agrenes.co.uk" style={{ color: 'var(--g3)', fontWeight: 600 }}>support@agrenes.co.uk</a></p>
+          <p style={{ ...prose, marginBottom: 8 }}>Email: <a href="mailto:hello@agrenesmarket.com" style={{ color: 'var(--g3)', fontWeight: 600 }}>hello@agrenesmarket.com</a></p>
           <p style={{ ...prose, marginBottom: 0 }}>Include your order reference number and clear photos of the issue in your email.</p>
         </div>
 

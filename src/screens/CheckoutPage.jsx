@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Check, Lock, MapPin } from 'lucide-react'
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js'
-import { stripePromise, createPaymentIntent } from '../lib/stripe'
+import { stripePromise, createPaymentIntent, confirmPaymentOnServer } from '../lib/stripe'
 import { useCartStore, useAuthStore } from '../lib/store'
 import { supabase } from '../lib/supabase'
 import { computeDeliveryInfo, isUKCountry } from '../lib/shipping'
@@ -187,6 +187,8 @@ export default function CheckoutPage() {
       p_order: orderFields,
       p_items: items.map(i => ({
         product_id: i.id, vendor_id: i.vendor_id ?? null,
+        // Lets the server look up the real price for this size option
+        variant_id: i.variant_id ?? null, tier_type: i.tier_type ?? null,
         name: i.name, image: i.images?.[0] || i.img || null,
         price: i.price, qty: i.qty,
         // Tier products already say the size in the name ("— Box (1 box)"), so no separate unit.
@@ -209,6 +211,7 @@ export default function CheckoutPage() {
         customer_email: delivery.email,
         status: 'quote_pending',
         order_type: 'wholesale',
+        delivery_country: delivery.country,
         subtotal: total,
         delivery_fee: 0,
         discount: 0,
@@ -247,45 +250,35 @@ export default function CheckoutPage() {
         discount: discount,
         total: payTotal,
         promo_code: promo?.code || null,
+        delivery_country: delivery.country,
         currency: 'GBP',
         payment_method: 'card',
         payment_status: 'pending',
         notes: `Delivery: ${delivery.fullName}, ${delivery.line1}, ${delivery.city}, ${delivery.postcode}, ${delivery.country}${delivery.phone ? ' · Phone: ' + delivery.phone : ''} · Email: ${delivery.email}`,
       })
 
-      // Charge exactly what the server recorded for this order.
+      // The server prices the order from the catalogue; that is the amount charged.
       const amountToCharge = order.total != null ? order.total : payTotal
       setChargedTotal(amountToCharge)
+      if (Math.abs(amountToCharge - payTotal) > 0.009) {
+        toast(`Your total has been updated to £${amountToCharge.toFixed(2)} using our latest prices.`, { duration: 7000 })
+      }
 
-      const { clientSecret: cs } = await createPaymentIntent({
-        amount: amountToCharge, currency: 'gbp', orderId: order.id, customerEmail: delivery.email,
-      })
-
+      const { clientSecret: cs } = await createPaymentIntent({ orderId: order.id, customerEmail: delivery.email })
       setOrderId(order.id); setOrderRef(order.reference); setClientSecret(cs); setStep(1)
     } catch (err) {
       toast.error(err.message || 'Something went wrong. Please try again.')
     } finally { setLoading(false) }
   }
 
-  const handlePaymentSuccess = async () => {
-    // Mark the order confirmed first: this logs the tracking event and
-    // triggers the confirmation email. Never block the success screen on it.
-    if (orderId) {
-      try {
-        const { error } = await supabase.rpc('confirm_order_payment', { p_order_id: orderId })
-        if (error) console.error('confirm_order_payment failed:', error.message)
-      } catch (e) { console.error('confirm_order_payment failed:', e) }
-    }
-    for (const item of items) {
-      if (item.id) {
-        const { data: prod } = await supabase.from('products').select('stock_qty,sales_count').eq('id', item.id).single()
-        if (prod) {
-          await supabase.from('products').update({
-            stock_qty: Math.max(0, (prod.stock_qty || 0) - item.qty),
-            sales_count: (prod.sales_count || 0) + item.qty
-          }).eq('id', item.id)
-        }
-      }
+  const handlePaymentSuccess = async (paymentIntentId) => {
+    // The server checks with Stripe and confirms the order (this logs the
+    // tracking event and sends the confirmation email). Runs in the background
+    // so the customer sees their success screen straight away.
+    if (paymentIntentId) {
+      confirmPaymentOnServer(paymentIntentId).then(ok => {
+        if (!ok) console.error('Payment taken but order not yet confirmed:', paymentIntentId)
+      })
     }
     clearCart(); setStep(2); toast.success('Payment confirmed! 🎉')
   }
@@ -528,7 +521,7 @@ export default function CheckoutPage() {
             <div style={{ background: 'var(--gll)', border: '1px solid var(--gl)', borderRadius: 14, padding: 20, marginBottom: 24, textAlign: 'left' }}>
               <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: .5, color: 'var(--g2)', marginBottom: 6 }}>Order Reference</div>
               <div style={{ fontFamily: 'Fraunces,serif', fontSize: 26, fontWeight: 700, color: 'var(--g1)' }}>{orderRef}</div>
-              <div style={{ fontSize: 12.5, color: 'var(--mu)', marginTop: 8 }}>✈️ Entebbe → Gatwick · Estimated delivery: 2–4 working days</div>
+              <div style={{ fontSize: 12.5, color: 'var(--mu)', marginTop: 8 }}>✈️ Entebbe → Gatwick · Estimated delivery: 4–5 working days</div>
               <div style={{ fontSize: 12.5, color: 'var(--mu)', marginTop: 4 }}>📧 Confirmation sent to {delivery.email}</div>
             </div>
 
@@ -542,7 +535,7 @@ export default function CheckoutPage() {
                   Create a free account with <strong>{delivery.email}</strong> to track this order and reorder in one tap next time. No password required to start — we'll send you a magic link.
                 </div>
                 <button
-                  onClick={() => navigate(`/register?email=${encodeURIComponent(delivery.email)}&ref=${encodeURIComponent(orderRef)}`)}
+                  onClick={() => navigate(`/login?mode=register&email=${encodeURIComponent(delivery.email)}`)}
                   className="btn-outline"
                   style={{ width: '100%', justifyContent: 'center', height: 42, fontSize: 13, borderRadius: 10, borderColor: 'var(--am)', color: 'var(--amd)' }}
                 >

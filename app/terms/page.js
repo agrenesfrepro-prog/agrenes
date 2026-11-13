@@ -17,17 +17,17 @@ export default function TermsPage() {
       <h2>5. Payment</h2>
       <p>Payment is processed by Stripe. We accept major UK debit and credit cards. Payment is taken at order placement.</p>
       <h2>6. Delivery</h2>
-      <p>UK deliveries via Evri, rates calculated at checkout by box weight, typically 2-4 working days from dispatch. Retail delivery is also available to the UAE at £24.99 flat per order; delivery times vary by destination and the customer is responsible for any applicable import duties or customs fees. For wholesale and bulk export to the USA, Canada, Europe and the wider GCC, please contact our export arm at agrenesfrepro.com. Risk and title pass to you on delivery.</p>
+      <p>UK deliveries via Evri, rates calculated at checkout by box weight, typically 4–5 working days from the day you order. Retail delivery is also available to the UAE at £24.99 flat per order; delivery times vary by destination and the customer is responsible for any applicable import duties or customs fees. For wholesale and bulk export to the USA, Canada, Europe and the wider GCC, please contact our export arm at agrenesfrepro.com. Risk and title pass to you on delivery.</p>
       <h2>7. Your right to cancel</h2>
       <p>Under the UK Consumer Contracts Regulations 2013 you have 14 days from receipt to cancel most orders. This right does NOT apply to perishable goods (fresh fruit, vegetables, fresh prepared boxes) under Regulation 28(1)(d). See our <a href="/refund" style={{color:'#063D32', textDecoration:'underline'}}>Refund Policy</a>.</p>
       <h2>8. Faulty or damaged items</h2>
-      <p>If your order arrives damaged, is of unsatisfactory quality, or is not as described, you are entitled to a refund or replacement under the UK Consumer Rights Act 2015. Email support@agrenes.co.uk within 24 hours for fresh produce, within 30 days for non-perishable items. Include your order number and photos.</p>
+      <p>If your order arrives damaged, is of unsatisfactory quality, or is not as described, you are entitled to a refund or replacement under the UK Consumer Rights Act 2015. Email hello@agrenesmarket.com within 24 hours for fresh produce, within 30 days for non-perishable items. Include your order number and photos.</p>
       <h2>9. Our liability</h2>
       <p>Nothing limits your statutory rights as a UK consumer. Subject to that, our liability for any single order is limited to the value of that order.</p>
       <h2>10. Governing law</h2>
       <p>These terms are governed by the laws of England & Wales for UK consumer purchases, and the courts of England & Wales have jurisdiction over disputes with UK consumers.</p>
       <h2>11. Contact</h2>
-      <p>Questions: support@agrenes.co.uk</p>
+      <p>Questions: hello@agrenesmarket.com</p>
     </main>
   )
 }

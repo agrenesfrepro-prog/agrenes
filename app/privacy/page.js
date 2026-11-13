@@ -11,7 +11,7 @@ export default function PrivacyPage() {
         <li><strong>AGRENES Market</strong> (agrenesmarket.com) — UK direct-to-consumer retail</li>
         <li><strong>AGRENES Fresh Produce</strong> (<a href="https://agrenesfrepro.com">agrenesfrepro.com</a>) — wholesale export</li>
       </ul>
-      <p>Both sites share one data controller and one privacy regime. Contact for data protection matters: <a href="mailto:support@agrenes.co.uk">support@agrenes.co.uk</a></p>
+      <p>Both sites share one data controller and one privacy regime. Contact for data protection matters: <a href="mailto:hello@agrenesmarket.com">hello@agrenesmarket.com</a></p>
       <h2>2. Data we collect</h2>
       <ul><li>Account: name, email, delivery address, phone number</li><li>Orders: items purchased, order history, delivery preferences</li><li>Payment: handled by Stripe — we do NOT store full card details</li><li>Browsing: pages viewed and products searched (only with analytics consent)</li><li>Communications: emails and messages you send us</li></ul>
       <h2>3. How we use your data</h2>
@@ -21,7 +21,7 @@ export default function PrivacyPage() {
       <h2>5. How long we keep data</h2>
       <p>Orders: 7 years (UK tax law). Marketing: until you unsubscribe. Analytics: 14 months.</p>
       <h2>6. Your rights under UK GDPR</h2>
-      <p>You have the right to access, correct, delete and port your data; to object to marketing; to withdraw cookie consent; and to complain to the UK ICO (ico.org.uk). Email support@agrenes.co.uk — we respond within 30 days.</p>
+      <p>You have the right to access, correct, delete and port your data; to object to marketing; to withdraw cookie consent; and to complain to the UK ICO (ico.org.uk). Email hello@agrenesmarket.com — we respond within 30 days.</p>
       <h2>7. Cookies</h2>
       <p>See our <a href="/cookies" style={{color:'#063D32', textDecoration:'underline'}}>Cookies Policy</a>.</p>
       <h2>8. Changes</h2>
