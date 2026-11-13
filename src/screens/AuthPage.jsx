@@ -1,8 +1,106 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { Eye, EyeOff, ArrowLeft } from 'lucide-react'
 import { useAuthStore } from '../lib/store'
 import toast from 'react-hot-toast'
+
+// Google client ID (a public value). Set NEXT_PUBLIC_GOOGLE_CLIENT_ID in Vercel.
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ''
+
+let gsiPromise = null
+function loadGoogleScript() {
+  if (typeof window === 'undefined') return Promise.reject(new Error('no window'))
+  if (window.google?.accounts?.id) return Promise.resolve()
+  if (!gsiPromise) {
+    gsiPromise = new Promise((resolve, reject) => {
+      const el = document.createElement('script')
+      el.src = 'https://accounts.google.com/gsi/client'
+      el.async = true
+      el.onload = () => resolve()
+      el.onerror = () => { gsiPromise = null; reject(new Error('Google script blocked')) }
+      document.head.appendChild(el)
+    })
+  }
+  return gsiPromise
+}
+
+// "Continue with Google".
+// Preferred: Google's own button on our page. The customer picks an account in a
+// Google popup that names agrenesmarket.com, and we hand Google's ID token to
+// Supabase (signInWithIdToken). No trip through the supabase.co address.
+// Fallback (no client ID configured, or Google's script is blocked): the
+// original redirect sign-in.
+function GoogleSignIn({ onSignedIn }) {
+  const holder = useRef(null)
+  const [useFallback, setUseFallback] = useState(!GOOGLE_CLIENT_ID)
+
+  useEffect(() => {
+    if (!GOOGLE_CLIENT_ID) return
+    let cancelled = false
+    ;(async () => {
+      try {
+        // Nonce: Google gets the SHA-256 hash, Supabase gets the raw value.
+        const bytes = crypto.getRandomValues(new Uint8Array(32))
+        const rawNonce = Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('')
+        const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(rawNonce))
+        const hashedNonce = Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('')
+
+        await loadGoogleScript()
+        if (cancelled || !holder.current || !window.google?.accounts?.id) return
+
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          nonce: hashedNonce,
+          ux_mode: 'popup',
+          callback: async (response) => {
+            try {
+              const { supabase } = await import('../lib/supabase')
+              const { error } = await supabase.auth.signInWithIdToken({
+                provider: 'google',
+                token: response.credential,
+                nonce: rawNonce,
+              })
+              if (error) throw error
+              onSignedIn()
+            } catch (err) {
+              toast.error(err.message || 'Google sign-in failed. Please try again.')
+              setUseFallback(true)
+            }
+          },
+        })
+        window.google.accounts.id.renderButton(holder.current, {
+          type: 'standard', theme: 'outline', size: 'large', shape: 'rectangular',
+          text: 'continue_with', logo_alignment: 'center',
+          width: Math.max(200, Math.min(400, holder.current.offsetWidth || 320)),
+        })
+      } catch {
+        if (!cancelled) setUseFallback(true)
+      }
+    })()
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  if (useFallback) {
+    return (
+      <button onClick={async () => {
+        const { error } = await import('../lib/supabase').then(m => m.supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: { redirectTo: window.location.origin }
+        }))
+        if (error) toast.error(error.message)
+      }} style={{
+        width:'100%', background:'var(--bg)', border:'1px solid var(--br)',
+        borderRadius:10, padding:'12px 0', fontSize:14, fontWeight:600,
+        display:'flex', alignItems:'center', justifyContent:'center', gap:10, cursor:'pointer'
+      }}>
+        <span>🔵</span> Continue with Google
+      </button>
+    )
+  }
+
+  return <div ref={holder} style={{ display:'flex', justifyContent:'center', minHeight:44 }} />
+}
 
 export default function AuthPage() {
   const navigate = useNavigate()
@@ -152,20 +250,7 @@ export default function AuthPage() {
           </span>
         </div>
 
-        {/* Social login placeholder */}
-        <button onClick={async () => {
-          const { error } = await import('../lib/supabase').then(m => m.supabase.auth.signInWithOAuth({
-            provider: 'google',
-            options: { redirectTo: window.location.origin }
-          }))
-          if (error) toast.error(error.message)
-        }} style={{
-          width:'100%', background:'var(--bg)', border:'1px solid var(--br)',
-          borderRadius:10, padding:'12px 0', fontSize:14, fontWeight:600,
-          display:'flex', alignItems:'center', justifyContent:'center', gap:10, cursor:'pointer'
-        }}>
-          <span>🔵</span> Continue with Google
-        </button>
+        <GoogleSignIn onSignedIn={() => { toast.success('Welcome!'); navigate('/') }} />
 
         <p style={{textAlign:'center', marginTop:20, fontSize:13, color:'var(--mu)'}}>
           By {mode==='login' ? 'signing in' : 'creating an account'}, you agree to our{' '}
