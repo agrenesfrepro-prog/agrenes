@@ -1,4 +1,3 @@
-'use client'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Check, Lock, MapPin } from 'lucide-react'
@@ -151,13 +150,30 @@ export default function CheckoutPage() {
     return true
   }
 
+  // Creates the order + its line items in one server-side call (place_order RPC).
+  // Works for guests and signed-in customers; the server sets user_id itself.
+  const placeOrder = async (orderFields) => {
+    const { data, error } = await supabase.rpc('place_order', {
+      p_order: orderFields,
+      p_items: items.map(i => ({
+        product_id: i.id, vendor_id: i.vendor_id ?? null,
+        name: i.name, image: i.images?.[0] || i.img || null,
+        price: i.price, qty: i.qty, unit: i.unit ?? null,
+        subtotal: i.price * i.qty,
+      })),
+    })
+    if (error) throw error
+    const row = Array.isArray(data) ? data[0] : data
+    if (!row?.order_id) throw new Error('We could not create your order. Please try again.')
+    return { id: row.order_id, reference: row.order_reference }
+  }
+
   // Bulk-order path — save the order as 'quote_pending' and open WhatsApp
   const requestBulkQuote = async () => {
     if (!validateDelivery()) return
     setLoading(true)
     try {
-      const { data: order, error: orderErr } = await supabase.from('orders').insert({
-        user_id: user?.id ?? null,
+      const order = await placeOrder({
         customer_email: delivery.email,
         status: 'quote_pending',
         order_type: 'wholesale',
@@ -169,18 +185,7 @@ export default function CheckoutPage() {
         payment_method: 'bulk_quote',
         payment_status: 'awaiting_quote',
         notes: `BULK QUOTE REQUEST · ${deliveryInfo.totalWeightKg} kg · Delivery: ${delivery.fullName}, ${delivery.line1}, ${delivery.city}, ${delivery.postcode}, ${delivery.country}${delivery.phone ? ' · Phone: ' + delivery.phone : ''} · Email: ${delivery.email}`,
-      }).select().single()
-      if (orderErr) throw orderErr
-
-      await supabase.from('order_items').insert(
-        items.map(i => ({
-          order_id: order.id,
-          product_id: i.id, vendor_id: i.vendor_id,
-          name: i.name, image: i.images?.[0] || i.img,
-          price: i.price, qty: i.qty, unit: i.unit,
-          subtotal: i.price * i.qty,
-        }))
-      )
+      })
 
       // Build WhatsApp message with the quote details
       const itemsList = items.map(i => `• ${i.name} × ${i.qty} = £${(i.price * i.qty).toFixed(2)}`).join('\n')
@@ -201,8 +206,7 @@ export default function CheckoutPage() {
     if (!validateDelivery()) return
     setLoading(true)
     try {
-      const { data: order, error: orderErr } = await supabase.from('orders').insert({
-        user_id: user?.id ?? null,
+      const order = await placeOrder({
         customer_email: delivery.email,
         status: 'pending',
         order_type: 'retail',
@@ -214,18 +218,7 @@ export default function CheckoutPage() {
         payment_method: 'card',
         payment_status: 'pending',
         notes: `Delivery: ${delivery.fullName}, ${delivery.line1}, ${delivery.city}, ${delivery.postcode}, ${delivery.country}${delivery.phone ? ' · Phone: ' + delivery.phone : ''} · Email: ${delivery.email}`,
-      }).select().single()
-      if (orderErr) throw orderErr
-
-      await supabase.from('order_items').insert(
-        items.map(i => ({
-          order_id: order.id,
-          product_id: i.id, vendor_id: i.vendor_id,
-          name: i.name, image: i.images?.[0] || i.img,
-          price: i.price, qty: i.qty, unit: i.unit,
-          subtotal: i.price * i.qty,
-        }))
-      )
+      })
 
       const { clientSecret: cs } = await createPaymentIntent({
         amount: grandTotal, currency: 'gbp', orderId: order.id, customerEmail: delivery.email,
@@ -238,6 +231,14 @@ export default function CheckoutPage() {
   }
 
   const handlePaymentSuccess = async () => {
+    // Mark the order confirmed first: this logs the tracking event and
+    // triggers the confirmation email. Never block the success screen on it.
+    if (orderId) {
+      try {
+        const { error } = await supabase.rpc('confirm_order_payment', { p_order_id: orderId })
+        if (error) console.error('confirm_order_payment failed:', error.message)
+      } catch (e) { console.error('confirm_order_payment failed:', e) }
+    }
     for (const item of items) {
       if (item.id) {
         const { data: prod } = await supabase.from('products').select('stock_qty,sales_count').eq('id', item.id).single()
@@ -248,10 +249,6 @@ export default function CheckoutPage() {
           }).eq('id', item.id)
         }
       }
-    }
-    // CHUNK A: auto-confirm the order so DB triggers log the event and fire the Resend email
-    if (orderId) {
-      await supabase.from('orders').update({ status: 'confirmed', payment_status: 'paid' }).eq('id', orderId)
     }
     clearCart(); setStep(2); toast.success('Payment confirmed! 🎉')
   }
